@@ -198,7 +198,7 @@ export default function PackagesClient() {
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="text-destructive hover:text-destructive"
+                          className="text-destructive hover:text-destructive sm:h-9 sm:w-9 h-11 w-11"
                           onClick={() => {
                             removeMCPFromPackage(mcp.id);
                             toast({
@@ -220,7 +220,7 @@ export default function PackagesClient() {
               {/* Package Actions */}
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button 
-                  className="flex-1" 
+                  className="flex-1 w-full sm:w-auto min-h-[44px]" 
                   onClick={handleGenerateScript}
                   disabled={currentPackage.mcps.length === 0}
                 >
@@ -229,7 +229,7 @@ export default function PackagesClient() {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="flex-1"
+                  className="flex-1 w-full sm:w-auto min-h-[44px]"
                   onClick={handleSavePackage}
                   disabled={currentPackage.mcps.length === 0}
                 >
@@ -264,28 +264,29 @@ export default function PackagesClient() {
                     <span>{pkg.mcps.length} MCPs</span>
                     <span>{pkg.mcps.reduce((acc, mcp) => acc + parseFloat(mcp.size?.replace(' MB', '') || '0'), 0).toFixed(1)} MB</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">
-                      Modified {new Date(pkg.lastModified).toLocaleDateString()}
-                    </span>
-                    <div className="flex gap-1">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleLoadPackage(pkg.id)}
-                      >
-                        Load
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={() => handleDeletePackage(pkg.id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">
+                        Modified {new Date(pkg.lastModified).toLocaleDateString()}
+                      </span>
+                      <div className="flex gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="min-h-[44px]"
+                          onClick={() => handleLoadPackage(pkg.id)}
+                        >
+                          Load
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="sm:h-9 sm:w-9 h-10 w-10 text-destructive hover:text-destructive"
+                          onClick={() => handleDeletePackage(pkg.id)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
                 </CardContent>
               </Card>
             ))}

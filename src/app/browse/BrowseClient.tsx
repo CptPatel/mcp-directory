@@ -132,7 +132,7 @@ export default function BrowseClient() {
             <Button 
               variant={viewMode === "grid" ? "default" : "ghost"} 
               size="icon" 
-              className="rounded-r-none"
+              className="rounded-r-none sm:h-9 sm:w-9 h-11 w-11"
               onClick={() => setViewMode("grid")}
               aria-label="Grid view"
             >
@@ -141,7 +141,7 @@ export default function BrowseClient() {
             <Button 
               variant={viewMode === "list" ? "default" : "ghost"} 
               size="icon" 
-              className="rounded-l-none border-l"
+              className="rounded-l-none border-l sm:h-9 sm:w-9 h-11 w-11"
               onClick={() => setViewMode("list")}
               aria-label="List view"
             >
@@ -224,7 +224,7 @@ export default function BrowseClient() {
                     </>
                   )}
                 </Button>
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" className="sm:h-9 sm:w-9 h-11 w-11">
                   <Star className="h-4 w-4" />
                 </Button>
               </div>
