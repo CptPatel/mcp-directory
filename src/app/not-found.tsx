@@ -1,13 +1,9 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search, Home, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Page Not Found - MCP Directory",
-  description: "The page you're looking for doesn't exist. Browse our MCP directory or return to the homepage.",
-};
 
 export default function NotFound() {
   return (
