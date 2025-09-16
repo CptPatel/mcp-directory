@@ -8,6 +8,7 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import Providers from "./providers";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // Force dynamic rendering for all pages
 export const dynamic = 'force-dynamic';
@@ -107,6 +108,7 @@ export default function RootLayout({
           </Providers>
           <TempoInit />
           <WebVitals />
+          <SpeedInsights />
         </body>
       </html>
     </ClerkProvider>
