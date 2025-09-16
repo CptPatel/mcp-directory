@@ -98,9 +98,9 @@ export default function BrowseClient() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="sm:w-[140px] w-full min-w-[140px]">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
@@ -113,7 +113,7 @@ export default function BrowseClient() {
           </Select>
           
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[120px]">
+            <SelectTrigger className="sm:w-[120px] w-full min-w-[120px]">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
@@ -124,16 +124,17 @@ export default function BrowseClient() {
             </SelectContent>
           </Select>
 
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" aria-label="More filters" className="sm:h-9 sm:w-9 h-10 w-10">
             <Filter className="h-4 w-4" />
           </Button>
           
-          <div className="flex border rounded-md">
+          <div className="flex border rounded-md w-full sm:w-auto">
             <Button 
               variant={viewMode === "grid" ? "default" : "ghost"} 
               size="icon" 
               className="rounded-r-none"
               onClick={() => setViewMode("grid")}
+              aria-label="Grid view"
             >
               <Grid className="h-4 w-4" />
             </Button>
@@ -142,6 +143,7 @@ export default function BrowseClient() {
               size="icon" 
               className="rounded-l-none border-l"
               onClick={() => setViewMode("list")}
+              aria-label="List view"
             >
               <List className="h-4 w-4" />
             </Button>

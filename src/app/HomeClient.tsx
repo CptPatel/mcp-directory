@@ -27,7 +27,7 @@ export default function HomeClient() {
     <div className="bg-background relative overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -inset-10 opacity-50">
+        <div className="absolute -inset-10 opacity-50 hidden sm:block">
           <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-purple-500/10 dark:bg-purple-400/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-xl animate-pulse"></div>
           <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-blue-500/10 dark:bg-blue-400/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-xl animate-pulse" style={{ animationDelay: '2s' }}></div>
           <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-indigo-500/10 dark:bg-indigo-400/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-xl animate-pulse" style={{ animationDelay: '4s' }}></div>
@@ -35,7 +35,7 @@ export default function HomeClient() {
         
         {/* Interactive cursor glow */}
         <div 
-          className="absolute w-96 h-96 bg-gradient-radial from-purple-500/5 dark:from-purple-400/10 to-transparent rounded-full transition-all duration-300 ease-out"
+          className="absolute w-96 h-96 bg-gradient-radial from-purple-500/5 dark:from-purple-400/10 to-transparent rounded-full transition-all duration-300 ease-out hidden sm:block"
           style={{
             left: mousePosition.x - 192,
             top: mousePosition.y - 192,
@@ -67,11 +67,11 @@ export default function HomeClient() {
             <span className="text-foreground font-semibold">AI-powered creation tools</span> and one-click installation process. 
             Join thousands of AI enthusiasts building better workflows.
           </p>
-          <div className={`flex flex-col sm:flex-row gap-6 justify-center transition-all duration-1000 delay-600 relative z-20 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div className={`flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center transition-all duration-1000 delay-600 relative z-20 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <SignedIn>
               <Button 
                 size="lg" 
-                className="text-lg px-10 py-4 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-700 hover:via-blue-700 hover:to-indigo-700 shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105 hover:-translate-y-1 group relative overflow-hidden" 
+                className="w-full sm:w-auto text-lg px-8 sm:px-10 py-4 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-700 hover:via-blue-700 hover:to-indigo-700 shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105 hover:-translate-y-1 group relative overflow-hidden" 
                 asChild
               >
                 <Link href="/create">
@@ -346,7 +346,7 @@ export default function HomeClient() {
             ))}
           </div>
           <div className="text-center mt-8">
-            <Button variant="outline" size="lg" asChild>
+            <Button variant="outline" size="lg" className="w-full sm:w-auto" asChild>
               <Link href="/browse">
                 View All 1,200+ MCPs
                 <ArrowRight className="h-4 w-4 ml-2" />
@@ -397,14 +397,14 @@ export default function HomeClient() {
           <p className="text-lg text-muted-foreground mb-8">
             Join thousands of developers already using MCP Directory to build better AI-powered applications.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="text-lg px-8" asChild>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <Button size="lg" className="w-full sm:w-auto text-lg px-8" asChild>
               <Link href="/packages">
                 Start Building Your Package
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Link>
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8" asChild>
+            <Button variant="outline" size="lg" className="w-full sm:w-auto text-lg px-8" asChild>
               <Link href="/community">
                 Join Community
               </Link>
