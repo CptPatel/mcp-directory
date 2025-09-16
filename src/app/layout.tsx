@@ -9,6 +9,7 @@ import Script from "next/script";
 import "./globals.css";
 import Providers from "./providers";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 
 // Force dynamic rendering for all pages
 export const dynamic = 'force-dynamic';
@@ -109,6 +110,7 @@ export default function RootLayout({
           <TempoInit />
           <WebVitals />
           <SpeedInsights />
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
