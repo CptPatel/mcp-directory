@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Vercel Speed Insights and Web Analytics components in root layout
+- Clerk sign-in/sign-up routes at `/sign-in` and `/sign-up`
+- Functional AI Creator panel on `/create` with OpenRouter integration and stub fallback
+- API route `POST /api/creator` for MCP generation
+- PowerShell installer variant alongside Bash; UI tabs with Copy/Download
+- Mobile nav drawer (hamburger) with Theme switcher and auth controls
+- Nonce-based CSP with per-request nonce via HttpOnly cookie
+- Basic rate limiting and CSRF enforcement for API routes
+
+### Changed
+- Converted not-found (404) to Client Component to avoid server-side event handler serialization
+- Polished mobile UX: safe-area padding, full-width CTAs, larger tap targets, filter toolbar wrapping
+- Improved installer generation to prefer `installCommand` when present and add category fallbacks
+- Consolidated security headers between middleware and Next headers (removed duplicate CSP from Next headers)
+
+### Fixed
+- Google OAuth 404 by adding explicit Clerk auth routes
+- TypeScript error for missing `generateInstallScriptPS` import in `PackagesClient`
+
+### Security
+- Global security headers: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP
+- Nonce-based Content Security Policy with tight allowlists (Clerk, Vercel analytics, OpenRouter)
+- `Cache-Control: no-store` + `Vary: Authorization, Cookie` for API/auth; `immutable` caching for static assets
+
 ### Fixed
 - Removed auth requirement from "Create" navbar item for better accessibility
 - Created CopyButton component to isolate onClick handlers from server components

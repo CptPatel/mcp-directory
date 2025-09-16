@@ -9,6 +9,20 @@ function generateNonce(): string {
   return btoa(binary);
 }
 
+// Simple in-memory rate limiting for API routes (demo only; not durable across instances)
+const buckets = new Map<string, { ts: number; count: number }>();
+function isRateLimited(key: string, limit = 60, windowMs = 60_000) {
+  const now = Date.now();
+  const rec = buckets.get(key) ?? { ts: now, count: 0 };
+  if (now - rec.ts > windowMs) {
+    rec.ts = now;
+    rec.count = 0;
+  }
+  rec.count += 1;
+  buckets.set(key, rec);
+  return rec.count > limit;
+}
+
 export default clerkMiddleware((auth, req) => {
   const res = NextResponse.next();
 
@@ -34,8 +48,35 @@ export default clerkMiddleware((auth, req) => {
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   res.headers.set("Cross-Origin-Opener-Policy", "same-origin");
+
+  // Rate limit API routes
+  const ip = (req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for") || "unknown").toString();
+  const path = req.nextUrl.pathname;
+  if (path.startsWith("/api")) {
+    const key = `${ip}:${path}`;
+    if (isRateLimited(key)) {
+      return new NextResponse("Rate limit exceeded", {
+        status: 429,
+        headers: {
+          "Cache-Control": "no-store",
+          Vary: "Authorization, Cookie",
+        },
+      });
+    }
+  }
+
+  // CSRF: enforce same-origin for state-changing methods
+  const method = req.method?.toUpperCase() || "GET";
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+    const origin = req.headers.get("origin") || "";
+    const referer = req.headers.get("referer") || "";
+    const allowed = req.nextUrl.origin;
+    if ((origin && !origin.startsWith(allowed)) && (referer && !referer.startsWith(allowed))) {
+      return new NextResponse("Invalid CSRF token", { status: 403, headers: { "Cache-Control": "no-store" } });
+    }
+  }
   const p = req.nextUrl.pathname;
-  if (p.startsWith("/api") || p.startsWith("/sign-in") || p.startsWith("/sign-up")) {
+  if (p.startsWith("/api") || p.startsWith("/sign-in") || p.startsWith("/sign-up") || p.startsWith("/auth")) {
     res.headers.set("Cache-Control", "no-store");
     res.headers.set("Vary", "Authorization, Cookie");
   }
