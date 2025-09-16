@@ -1,22 +1,32 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-const csp = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.clerk.com https://*.clerk.accounts.dev",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "img-src 'self' data: https:",
-  "font-src 'self' https://fonts.gstatic.com",
-  "connect-src 'self' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://openrouter.ai https://*.clerk.com https://*.clerk.accounts.dev",
-  "frame-ancestors 'none'",
-  "base-uri 'self'",
-  "form-action 'self' https://*.clerk.com https://*.clerk.accounts.dev",
-  "object-src 'none'",
-  "upgrade-insecure-requests",
-].join("; ");
+function generateNonce(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
 
 export default clerkMiddleware((auth, req) => {
   const res = NextResponse.next();
+
+  const nonce = generateNonce();
+  const csp = [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.clerk.com https://*.clerk.accounts.dev`,
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "img-src 'self' data: https:",
+    "font-src 'self' https://fonts.gstatic.com",
+    "connect-src 'self' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://openrouter.ai https://*.clerk.com https://*.clerk.accounts.dev",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self' https://*.clerk.com https://*.clerk.accounts.dev",
+    "object-src 'none'",
+    "upgrade-insecure-requests",
+  ].join("; ");
+
   res.headers.set("Content-Security-Policy", csp);
   res.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
   res.headers.set("X-Frame-Options", "DENY");
@@ -29,6 +39,13 @@ export default clerkMiddleware((auth, req) => {
     res.headers.set("Cache-Control", "no-store");
     res.headers.set("Vary", "Authorization, Cookie");
   }
+  // Expose nonce for server components via HttpOnly cookie
+  res.cookies.set("csp-nonce", nonce, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+    path: "/",
+  });
   return res;
 });
 

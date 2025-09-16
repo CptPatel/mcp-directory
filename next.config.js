@@ -4,27 +4,11 @@ const nextConfig = {
     domains: ["images.unsplash.com", "avatars.githubusercontent.com"],
   },
   async headers() {
-    const csp = [
-      "default-src 'self'",
-      // Allow inline JSON-LD and Next internal runtime; keep list tight
-      "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.clerk.com https://*.clerk.accounts.dev",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: https:",
-      "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://openrouter.ai https://*.clerk.com https://*.clerk.accounts.dev",
-      "frame-ancestors 'none'",
-      "base-uri 'self'",
-      "form-action 'self' https://*.clerk.com https://*.clerk.accounts.dev",
-      "object-src 'none'",
-      "upgrade-insecure-requests",
-    ].join("; ");
-
     return [
       // Global security headers
       {
         source: "/(.*)",
         headers: [
-          { key: "Content-Security-Policy", value: csp },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
