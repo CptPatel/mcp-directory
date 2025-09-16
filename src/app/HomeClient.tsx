@@ -3,112 +3,221 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, Download, Zap, Shield, Users, ArrowRight, CheckCircle, TrendingUp } from "lucide-react";
+import { Star, Download, Zap, Shield, Users, ArrowRight, CheckCircle, TrendingUp, Sparkles, Bot, Cpu } from "lucide-react";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function HomeClient() {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   return (
-    <div className="bg-background">
+    <div className="bg-background relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -inset-10 opacity-50">
+          <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-purple-500/10 dark:bg-purple-400/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-xl animate-pulse"></div>
+          <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-blue-500/10 dark:bg-blue-400/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-indigo-500/10 dark:bg-indigo-400/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-xl animate-pulse" style={{ animationDelay: '4s' }}></div>
+        </div>
+        
+        {/* Interactive cursor glow */}
+        <div 
+          className="absolute w-96 h-96 bg-gradient-radial from-purple-500/5 dark:from-purple-400/10 to-transparent rounded-full transition-all duration-300 ease-out"
+          style={{
+            left: mousePosition.x - 192,
+            top: mousePosition.y - 192,
+          }}
+        />
+      </div>
+
       {/* Hero Section */}
-      <section className="container px-4 py-16 mx-auto text-center">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex justify-center mb-6">
-            <Badge variant="secondary" className="text-sm">
-              <TrendingUp className="h-4 w-4 mr-1" />
+      <section className="container px-4 py-8 mx-auto text-center relative z-10">
+        <div className="max-w-5xl mx-auto">
+          <div className={`flex justify-center mb-6 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+            <Badge variant="secondary" className="text-sm bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/50 dark:to-blue-900/50 text-purple-700 dark:text-purple-300 border-purple-200/50 dark:border-purple-700/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <Bot className="h-4 w-4 mr-2 animate-pulse" />
               Trusted by 12,000+ developers
+              <Sparkles className="h-4 w-4 ml-2" />
             </Badge>
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-            Setup Multiple MCPs in{" "}
-            <span className="text-primary">Minutes</span>, Not Hours
+          
+          <h1 className={`text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 transition-all duration-1000 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            <span className="inline-block">Setup Multiple MCPs in</span>{" "}
+            <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent animate-gradient-x bg-300% inline-block">
+              Minutes
+            </span>
+            <span className="inline-block">, Not Hours</span>
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Discover, bundle, and deploy Model Context Protocol configurations with our one-click installation process. 
-            Join thousands of AI enthusiasts building better workflows across VS Code, Cursor, Windsurf, and more.
+          
+          <p className={`text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed transition-all duration-1000 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            Discover, bundle, and deploy Model Context Protocol configurations with our{" "}
+            <span className="text-foreground font-semibold">AI-powered creation tools</span> and one-click installation process. 
+            Join thousands of AI enthusiasts building better workflows.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="text-lg px-8" asChild>
+          <div className={`flex flex-col sm:flex-row gap-6 justify-center transition-all duration-1000 delay-600 relative z-20 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            <SignedIn>
+              <Button 
+                size="lg" 
+                className="text-lg px-10 py-4 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-700 hover:via-blue-700 hover:to-indigo-700 shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105 hover:-translate-y-1 group relative overflow-hidden" 
+                asChild
+              >
+                <Link href="/create">
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Sparkles className="h-5 w-5 mr-3 group-hover:animate-spin" />
+                  Create with AI
+                  <ArrowRight className="h-5 w-5 ml-3 group-hover:translate-x-1 transition-transform duration-300" />
+                </Link>
+              </Button>
+            </SignedIn>
+            
+            <SignedOut>
+              <Button 
+                size="lg" 
+                className="text-lg px-10 py-4 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-700 hover:via-blue-700 hover:to-indigo-700 shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105 hover:-translate-y-1 group relative overflow-hidden" 
+                asChild
+              >
+                <Link href="/create">
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Sparkles className="h-5 w-5 mr-3 group-hover:animate-spin" />
+                  Create with AI
+                  <ArrowRight className="h-5 w-5 ml-3 group-hover:translate-x-1 transition-transform duration-300" />
+                </Link>
+              </Button>
+            </SignedOut>
+            
+            <Button 
+              size="lg" 
+              className="text-lg px-10 py-4 bg-gradient-to-r from-slate-900 to-slate-700 hover:from-slate-800 hover:to-slate-600 dark:from-slate-100 dark:to-slate-300 dark:hover:from-slate-200 dark:hover:to-slate-400 dark:text-slate-900 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 hover:-translate-y-1 group" 
+              asChild
+            >
               <Link href="/browse">
+                <Shield className="h-5 w-5 mr-3 group-hover:rotate-12 transition-transform duration-300" />
                 Explore MCPs
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <ArrowRight className="h-5 w-5 ml-3 group-hover:translate-x-1 transition-transform duration-300" />
               </Link>
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8" asChild>
+            
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="text-lg px-10 py-4 border-2 hover:bg-muted/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 hover:-translate-y-1 group" 
+              asChild
+            >
               <Link href="/docs">
-                View Documentation
+                <Cpu className="h-5 w-5 mr-3 group-hover:animate-pulse" />
+                Documentation
               </Link>
             </Button>
           </div>
-          <div className="flex justify-center items-center gap-6 mt-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              <span>1,200+ verified MCPs</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              <span>7 supported stacks</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              <span>Free forever</span>
-            </div>
+          <div className={`flex flex-wrap justify-center items-center gap-6 mt-8 text-sm transition-all duration-1000 delay-800 relative z-20 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            {[
+              { icon: CheckCircle, text: "1,200+ verified MCPs", color: "text-emerald-500" },
+              { icon: Zap, text: "AI-powered creation", color: "text-purple-500" },
+              { icon: Shield, text: "Enterprise secure", color: "text-blue-500" },
+              { icon: Sparkles, text: "Free forever", color: "text-indigo-500" }
+            ].map((item, index) => (
+              <div 
+                key={index}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted/30 dark:bg-muted/20 backdrop-blur-sm border border-border/50 dark:border-border/30 hover:bg-muted/50 dark:hover:bg-muted/40 transition-all duration-300 hover:scale-105 group"
+                style={{ animationDelay: `${index * 200}ms` }}
+              >
+                <item.icon className={`h-4 w-4 ${item.color} group-hover:animate-pulse`} />
+                <span className="text-muted-foreground dark:text-muted-foreground group-hover:text-foreground dark:group-hover:text-foreground transition-colors duration-300">{item.text}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="container px-4 py-16 mx-auto">
+      <section className="container px-4 py-16 mx-auto relative">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">Why Choose MCP Directory?</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            The most comprehensive platform for Model Context Protocol management
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 bg-clip-text text-transparent">
+            Why Choose MCP Directory?
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            The most comprehensive platform for Model Context Protocol management with cutting-edge AI capabilities
           </p>
         </div>
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          <Card className="text-center hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <Zap className="h-12 w-12 mx-auto mb-4 text-primary" />
-              <CardTitle>One-Click Installation</CardTitle>
-              <CardDescription>
-                Deploy multiple MCPs instantly with our automated setup process. No manual configuration required.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/packages">Try Package Builder</Link>
-              </Button>
-            </CardContent>
-          </Card>
-          
-          <Card className="text-center hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <Shield className="h-12 w-12 mx-auto mb-4 text-primary" />
-              <CardTitle>Verified & Secure</CardTitle>
-              <CardDescription>
-                All MCPs are reviewed and verified by our community for safety, quality, and compatibility.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/community">Join Community</Link>
-              </Button>
-            </CardContent>
-          </Card>
-          
-          <Card className="text-center hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <Users className="h-12 w-12 mx-auto mb-4 text-primary" />
-              <CardTitle>Multi-Stack Support</CardTitle>
-              <CardDescription>
-                Works with VS Code, Cursor, Windsurf, Claude Code, Gemini CLI, JetBrains, and more.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/docs">Setup Guide</Link>
-              </Button>
-            </CardContent>
-          </Card>
+        
+        <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          {[
+            {
+              icon: Sparkles,
+              title: "AI-Powered Creation",
+              description: "Generate custom MCPs using natural language. Our AI understands your requirements and creates production-ready code instantly.",
+              href: "/create",
+              buttonText: "Try AI Creator",
+              gradient: "from-purple-500 to-pink-500",
+              delay: "0ms"
+            },
+            {
+              icon: Shield,
+              title: "Enterprise Security",
+              description: "All MCPs are automatically scanned for vulnerabilities and reviewed by our security team for enterprise-grade safety.",
+              href: "/community",
+              buttonText: "Security Details",
+              gradient: "from-blue-500 to-cyan-500",
+              delay: "200ms"
+            },
+            {
+              icon: Zap,
+              title: "Lightning Fast Setup",
+              description: "Deploy multiple MCPs in minutes with our one-click installation. No complex configuration or manual setup required.",
+              href: "/packages",
+              buttonText: "Quick Start",
+              gradient: "from-orange-500 to-red-500",
+              delay: "400ms"
+            }
+          ].map((feature, index) => (
+            <Card 
+              key={index}
+              className="group relative overflow-hidden border-0 bg-gradient-to-br from-white/50 to-white/30 dark:from-slate-800/50 dark:to-slate-900/30 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2"
+              style={{ animationDelay: feature.delay }}
+            >
+              <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-opacity duration-500`} />
+              <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-white/20 dark:from-white/10 to-transparent rounded-full group-hover:scale-150 transition-transform duration-700" />
+              
+              <CardHeader className="text-center relative z-10 pb-4">
+                <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} mb-6 mx-auto shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300`}>
+                  <feature.icon className="h-8 w-8 text-white group-hover:animate-pulse" />
+                </div>
+                <CardTitle className="text-xl font-bold mb-3 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-slate-900 group-hover:to-slate-600 dark:group-hover:from-slate-100 dark:group-hover:to-slate-300 group-hover:bg-clip-text transition-all duration-300">
+                  {feature.title}
+                </CardTitle>
+                <CardDescription className="text-muted-foreground leading-relaxed group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors duration-300">
+                  {feature.description}
+                </CardDescription>
+              </CardHeader>
+              
+              <CardContent className="text-center relative z-10">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="group-hover:bg-white/80 group-hover:border-transparent group-hover:shadow-lg transition-all duration-300 hover:scale-105" 
+                  asChild
+                >
+                  <Link href={feature.href}>
+                    {feature.buttonText}
+                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </section>
 
@@ -179,36 +288,57 @@ export default function HomeClient() {
                 isPopular: false
               }
             ].map((mcp, index) => (
-              <Card key={index} className="hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
+              <Card 
+                key={index} 
+                className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 hover:scale-[1.02] border-border/50 hover:border-border bg-card/50 backdrop-blur-sm"
+                style={{ 
+                  animationDelay: `${index * 100}ms`,
+                  animation: isVisible ? 'fadeInUp 0.6s ease-out forwards' : 'none'
+                }}
+              >
+                <CardHeader className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-transparent to-muted/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-lg" />
+                  <div className="flex items-start justify-between relative z-10">
                     <div>
-                      <CardTitle className="text-lg flex items-center gap-2">
+                      <CardTitle className="text-lg flex items-center gap-2 group-hover:text-primary transition-colors duration-300">
                         {mcp.name}
-                        {mcp.verified && <Shield className="h-4 w-4 text-green-500" />}
-                        {mcp.isPopular && <Badge variant="secondary" className="text-xs">Popular</Badge>}
+                        {mcp.verified && <Shield className="h-4 w-4 text-green-500 group-hover:animate-pulse" />}
+                        {mcp.isPopular && (
+                          <Badge variant="secondary" className="text-xs bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 group-hover:scale-110 transition-transform duration-300">
+                            Popular
+                          </Badge>
+                        )}
                       </CardTitle>
-                      <Badge variant="outline" className="mt-1">{mcp.category}</Badge>
+                      <Badge variant="outline" className="mt-1 group-hover:bg-primary/10 group-hover:border-primary/30 transition-colors duration-300">
+                        {mcp.category}
+                      </Badge>
                     </div>
                   </div>
-                  <CardDescription className="mt-2">
+                  <CardDescription className="mt-2 group-hover:text-foreground/80 transition-colors duration-300">
                     {mcp.description}
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="relative z-10">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <div className="flex items-center gap-1 group-hover:text-yellow-600 transition-colors duration-300">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 group-hover:animate-pulse" />
                         {mcp.rating}
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Download className="h-4 w-4" />
+                      <div className="flex items-center gap-1 group-hover:text-blue-600 transition-colors duration-300">
+                        <Download className="h-4 w-4 group-hover:animate-bounce" />
                         {mcp.downloads}
                       </div>
                     </div>
-                    <Button size="sm" asChild>
-                      <Link href="/browse">Add to Package</Link>
+                    <Button 
+                      size="sm" 
+                      className="group-hover:bg-primary group-hover:scale-105 transition-all duration-300 shadow-sm group-hover:shadow-md" 
+                      asChild
+                    >
+                      <Link href="/browse">
+                        Add to Package
+                        <ArrowRight className="h-3 w-3 ml-1 group-hover:translate-x-1 transition-transform duration-300" />
+                      </Link>
                     </Button>
                   </div>
                 </CardContent>

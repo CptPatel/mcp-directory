@@ -5,14 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { CopyButton } from "@/components/ui/copy-button";
 import { Code, Download, ExternalLink, Terminal, FileText, Zap, Shield, Users, CheckCircle } from "lucide-react";
-import type { Metadata } from "next";
+import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Documentation - MCP Directory Setup Guide",
-  description: "Complete setup instructions for Model Context Protocol configurations across all major development environments including VS Code, Cursor, Windsurf, Claude Code, and more.",
-  keywords: "MCP setup, VS Code MCP, Cursor MCP, Windsurf MCP, Claude Code MCP, Gemini CLI MCP, installation guide, development tools",
-};
 
 const stacks = [
   {
@@ -366,12 +362,10 @@ export default function DocsPage() {
                       <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
                         <code>{stack.sampleConfig}</code>
                       </pre>
-                      <Button variant="outline" size="sm" className="mt-3" onClick={() => {
-                        navigator.clipboard.writeText(stack.sampleConfig);
-                      }}>
-                        <Download className="h-4 w-4 mr-2" />
-                        Copy Config
-                      </Button>
+                      <CopyButton 
+                        text={stack.sampleConfig}
+                        className="mt-3"
+                      />
                     </CardContent>
                   </Card>
                 </div>
@@ -384,20 +378,20 @@ export default function DocsPage() {
                   <CardContent>
                     <div className="flex flex-wrap gap-3">
                       <Button variant="outline" size="sm" asChild>
-                        <a href={`/docs/${stack.id}/troubleshooting`}>
+                        <Link href={`/docs/${stack.id}/troubleshooting`}>
                           Troubleshooting Guide
-                        </a>
+                        </Link>
                       </Button>
                       <Button variant="outline" size="sm" asChild>
-                        <a href={`/docs/${stack.id}/examples`}>
+                        <Link href={`/docs/${stack.id}/examples`}>
                           Example Configurations
-                        </a>
+                        </Link>
                       </Button>
                       <Button variant="outline" size="sm" asChild>
-                        <a href={`/community?stack=${stack.id}`}>
+                        <Link href={`/community?stack=${stack.id}`}>
                           <Users className="h-4 w-4 mr-2" />
                           Community Support
-                        </a>
+                        </Link>
                       </Button>
                     </div>
                   </CardContent>
@@ -435,22 +429,22 @@ export default function DocsPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <Button variant="outline" className="w-full justify-start" asChild>
-              <a href="/community">
+              <Link href="/community">
                 <Users className="h-4 w-4 mr-2" />
                 Join Community Forum
-              </a>
+              </Link>
             </Button>
             <Button variant="outline" className="w-full justify-start" asChild>
-              <a href="https://github.com/mcp-directory/issues" target="_blank">
+              <a href="https://github.com/mcp-directory/issues" target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Report Issues on GitHub
               </a>
             </Button>
             <Button variant="outline" className="w-full justify-start" asChild>
-              <a href="/docs/faq">
+              <Link href="/docs/faq">
                 <FileText className="h-4 w-4 mr-2" />
                 Frequently Asked Questions
-              </a>
+              </Link>
             </Button>
           </CardContent>
         </Card>
