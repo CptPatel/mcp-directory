@@ -99,7 +99,7 @@ export default function RootLayout({
           <Providers>
             <div className="min-h-screen bg-background">
               <AnimatedNavBar />
-              <div className="pt-20">
+              <div className="pt-16 md:pt-20">
                 {children}
               </div>
             </div>

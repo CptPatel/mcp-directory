@@ -190,6 +190,14 @@ html {
   scroll-behavior: smooth;
 }
 
+/* iOS safe area helpers */
+.pt-safe {
+  padding-top: max(env(safe-area-inset-top), 0.75rem);
+}
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 0rem);
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

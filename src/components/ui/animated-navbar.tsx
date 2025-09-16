@@ -75,7 +75,7 @@ export function AnimatedNavBar({ className }: AnimatedNavBarProps) {
           damping: 30,
         }}
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 px-4 pt-4",
+          "fixed top-0 left-0 right-0 z-50 px-4 pt-safe md:pt-4",
           className
         )}
       >
@@ -219,7 +219,7 @@ export function AnimatedNavBar({ className }: AnimatedNavBarProps) {
                 <SheetTrigger asChild>
                   <button
                     aria-label="Open menu"
-                    className="md:hidden p-2 rounded-md border border-border/50"
+                    className="md:hidden h-11 w-11 flex items-center justify-center rounded-md border border-border/50"
                   >
                     <Menu className="h-5 w-5" />
                   </button>
@@ -270,41 +270,48 @@ export function AnimatedNavBar({ className }: AnimatedNavBarProps) {
                         </SignUpButton>
                       </div>
                     </SignedOut>
+
+                    <div className="px-3 pt-2">
+                      <ThemeSwitcher />
+                    </div>
                   </div>
                 </SheetContent>
               </Sheet>
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors"
-                  >
-                    Sign In
-                  </motion.button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="inline-flex items-center justify-center rounded-full text-sm font-medium bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 h-9 px-6 transition-all duration-200 shadow-lg hover:shadow-xl"
-                  >
-                    Sign Up
-                  </motion.button>
-                </SignUpButton>
-              </SignedOut>
-              
-              <SignedIn>
-                <UserButton 
-                  appearance={{
-                    elements: {
-                      avatarBox: "h-8 w-8 hover:scale-105 transition-transform"
-                    }
-                  }}
-                />
-              </SignedIn>
-              
-              <ThemeSwitcher />
+              {/* Desktop auth & theme */}
+              <div className="hidden md:flex items-center gap-3">
+                <SignedOut>
+                  <SignInButton mode="modal">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors"
+                    >
+                      Sign In
+                    </motion.button>
+                  </SignInButton>
+                  <SignUpButton mode="modal">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="inline-flex items-center justify-center rounded-full text-sm font-medium bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 h-9 px-6 transition-all duration-200 shadow-lg hover:shadow-xl"
+                    >
+                      Sign Up
+                    </motion.button>
+                  </SignUpButton>
+                </SignedOut>
+
+                <SignedIn>
+                  <UserButton 
+                    appearance={{
+                      elements: {
+                        avatarBox: "h-8 w-8 hover:scale-105 transition-transform"
+                      }
+                    }}
+                  />
+                </SignedIn>
+
+                <ThemeSwitcher />
+              </div>
             </div>
           </motion.div>
         </div>
