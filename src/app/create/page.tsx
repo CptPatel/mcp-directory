@@ -1,6 +1,7 @@
 "use client";
 
 import AICreatorClient from "./AICreatorClient";
+import AIGeneratorPanel from "./AIGeneratorPanel";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ export default function CreatePage() {
     <>
       <SignedIn>
         <AICreatorClient />
+        <AIGeneratorPanel />
       </SignedIn>
       <SignedOut>
         <div className="container px-4 py-16 mx-auto max-w-2xl text-center">

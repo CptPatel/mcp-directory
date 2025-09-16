@@ -37,6 +37,7 @@ interface PackageContextType {
   deletePackage: (packageId: string) => void;
   clearCurrentPackage: () => void;
   generateInstallScript: () => string;
+  generateInstallScriptPS: () => string;
   isInPackage: (mcpId: number) => boolean;
 }
 
@@ -142,6 +143,9 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const generateInstallScript = () => {
     const mcpCommands = currentPackage.mcps.map(mcp => {
+      if (mcp.installCommand && mcp.installCommand.trim().length > 0) {
+        return `# Install ${mcp.name}\n${mcp.installCommand}`;
+      }
       // Generate install commands based on MCP type
       switch (mcp.category.toLowerCase()) {
         case 'development':
@@ -150,6 +154,8 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
           return `# Install ${mcp.name}\npip install ${mcp.name.toLowerCase().replace(/\s+/g, '-')}-mcp`;
         case 'communication':
           return `# Install ${mcp.name}\ncurl -sSL https://install.${mcp.name.toLowerCase().replace(/\s+/g, '')}.com | bash`;
+        case 'cloud':
+          return `# Install ${mcp.name}\npip install ${mcp.name.toLowerCase().replace(/\s+/g, '-')}-mcp || npm i -g ${mcp.name.toLowerCase().replace(/\s+/g, '-')}-mcp`;
         default:
           return `# Install ${mcp.name}\necho "Installing ${mcp.name}..."`;
       }
@@ -174,6 +180,27 @@ echo "All ${currentPackage.mcps.length} MCPs have been installed successfully."
 `;
   };
 
+  const generateInstallScriptPS = () => {
+    const mcpCommands = currentPackage.mcps.map(mcp => {
+      const name = mcp.name;
+      if (mcp.installCommand && mcp.installCommand.trim().length > 0) {
+        return `# Install ${name}\n${mcp.installCommand}`;
+      }
+      switch (mcp.category.toLowerCase()) {
+        case 'development':
+          return `# Install ${name}\nnpm install -g ${name.toLowerCase().replace(/\s+/g, '-')}-mcp`;
+        case 'database':
+          return `# Install ${name}\npip install ${name.toLowerCase().replace(/\s+/g, '-')}-mcp`;
+        case 'communication':
+          return `# Install ${name}\n# Run vendor installer in PowerShell\nInvoke-WebRequest -UseBasicParsing https://install.${name.toLowerCase().replace(/\s+/g, '')}.com -OutFile install_${name.toLowerCase().replace(/\s+/g, '-')}.ps1\nPowerShell -ExecutionPolicy Bypass -File .\\install_${name.toLowerCase().replace(/\s+/g, '-')}.ps1`;
+        default:
+          return `# Install ${name}\nWrite-Output "Installing ${name}..."`;
+      }
+    }).join('\n\n');
+
+    return `# MCP Package Installation Script (PowerShell)\n# Package: ${currentPackage.name}\n# Description: ${currentPackage.description}\n# Generated: ${new Date().toISOString()}\n\n$ErrorActionPreference = 'Stop'\nWrite-Output "Installing MCP Package: ${currentPackage.name}"\nWrite-Output "Description: ${currentPackage.description}"\nWrite-Output "MCPs to install: ${currentPackage.mcps.length}"\nWrite-Output ""\n\n${mcpCommands}\n\nWrite-Output ""\nWrite-Output "Installation complete!"\nWrite-Output "All ${currentPackage.mcps.length} MCPs have been installed successfully."\n`;
+  };
+
   const isInPackage = (mcpId: number) => {
     return currentPackage.mcps.some(mcp => mcp.id === mcpId);
   };
@@ -190,6 +217,7 @@ echo "All ${currentPackage.mcps.length} MCPs have been installed successfully."
       deletePackage,
       clearCurrentPackage,
       generateInstallScript,
+      generateInstallScriptPS,
       isInPackage
     }}>
       {children}

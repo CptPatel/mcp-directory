@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePackage } from "@/contexts/PackageContext";
 import { X, Package, Download, Settings, Plus, Trash2, Copy, ExternalLink, Save } from "lucide-react";
 import Link from "next/link";
@@ -31,6 +32,7 @@ export default function PackagesClient() {
   const [packageDescription, setPackageDescription] = useState(currentPackage.description);
   const [showInstallScript, setShowInstallScript] = useState(false);
   const [installScript, setInstallScript] = useState("");
+  const [installScriptPS, setInstallScriptPS] = useState("");
 
   const handleUpdatePackageInfo = () => {
     updatePackageInfo(packageName, packageDescription);
@@ -81,16 +83,28 @@ export default function PackagesClient() {
 
   const handleGenerateScript = () => {
     const script = generateInstallScript();
+    const scriptPS = generateInstallScriptPS();
     setInstallScript(script);
+    setInstallScriptPS(scriptPS);
     setShowInstallScript(true);
   };
 
-  const handleCopyScript = () => {
-    navigator.clipboard.writeText(installScript);
+  const handleCopyScript = (text: string) => {
+    navigator.clipboard.writeText(text);
     toast({
       title: "Script copied",
       description: "Installation script copied to clipboard.",
     });
+  };
+
+  const handleDownload = (text: string, filename: string) => {
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const totalSize = currentPackage.mcps.reduce((acc, mcp) => {
@@ -343,22 +357,38 @@ export default function PackagesClient() {
               <p className="text-sm text-muted-foreground">
                 Package: {currentPackage.name} ({currentPackage.mcps.length} MCPs)
               </p>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={handleCopyScript}>
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy Script
-                </Button>
-                <Button variant="outline" size="sm" asChild>
-                  <a href="/docs/installation" target="_blank">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Installation Guide
-                  </a>
-                </Button>
-              </div>
             </div>
-            <pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto whitespace-pre-wrap">
-              {installScript}
-            </pre>
+
+            <Tabs defaultValue="bash">
+              <TabsList className="mb-2">
+                <TabsTrigger value="bash">Bash (macOS/Linux)</TabsTrigger>
+                <TabsTrigger value="ps">PowerShell (Windows)</TabsTrigger>
+              </TabsList>
+              <TabsContent value="bash">
+                <div className="flex gap-2 mb-2">
+                  <Button variant="outline" size="sm" onClick={() => handleCopyScript(installScript)}>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleDownload(installScript, "mcp-install.sh")}>Download</Button>
+                </div>
+                <pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto whitespace-pre-wrap">
+{installScript}
+                </pre>
+              </TabsContent>
+              <TabsContent value="ps">
+                <div className="flex gap-2 mb-2">
+                  <Button variant="outline" size="sm" onClick={() => handleCopyScript(installScriptPS)}>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleDownload(installScriptPS, "mcp-install.ps1")}>Download</Button>
+                </div>
+                <pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto whitespace-pre-wrap">
+{installScriptPS}
+                </pre>
+              </TabsContent>
+            </Tabs>
           </div>
         </DialogContent>
       </Dialog>
