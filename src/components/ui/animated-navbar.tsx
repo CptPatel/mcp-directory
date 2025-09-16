@@ -5,8 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import { ThemeSwitcher } from "@/components/theme-switcher";
-import { LucideIcon, Search, Package, Sparkles, BookOpen, Users, LayoutDashboard } from "lucide-react";
+import { LucideIcon, Search, Package, Sparkles, BookOpen, Users, LayoutDashboard, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 interface NavItem {
   name: string;
@@ -213,6 +214,65 @@ export function AnimatedNavBar({ className }: AnimatedNavBarProps) {
 
             {/* Auth & Theme Controls */}
             <div className="flex items-center gap-3">
+              {/* Mobile menu trigger */}
+              <Sheet>
+                <SheetTrigger asChild>
+                  <button
+                    aria-label="Open menu"
+                    className="md:hidden p-2 rounded-md border border-border/50"
+                  >
+                    <Menu className="h-5 w-5" />
+                  </button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-72">
+                  <div className="flex flex-col gap-2 mt-8">
+                    {navItems.map((item) => (
+                      <Link
+                        key={item.name}
+                        href={item.url}
+                        className="text-sm font-medium px-3 py-2 rounded-md hover:bg-muted/60"
+                        onClick={() => setActiveTab(item.name)}
+                      >
+                        <span className="flex items-center gap-2">
+                          <item.icon className="h-4 w-4" />
+                          {item.name}
+                        </span>
+                      </Link>
+                    ))}
+
+                    <SignedIn>
+                      <Link
+                        href="/dashboard"
+                        className="text-sm font-medium px-3 py-2 rounded-md hover:bg-muted/60"
+                        onClick={() => setActiveTab("Dashboard")}
+                      >
+                        <span className="flex items-center gap-2">
+                          <LayoutDashboard className="h-4 w-4" />
+                          Dashboard
+                        </span>
+                      </Link>
+                      <div className="px-3 pt-2">
+                        <UserButton appearance={{ elements: { avatarBox: "h-8 w-8" } }} />
+                      </div>
+                    </SignedIn>
+
+                    <SignedOut>
+                      <div className="flex gap-2 px-3 pt-2">
+                        <SignInButton mode="modal">
+                          <button className="flex-1 text-sm font-medium py-2 rounded-md border hover:bg-muted/60">
+                            Sign In
+                          </button>
+                        </SignInButton>
+                        <SignUpButton mode="modal">
+                          <button className="flex-1 text-sm font-medium py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90">
+                            Sign Up
+                          </button>
+                        </SignUpButton>
+                      </div>
+                    </SignedOut>
+                  </div>
+                </SheetContent>
+              </Sheet>
               <SignedOut>
                 <SignInButton mode="modal">
                   <motion.button
