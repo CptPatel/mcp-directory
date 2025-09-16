@@ -24,7 +24,8 @@ export default function PackagesClient() {
     loadPackage,
     deletePackage,
     clearCurrentPackage,
-    generateInstallScript
+    generateInstallScript,
+    generateInstallScriptPS
   } = usePackage();
   
   const { toast } = useToast();
