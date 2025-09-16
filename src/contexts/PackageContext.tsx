@@ -64,15 +64,19 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Load saved packages from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem('mcp-saved-packages');
-    if (saved) {
-      setSavedPackages(JSON.parse(saved));
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('mcp-saved-packages');
+      if (saved) {
+        setSavedPackages(JSON.parse(saved));
+      }
     }
   }, []);
 
   // Save packages to localStorage whenever savedPackages changes
   useEffect(() => {
-    localStorage.setItem('mcp-saved-packages', JSON.stringify(savedPackages));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mcp-saved-packages', JSON.stringify(savedPackages));
+    }
   }, [savedPackages]);
 
   const addMCPToPackage = (mcp: MCP) => {
