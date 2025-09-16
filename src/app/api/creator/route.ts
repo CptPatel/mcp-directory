@@ -5,12 +5,68 @@ type ReqBody = {
   model?: string;
 };
 
+// Simple in-memory rate limit (per instance). For production, use a durable store.
+const rlStore = new Map<string, { count: number; reset: number }>();
+const WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const MAX_REQ = 30; // per IP per window
+
+function getClientIp(req: Request) {
+  const xff = req.headers.get("x-forwarded-for");
+  if (xff) return xff.split(",")[0].trim();
+  const xrip = req.headers.get("x-real-ip");
+  if (xrip) return xrip;
+  try {
+    return (new URL(req.url)).hostname;
+  } catch {
+    return "unknown";
+  }
+}
+
+function rateLimitKey(req: Request) {
+  return `creator:${getClientIp(req)}`;
+}
+
+function checkRateLimit(req: Request) {
+  const key = rateLimitKey(req);
+  const now = Date.now();
+  const entry = rlStore.get(key);
+  if (!entry || entry.reset < now) {
+    rlStore.set(key, { count: 1, reset: now + WINDOW_MS });
+    return { allowed: true, remaining: MAX_REQ - 1, reset: now + WINDOW_MS };
+  }
+  if (entry.count >= MAX_REQ) {
+    return { allowed: false, remaining: 0, reset: entry.reset };
+  }
+  entry.count++;
+  return { allowed: true, remaining: MAX_REQ - entry.count, reset: entry.reset };
+}
+
 export async function POST(req: Request) {
+  // Basic CSRF check: require same-origin
+  const origin = req.headers.get("origin") || req.headers.get("referer") || "";
+  const reqOrigin = (() => {
+    try { return new URL(req.url).origin; } catch { return ""; }
+  })();
+  if (origin && !origin.startsWith(reqOrigin)) {
+    return NextResponse.json({ error: "Invalid origin" }, { status: 403, headers: { "Cache-Control": "no-store" } });
+  }
+
+  // Rate limit
+  const rl = checkRateLimit(req);
+  if (!rl.allowed) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, {
+      status: 429,
+      headers: {
+        "Cache-Control": "no-store",
+        "Retry-After": Math.ceil((rl.reset - Date.now()) / 1000).toString(),
+      },
+    });
+  }
   try {
     const { prompt = "", model = "openrouter/auto" } = (await req.json()) as ReqBody;
 
     if (!prompt || prompt.trim().length < 8) {
-      return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
+      return NextResponse.json({ error: "Prompt is required" }, { status: 400, headers: { "Cache-Control": "no-store" } });
     }
 
     const apiKey = process.env.OPENROUTER_API_KEY;
@@ -18,7 +74,7 @@ export async function POST(req: Request) {
     // Fallback local generator if no API key configured
     if (!apiKey) {
       const stub = buildStubFromPrompt(prompt);
-      return NextResponse.json({ source: "stub", mcp: stub });
+      return NextResponse.json({ source: "stub", mcp: stub }, { headers: { "Cache-Control": "no-store" } });
     }
 
     // Call OpenRouter chat completions
@@ -51,7 +107,7 @@ export async function POST(req: Request) {
       const text = await res.text();
       console.error("OpenRouter error:", text);
       const stub = buildStubFromPrompt(prompt);
-      return NextResponse.json({ source: "stub", mcp: stub, warning: "OpenRouter call failed; returned stub" }, { status: 200 });
+      return NextResponse.json({ source: "stub", mcp: stub, warning: "OpenRouter call failed; returned stub" }, { status: 200, headers: { "Cache-Control": "no-store" } });
     }
 
     const data = await res.json();
@@ -73,10 +129,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ source: "fallback", mcp: stub }, { status: 200 });
     }
 
-    return NextResponse.json({ source: "openrouter", mcp: normalizeMCP(parsed) });
+    return NextResponse.json({ source: "openrouter", mcp: normalizeMCP(parsed) }, { headers: { "Cache-Control": "no-store" } });
   } catch (e) {
     console.error("/api/creator error", e);
-    return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
+    return NextResponse.json({ error: "Unexpected error" }, { status: 500, headers: { "Cache-Control": "no-store" } });
   }
 }
 
@@ -139,4 +195,3 @@ function buildStubFromPrompt(prompt: string) {
     size: "1.0 MB",
   });
 }
-
