@@ -8,10 +8,12 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "test:select": "tsx scripts/test-select.ts",
-    "test:write": "tsx scripts/test-write.ts"
+    "test:write": "tsx scripts/test-write.ts",
+    "test:insert-user": "tsx scripts/test-insert-user.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
+    "dotenv": "^16.4.5",
     "zod": "^3.23.8"
   },
   "devDependencies": {

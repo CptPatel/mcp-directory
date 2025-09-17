@@ -4,7 +4,7 @@ type RpcReq = { jsonrpc: "2.0"; id: number; method: string; params?: any };
 type RpcRes = { jsonrpc: "2.0"; id: number | null; result?: any; error?: any };
 
 async function main() {
-  const child = spawn(process.platform === "win32" ? "npx.cmd" : "npx", ["tsx", "src/index.ts"], {
+  const child = spawn(process.platform === "win32" ? "npm.cmd" : "npm", ["run", "dev"], {
     cwd: process.cwd(),
     stdio: ["pipe", "pipe", "inherit"],
     env: process.env,
@@ -82,4 +82,3 @@ main().catch((e) => {
   console.error(e);
   process.exit(1);
 });
-

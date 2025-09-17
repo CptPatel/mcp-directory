@@ -23,6 +23,8 @@ npm install
 ```
 cp .env.example .env.local
 # Fill in SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
+# Optional: restrict writes to only these tables (default shown)
+# SUPABASE_MCP_WRITE_TABLES=community_posts,community_comments
 ```
 
 3) Run
@@ -96,4 +98,3 @@ Add to your `settings.json`:
 - This server trusts the Service Role key. Keep it local. If you want to expose it, add auth and finer-grained allowlists.
 - To make it read-only, set only `SUPABASE_URL` and `SUPABASE_ANON_KEY`.
 - Update the whitelist (`ALLOWED_TABLES`) in `src/index.ts` as needed.
-

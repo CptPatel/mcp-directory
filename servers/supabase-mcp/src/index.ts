@@ -9,6 +9,16 @@
   This is intentionally simple and safe. Keep it local; do not expose to the internet without additional auth.
 */
 import { createClient } from "@supabase/supabase-js";
+import * as dotenv from "dotenv";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+
+// Load env from server folder and project root for convenience
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+dotenv.config({ path: path.resolve(__dirname, "../../.env.local") });
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 import { z } from "zod";
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -24,7 +34,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
 });
 
 // Restrict to safe tables
-const ALLOWED_TABLES = new Set([
+// Read whitelist (safe to query)
+const READ_ALLOWED = new Set([
   "mcps",
   "packages",
   "package_items",
@@ -32,6 +43,14 @@ const ALLOWED_TABLES = new Set([
   "community_comments",
   "blog_posts",
 ]);
+
+// Write whitelist (narrow by default to community tables only)
+const WRITE_ALLOWED = new Set(
+  (process.env.SUPABASE_MCP_WRITE_TABLES || "community_posts,community_comments")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+);
 
 const WhereSchema = z.record(z.string(), z.union([z.string(), z.number(), z.boolean()]));
 
@@ -64,7 +83,7 @@ type JSONValue = any;
 
 async function handleSelect(args: JSONValue) {
   const input = SelectInput.parse(args);
-  if (!ALLOWED_TABLES.has(input.table)) throw new Error("table not allowed");
+  if (!READ_ALLOWED.has(input.table)) throw new Error("table not allowed");
   const cols = input.columns?.length ? input.columns.join(",") : "*";
   let q = supabase.from(input.table).select(cols);
   if (input.where) {
@@ -81,7 +100,7 @@ async function handleSelect(args: JSONValue) {
 
 async function handleInsert(args: JSONValue) {
   const input = InsertInput.parse(args);
-  if (!ALLOWED_TABLES.has(input.table)) throw new Error("table not allowed");
+  if (!WRITE_ALLOWED.has(input.table)) throw new Error("table not allowed for insert");
   const { data, error } = await supabase.from(input.table).insert(input.values).select("*");
   if (error) throw error;
   return data;
@@ -89,7 +108,7 @@ async function handleInsert(args: JSONValue) {
 
 async function handleUpdate(args: JSONValue) {
   const input = UpdateInput.parse(args);
-  if (!ALLOWED_TABLES.has(input.table)) throw new Error("table not allowed");
+  if (!WRITE_ALLOWED.has(input.table)) throw new Error("table not allowed for update");
   let q = supabase.from(input.table).update(input.values);
   for (const [k, v] of Object.entries(input.where)) {
     q = q.eq(k, v as any);
@@ -101,7 +120,7 @@ async function handleUpdate(args: JSONValue) {
 
 async function handleDelete(args: JSONValue) {
   const input = DeleteInput.parse(args);
-  if (!ALLOWED_TABLES.has(input.table)) throw new Error("table not allowed");
+  if (!WRITE_ALLOWED.has(input.table)) throw new Error("table not allowed for delete");
   let q = supabase.from(input.table).delete();
   for (const [k, v] of Object.entries(input.where)) {
     q = q.eq(k, v as any);
@@ -267,4 +286,3 @@ process.stdin.on("data", (chunk) => {
 });
 
 process.stdin.on("end", () => process.exit(0));
-

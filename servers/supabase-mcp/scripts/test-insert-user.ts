@@ -39,21 +39,22 @@ async function main() {
     });
 
   await call(1, "initialize", {});
-  const list = await call(2, "tools/list", {});
-  console.log("tools:", list.result?.tools?.map((t: any) => t.name));
+  await call(2, "tools/list", {});
 
-  const sel = await call(3, "tools/call", {
-    name: "supabase_select",
+  const uid = `user_mcp_${Date.now()}`;
+  const ins = await call(3, "tools/call", {
+    name: "supabase_insert",
     arguments: {
-      table: "mcps",
-      columns: ["id", "name", "category", "rating", "downloads"],
-      orderBy: "id",
-      ascending: false,
-      limit: 1,
+      table: "users",
+      values: { id: uid, handle: `handle_${Date.now()}` },
     },
   });
-  const payload = sel.result?.content?.[0]?.text || "";
-  console.log("select result:", payload);
+
+  if (ins.error) {
+    console.error("insert error:", ins.error);
+  } else {
+    console.log("insert result:", ins.result?.content?.[0]?.text);
+  }
 
   child.kill();
 }
@@ -62,3 +63,4 @@ main().catch((e) => {
   console.error(e);
   process.exit(1);
 });
+
