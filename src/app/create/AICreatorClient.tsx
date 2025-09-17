@@ -7,12 +7,21 @@ import { Badge } from "@/components/ui/badge";
 import { Sparkles, Zap, Code, TestTube, Package, Bot, Cpu, Brain } from "lucide-react";
 import Link from "next/link";
 import { usePackage } from "@/contexts/PackageContext";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function AICreatorClient() {
-  const { currentPackage } = usePackage();
+  const { currentPackage, addMCPToPackage } = usePackage();
+  const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState<'prompt' | 'generate' | 'test' | 'save'>('prompt');
   const [isVisible, setIsVisible] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [prompt, setPrompt] = useState("");
+  const [model, setModel] = useState("openrouter/auto");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<any | null>(null);
 
   useEffect(() => {
     setIsVisible(true);
@@ -24,6 +33,34 @@ export default function AICreatorClient() {
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
+
+  async function onGenerate() {
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      const res = await fetch('/api/creator', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, model })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Generation failed');
+      setResult(data);
+      setCurrentStep('generate');
+    } catch (e: any) {
+      setError(e.message || 'Failed to generate');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function onAddToPackage() {
+    if (!result?.mcp) return;
+    addMCPToPackage(result.mcp);
+    toast({ title: 'Added to package', description: `${result.mcp.name} added to ${currentPackage.name}` });
+    setCurrentStep('save');
+  }
 
   return (
     <div className="container px-4 py-4 mx-auto max-w-7xl relative overflow-hidden">
@@ -131,42 +168,69 @@ export default function AICreatorClient() {
             
             <CardContent className="relative z-10">
               <div className="space-y-8">
-                {/* Prompt Input Area - Enhanced Placeholder */}
-                <div className="min-h-[450px] border-2 border-dashed border-purple-200/50 rounded-2xl flex items-center justify-center bg-gradient-to-br from-purple-50/50 to-blue-50/50 backdrop-blur-sm group-hover:border-purple-300/50 transition-all duration-500 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  
-                  <div className="text-center text-muted-foreground relative z-10">
-                    <div className="relative mb-6">
-                      <Sparkles className="h-16 w-16 mx-auto mb-4 text-purple-400 animate-pulse" />
-                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full animate-bounce" />
-                      <div className="absolute -bottom-2 -left-2 w-4 h-4 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '1s' }} />
-                    </div>
-                    <p className="text-xl font-semibold mb-3 text-gradient-purple">AI Conversation Interface</p>
-                    <p className="text-sm max-w-md mx-auto leading-relaxed">
-                      This will be your intelligent conversational interface where you can describe your MCP requirements 
-                      and iterate with AI to create the perfect solution.
-                    </p>
-                    <div className="mt-6 flex justify-center gap-2">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }} />
-                      <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
-                    </div>
+                {/* Prompt & Model */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Describe your MCP</label>
+                    <Textarea
+                      rows={6}
+                      placeholder="e.g., Create an MCP that manages GitHub issues and pull requests with natural language commands"
+                      value={prompt}
+                      onChange={(e) => setPrompt(e.target.value)}
+                    />
+                  </div>
+                  <div className="max-w-sm">
+                    <label className="text-sm font-medium mb-2 block">Model</label>
+                    <Select value={model} onValueChange={setModel}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="openrouter/auto">Auto (OpenRouter)</SelectItem>
+                        <SelectItem value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</SelectItem>
+                        <SelectItem value="openai/gpt-4o">GPT‑4o</SelectItem>
+                        <SelectItem value="google/gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
+                        <SelectItem value="mistralai/mixtral-8x7b-instruct">Mixtral 8x7B</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 
                 {/* Action Buttons */}
-                <div className="flex gap-4">
-                  <Button className="flex-1 btn-premium text-lg py-6 shadow-xl hover:shadow-2xl transition-all duration-300 group">
-                    <Sparkles className="h-5 w-5 mr-3 group-hover:animate-spin" />
-                    Generate MCP with AI
-                    <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="w-2 h-2 bg-white/50 rounded-full animate-pulse" />
+                <div className="space-y-3">
+                  {error && (
+                    <div className="p-3 border border-destructive/30 text-sm rounded-md text-destructive">
+                      {error}
                     </div>
-                  </Button>
-                  <Button variant="outline" className="px-8 py-6 hover:bg-muted/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group">
-                    <TestTube className="h-5 w-5 mr-2 group-hover:animate-bounce" />
-                    Test & Validate
-                  </Button>
+                  )}
+                  <div className="flex gap-4">
+                    <Button className="flex-1 btn-premium text-lg py-6 shadow-xl hover:shadow-2xl transition-all duration-300 group" onClick={onGenerate} disabled={loading || !prompt.trim()}>
+                      <Sparkles className="h-5 w-5 mr-3 group-hover:animate-spin" />
+                      {loading ? 'Generating…' : 'Generate MCP with AI'}
+                      <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="w-2 h-2 bg-white/50 rounded-full animate-pulse" />
+                      </div>
+                    </Button>
+                    <Button variant="outline" className="px-8 py-6 hover:bg-muted/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group" disabled>
+                      <TestTube className="h-5 w-5 mr-2 group-hover:animate-bounce" />
+                      Test & Validate
+                    </Button>
+                  </div>
+                  {result?.mcp && (
+                    <div className="mt-4 space-y-3">
+                      <div className="p-3 bg-muted rounded-md text-sm">
+                        <pre className="whitespace-pre-wrap break-words">{JSON.stringify(result.mcp, null, 2)}</pre>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={onAddToPackage} className="flex-1">
+                          Add to Package
+                        </Button>
+                        <Button variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(result.mcp, null, 2))}>
+                          Copy JSON
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 type ReqBody = {
   prompt?: string;
@@ -129,7 +130,28 @@ export async function POST(req: Request) {
       return NextResponse.json({ source: "fallback", mcp: stub }, { status: 200 });
     }
 
-    return NextResponse.json({ source: "openrouter", mcp: normalizeMCP(parsed) }, { headers: { "Cache-Control": "no-store" } });
+    const normalized = normalizeMCP(parsed);
+    const schema = z.object({
+      id: z.number().optional(),
+      name: z.string().min(1),
+      description: z.string().min(1),
+      category: z.string().min(1),
+      tags: z.array(z.string()).default([]),
+      verified: z.boolean().optional(),
+      author: z.string().min(1),
+      lastUpdated: z.string().optional(),
+      size: z.string().optional(),
+      installCommand: z.string().min(1),
+      downloads: z.string().optional(),
+      rating: z.number().optional(),
+    });
+    const safe = schema.safeParse(normalized);
+    if (!safe.success) {
+      const stub = buildStubFromPrompt(prompt);
+      return NextResponse.json({ source: "validated-fallback", mcp: stub }, { status: 200, headers: { "Cache-Control": "no-store" } });
+    }
+
+    return NextResponse.json({ source: "openrouter", mcp: safe.data }, { headers: { "Cache-Control": "no-store" } });
   } catch (e) {
     console.error("/api/creator error", e);
     return NextResponse.json({ error: "Unexpected error" }, { status: 500, headers: { "Cache-Control": "no-store" } });

@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test:select": "tsx scripts/test-select.ts",
+    "test:write": "tsx scripts/test-write.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
@@ -18,4 +20,3 @@
     "@types/node": "^20.12.12"
   }
 }
-
