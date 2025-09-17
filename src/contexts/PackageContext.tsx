@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
 
 export interface MCP {
   id: number;
@@ -52,6 +53,7 @@ export const usePackage = () => {
 };
 
 export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, isSignedIn } = useUser();
   const [currentPackage, setCurrentPackage] = useState<Package>({
     id: 'current',
     name: 'My MCP Package',
@@ -96,27 +98,72 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }));
   };
 
-  const updatePackageInfo = (name: string, description: string) => {
-    setCurrentPackage(prev => ({
-      ...prev,
-      name,
-      description,
-      lastModified: new Date().toISOString()
-    }));
+  const updatePackageInfo = async (name: string, description: string) => {
+    setCurrentPackage(prev => ({ ...prev, name, description, lastModified: new Date().toISOString() }));
+    // If signed in and a saved package is selected (by UX later), you could persist here.
+    // For now, info is saved when user clicks Save Package, or if loaded from server and then saved again.
   };
 
-  const savePackage = () => {
+  const savePackage = async () => {
+    // If signed in, save to server; else fallback to localStorage
+    if (isSignedIn) {
+      try {
+        const res = await fetch('/api/packages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: currentPackage.name,
+            description: currentPackage.description,
+            mcps: currentPackage.mcps.map((m, idx) => ({ id: m.id, position: idx })),
+          }),
+        });
+        if (!res.ok) throw new Error('Failed to save package');
+        const data = await res.json();
+        // Refresh list from server
+        const list = await fetch('/api/packages', { cache: 'no-store' });
+        if (list.ok) {
+          const j = await list.json();
+          setSavedPackages(
+            (j.packages || []).map((p: any) => ({ id: p.id, name: p.name, description: p.description, mcps: [], createdAt: '', lastModified: p.lastModified }))
+          );
+        }
+        // Update currentPackage id to reflect server package? Keep 'current' locally.
+      } catch (err) {
+        console.error('savePackage', err);
+      }
+      return;
+    }
+
     const packageToSave = {
       ...currentPackage,
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
       lastModified: new Date().toISOString()
     };
-    
     setSavedPackages(prev => [...prev, packageToSave]);
   };
 
-  const loadPackage = (packageId: string) => {
+  const loadPackage = async (packageId: string) => {
+    if (isSignedIn) {
+      try {
+        const res = await fetch(`/api/packages/${packageId}`, { cache: 'no-store' });
+        if (res.ok) {
+          const pkg = await res.json();
+          setCurrentPackage({
+            id: 'current',
+            name: pkg.name,
+            description: pkg.description,
+            mcps: pkg.mcps || [],
+            createdAt: new Date().toISOString(),
+            lastModified: pkg.lastModified || new Date().toISOString(),
+          });
+          return;
+        }
+      } catch (err) {
+        console.error('loadPackage', err);
+      }
+    }
+
     const packageToLoad = savedPackages.find(pkg => pkg.id === packageId);
     if (packageToLoad) {
       setCurrentPackage({
@@ -126,7 +173,20 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const deletePackage = (packageId: string) => {
+  const deletePackage = async (packageId: string) => {
+    if (isSignedIn) {
+      try {
+        await fetch(`/api/packages/${packageId}`, { method: 'DELETE' });
+        const list = await fetch('/api/packages', { cache: 'no-store' });
+        if (list.ok) {
+          const j = await list.json();
+          setSavedPackages((j.packages || []).map((p: any) => ({ id: p.id, name: p.name, description: p.description, mcps: [], createdAt: '', lastModified: p.lastModified })));
+        }
+      } catch (err) {
+        console.error('deletePackage', err);
+      }
+      return;
+    }
     setSavedPackages(prev => prev.filter(pkg => pkg.id !== packageId));
   };
 
