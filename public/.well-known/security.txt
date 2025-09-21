@@ -1,0 +1,6 @@
+Contact: security@mcpdirectory.app
+Expires: 2026-09-21T00:00:00.000Z
+Encryption: https://mcpdirectory.app/pgp-key.txt
+Preferred-Languages: en
+Canonical: https://mcpdirectory.app/.well-known/security.txt
+Policy: https://mcpdirectory.app/security-policy

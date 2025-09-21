@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# High-value pages for crawling
+Allow: /docs/
+Allow: /blog/
+Allow: /browse/
+Allow: /create/
+
+# Disallow private areas
+Disallow: /private/
+Disallow: /admin/
+Disallow: /api/auth/
+Disallow: /dashboard/private/
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://mcpdirectory.app/sitemap.xml
+
+# Additional sitemaps
+Sitemap: https://mcpdirectory.app/docs-sitemap.xml

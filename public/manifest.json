@@ -1,0 +1,86 @@
+{
+  "name": "MCP Directory - Model Context Protocol Hub",
+  "short_name": "MCP Directory",
+  "description": "Discover, bundle, and deploy Model Context Protocol configurations with one-click installation. Browse 1,200+ verified MCPs.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "categories": ["developer", "productivity", "utilities"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "MCP Directory Desktop View"
+    },
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "MCP Directory Mobile View"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Browse MCPs",
+      "short_name": "Browse",
+      "description": "Browse all available MCP servers",
+      "url": "/browse",
+      "icons": [
+        {
+          "src": "/icon-browse.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Documentation",
+      "short_name": "Docs",
+      "description": "View MCP setup guides and documentation",
+      "url": "/docs",
+      "icons": [
+        {
+          "src": "/icon-docs.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Create MCP",
+      "short_name": "Create",
+      "description": "Create a new MCP server",
+      "url": "/create",
+      "icons": [
+        {
+          "src": "/icon-create.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}
