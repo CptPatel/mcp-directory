@@ -109,222 +109,83 @@ const featuredMCPs = [
 
 export default function CommunityClient() {
   return (
-    <div className="container px-4 py-8 mx-auto max-w-7xl">
-      {/* Header */}
-      <div className="mb-12 text-center">
-        <h1 className="text-4xl font-bold mb-4">MCP Community</h1>
-        <p className="text-xl text-muted-foreground mb-6 max-w-3xl mx-auto">
-          Join thousands of developers sharing knowledge, contributing MCPs, and building the future of AI-powered development tools
-        </p>
-        <div className="flex justify-center gap-4">
-          <Button size="lg">
-            <Users className="h-4 w-4 mr-2" />
-            Join Community
-          </Button>
-          <Button variant="outline" size="lg">
-            <ExternalLink className="h-4 w-4 mr-2" />
-            Discord Server
-          </Button>
-        </div>
-      </div>
-
-      {/* Community Stats */}
-      <div className="grid md:grid-cols-4 gap-6 mb-12">
-        {communityStats.map((stat) => (
-          <Card key={stat.label} className="text-center">
-            <CardContent className="pt-6">
-              <stat.icon className="h-8 w-8 mx-auto mb-3 text-primary" />
-              <div className="text-2xl font-bold mb-1">{stat.value}</div>
-              <div className="text-sm text-muted-foreground">{stat.label}</div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Recent Discussions */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5" />
-                Recent Discussions
-              </CardTitle>
-              <CardDescription>
-                Latest conversations from the community
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentDiscussions.map((discussion, index) => (
-                  <div key={index}>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-medium hover:text-primary cursor-pointer">
-                            {discussion.title}
-                          </h3>
-                          {discussion.isHot && (
-                            <Badge variant="destructive" className="text-xs">
-                              <TrendingUp className="h-3 w-3 mr-1" />
-                              Hot
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>by {discussion.author}</span>
-                          <Badge variant="outline" className="text-xs">
-                            {discussion.category}
-                          </Badge>
-                          <span>{discussion.timeAgo}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <MessageCircle className="h-4 w-4" />
-                          {discussion.replies}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Heart className="h-4 w-4" />
-                          {discussion.likes}
-                        </div>
-                      </div>
-                    </div>
-                    {index < recentDiscussions.length - 1 && <Separator className="mt-4" />}
-                  </div>
-                ))}
-              </div>
-              <Button variant="outline" className="w-full mt-6">
-                View All Discussions
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Featured Community MCPs */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5" />
-                Community Featured MCPs
-              </CardTitle>
-              <CardDescription>
-                Outstanding MCPs created and shared by community members
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {featuredMCPs.map((mcp, index) => (
-                  <div key={index} className="flex items-start justify-between p-4 border rounded-lg">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-medium">{mcp.name}</h3>
-                        {mcp.isNew && (
-                          <Badge variant="secondary" className="text-xs">New</Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-2">{mcp.description}</p>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>by {mcp.author}</span>
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          {mcp.rating}
-                        </div>
-                        <span>{mcp.downloads} downloads</span>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      View MCP
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+    <div className="container px-4 py-8 mx-auto max-w-4xl">
+      {/* Coming Soon Header */}
+      <div className="text-center py-20">
+        <div className="mb-8">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 mb-6">
+            <Users className="h-10 w-10 text-white" />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            Community
+            <span className="block text-2xl md:text-3xl text-muted-foreground font-normal mt-2">
+              Coming Soon
+            </span>
+          </h1>
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+            We're building an amazing community platform where developers can share knowledge, 
+            contribute MCPs, and collaborate on AI-powered development tools.
+          </p>
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Top Contributors */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Top Contributors
-              </CardTitle>
-              <CardDescription>
-                Community members making a difference
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {topContributors.map((contributor, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <Avatar>
-                      <AvatarImage src={contributor.avatar} />
-                      <AvatarFallback>{contributor.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-sm">{contributor.name}</p>
-                        <Badge variant="outline" className="text-xs">{contributor.badge}</Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{contributor.username}</p>
-                      <p className="text-xs text-muted-foreground">{contributor.speciality}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium">{contributor.contributions}</p>
-                      <p className="text-xs text-muted-foreground">contributions</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+        {/* Features Preview */}
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
+          <div className="p-6 rounded-lg border bg-card">
+            <MessageCircle className="h-8 w-8 text-primary mx-auto mb-4" />
+            <h3 className="font-semibold mb-2">Discussions</h3>
+            <p className="text-sm text-muted-foreground">Share knowledge and get help from the community</p>
+          </div>
+          <div className="p-6 rounded-lg border bg-card">
+            <Share2 className="h-8 w-8 text-primary mx-auto mb-4" />
+            <h3 className="font-semibold mb-2">MCP Sharing</h3>
+            <p className="text-sm text-muted-foreground">Contribute and discover community-created MCPs</p>
+          </div>
+          <div className="p-6 rounded-lg border bg-card">
+            <Award className="h-8 w-8 text-primary mx-auto mb-4" />
+            <h3 className="font-semibold mb-2">Recognition</h3>
+            <p className="text-sm text-muted-foreground">Get recognized for your contributions and expertise</p>
+          </div>
+        </div>
 
-          {/* Community Guidelines */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Community Guidelines</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              <p>• Be respectful and constructive in discussions</p>
-              <p>• Share knowledge and help others learn</p>
-              <p>• Test MCPs thoroughly before sharing</p>
-              <p>• Provide clear documentation and examples</p>
-              <p>• Report issues and bugs responsibly</p>
-              <Button variant="outline" size="sm" className="w-full mt-4">
-                Read Full Guidelines
-              </Button>
-            </CardContent>
-          </Card>
+        {/* Notify Me */}
+        <div className="bg-muted/50 rounded-lg p-8 mb-8">
+          <h3 className="text-xl font-semibold mb-4">Get Notified When We Launch</h3>
+          <p className="text-muted-foreground mb-6">
+            Be the first to know when our community platform goes live!
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <input 
+              type="email" 
+              placeholder="Enter your email" 
+              className="flex-1 px-4 py-2 rounded-md border border-input bg-background"
+            />
+            <Button>
+              Notify Me
+            </Button>
+          </div>
+        </div>
 
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Button variant="outline" className="w-full justify-start">
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Start Discussion
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <Share2 className="h-4 w-4 mr-2" />
-                Submit MCP
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <Star className="h-4 w-4 mr-2" />
-                Write Review
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
+        {/* Current Options */}
+        <div className="space-y-4">
+          <p className="text-muted-foreground">In the meantime, connect with us:</p>
+          <div className="flex justify-center gap-4">
+            <Button variant="outline" size="lg" asChild>
+              <a href="https://github.com/mcpdirectory/mcpdirectory" target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="h-4 w-4 mr-2" />
-                Join Discord
-              </Button>
-            </CardContent>
-          </Card>
+                GitHub
+              </a>
+            </Button>
+            <Button variant="outline" size="lg" asChild>
+              <a href="https://twitter.com/mcpdirectory" target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Twitter
+              </a>
+            </Button>
+          </div>
         </div>
       </div>
+
+
     </div>
   );
 }
