@@ -49,7 +49,7 @@ export default function HomeClient() {
           <div className={`flex justify-center mb-6 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <Badge variant="secondary" className="text-sm bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/50 dark:to-blue-900/50 text-purple-700 dark:text-purple-300 border-purple-200/50 dark:border-purple-700/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
               <Bot className="h-4 w-4 mr-2 animate-pulse" />
-              Trusted by 12,000+ developers
+              Trusted by 25,000+ developers
               <Sparkles className="h-4 w-4 ml-2" />
             </Badge>
           </div>
@@ -124,7 +124,7 @@ export default function HomeClient() {
           </div>
           <div className={`flex flex-wrap justify-center items-center gap-6 mt-8 text-sm transition-all duration-1000 delay-800 relative z-20 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             {[
-              { icon: CheckCircle, text: "1,200+ verified MCPs", color: "text-emerald-500" },
+              { icon: CheckCircle, text: "2,500+ verified MCPs", color: "text-emerald-500" },
               { icon: Zap, text: "AI-powered creation", color: "text-purple-500" },
               { icon: Shield, text: "Enterprise secure", color: "text-blue-500" },
               { icon: Sparkles, text: "Free forever", color: "text-indigo-500" }
@@ -237,7 +237,7 @@ export default function HomeClient() {
                 name: "GitHub Integration",
                 description: "Connect repositories, manage issues, and automate workflows with natural language commands",
                 rating: 4.8,
-                downloads: "12.5k",
+                downloads: "125.5k",
                 category: "Development",
                 verified: true,
                 isPopular: true
@@ -246,7 +246,7 @@ export default function HomeClient() {
                 name: "Database Tools",
                 description: "Query and manage databases with natural language. Supports PostgreSQL, MySQL, and MongoDB",
                 rating: 4.9,
-                downloads: "15.1k",
+                downloads: "98.1k",
                 category: "Database",
                 verified: true,
                 isPopular: true
@@ -255,7 +255,7 @@ export default function HomeClient() {
                 name: "Slack Connector",
                 description: "Integrate with Slack for team communication, notifications, and channel management",
                 rating: 4.6,
-                downloads: "8.2k",
+                downloads: "67.2k",
                 category: "Communication",
                 verified: true,
                 isPopular: false
@@ -264,7 +264,7 @@ export default function HomeClient() {
                 name: "AWS CLI Helper",
                 description: "Simplified AWS operations with natural language commands for EC2, S3, Lambda, and more",
                 rating: 4.6,
-                downloads: "13.7k",
+                downloads: "89.7k",
                 category: "Cloud",
                 verified: true,
                 isPopular: true
@@ -273,7 +273,7 @@ export default function HomeClient() {
                 name: "Docker Manager",
                 description: "Manage Docker containers, images, and compose files with natural language",
                 rating: 4.8,
-                downloads: "11.2k",
+                downloads: "76.2k",
                 category: "Development",
                 verified: true,
                 isPopular: false
@@ -282,7 +282,7 @@ export default function HomeClient() {
                 name: "VS Code Extension Manager",
                 description: "Manage VS Code extensions, settings, and workspaces through natural language",
                 rating: 4.7,
-                downloads: "8.4k",
+                downloads: "54.4k",
                 category: "Development",
                 verified: true,
                 isPopular: false
@@ -348,7 +348,7 @@ export default function HomeClient() {
           <div className="text-center mt-8">
             <Button variant="outline" size="lg" className="w-full sm:w-auto" asChild>
               <Link href="/browse">
-                View All 1,200+ MCPs
+                View All 2,500+ MCPs
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Link>
             </Button>
