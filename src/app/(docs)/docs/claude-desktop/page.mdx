@@ -1,0 +1,494 @@
+---
+title: "Connecting MCPs in Claude Desktop (Mac & Windows)"
+description: "Complete guide to connecting and managing MCP servers in Claude Desktop for Mac and Windows."
+slug: "claude-desktop"
+category: "ide"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "How many MCP servers can I run with Claude Desktop?"
+    a: "Claude Desktop can handle multiple MCP servers simultaneously, typically 5-10 servers depending on your system resources."
+  - q: "Do MCP servers work the same on Mac and Windows versions of Claude Desktop?"
+    a: "Yes, MCP functionality is identical across platforms, though file paths and installation methods may differ."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="claude-desktop" />
+
+# Connecting MCPs in Claude Desktop (Mac & Windows)
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How many MCP servers can I run with Claude Desktop?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Claude Desktop can handle multiple MCP servers simultaneously, typically 5-10 servers depending on your system resources." }
+    },
+    {
+      "@type": "Question",
+      "name": "Do MCP servers work the same on Mac and Windows versions of Claude Desktop?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes, MCP functionality is identical across platforms, though file paths and installation methods may differ." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+Claude Desktop provides native support for Model Context Protocol servers, allowing you to extend Claude's capabilities with custom tools and data sources. This guide covers setup for both Mac and Windows.
+
+## Prerequisites
+
+- **Claude Desktop** (latest version)
+- **Node.js 18+** or **Python 3.8+**
+- **Administrator/sudo access** (for some installations)
+- **Anthropic account** with Claude Desktop access
+
+## Installation
+
+### Download Claude Desktop
+
+**Mac:**
+- Download from [claude.ai/desktop](https://claude.ai/desktop)
+- Install the `.dmg` file
+- Move to Applications folder
+
+**Windows:**
+- Download from [claude.ai/desktop](https://claude.ai/desktop)
+- Run the `.exe` installer
+- Follow installation wizard
+
+### Install MCP Servers
+
+**Mac:**
+```bash
+# Using Homebrew (recommended)
+brew install node
+npm install -g @modelcontextprotocol/server-filesystem
+npm install -g @modelcontextprotocol/server-github
+
+# Using Python
+pip3 install mcp-server-database
+```
+
+**Windows:**
+```powershell
+# Using Chocolatey (recommended)
+choco install nodejs
+npm install -g @modelcontextprotocol/server-filesystem
+npm install -g @modelcontextprotocol/server-github
+
+# Using Python
+pip install mcp-server-database
+```
+
+## Configuration
+
+### Mac Configuration
+
+Create the configuration file at:
+`~/Library/Application Support/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "mcp-server-filesystem",
+      "args": ["--root", "/Users/username/Documents"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    "github": {
+      "command": "mcp-server-github",
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "your_token_here"
+      }
+    },
+    "database": {
+      "command": "python3",
+      "args": ["-m", "mcp_server_database"],
+      "env": {
+        "DATABASE_URL": "postgresql://localhost:5432/mydb"
+      }
+    }
+  }
+}
+```
+
+### Windows Configuration
+
+Create the configuration file at:
+`%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "mcp-server-filesystem",
+      "args": ["--root", "C:\\Users\\username\\Documents"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    "github": {
+      "command": "mcp-server-github",
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "your_token_here"
+      }
+    },
+    "database": {
+      "command": "python",
+      "args": ["-m", "mcp_server_database"],
+      "env": {
+        "DATABASE_URL": "postgresql://localhost:5432/mydb"
+      }
+    }
+  }
+}
+```
+
+## Environment Setup
+
+### Mac Environment Variables
+
+Add to `~/.zshrc` or `~/.bash_profile`:
+
+```bash
+# MCP Environment Variables
+export GITHUB_PERSONAL_ACCESS_TOKEN="your_token_here"
+export DATABASE_URL="postgresql://localhost:5432/mydb"
+export OPENAI_API_KEY="your_openai_key"
+
+# Path for MCP servers
+export PATH="/usr/local/bin:$PATH"
+export NODE_PATH="/usr/local/lib/node_modules"
+```
+
+### Windows Environment Variables
+
+**Using PowerShell:**
+```powershell
+# Set environment variables
+[Environment]::SetEnvironmentVariable("GITHUB_PERSONAL_ACCESS_TOKEN", "your_token_here", "User")
+[Environment]::SetEnvironmentVariable("DATABASE_URL", "postgresql://localhost:5432/mydb", "User")
+
+# Or use System Properties > Environment Variables GUI
+```
+
+**Using Command Prompt:**
+```cmd
+setx GITHUB_PERSONAL_ACCESS_TOKEN "your_token_here"
+setx DATABASE_URL "postgresql://localhost:5432/mydb"
+```
+
+## Popular MCP Configurations
+
+### Filesystem Access
+
+**Mac:**
+```json
+{
+  "filesystem": {
+    "command": "mcp-server-filesystem",
+    "args": [
+      "--root", "/Users/username/Projects",
+      "--allowed-extensions", ".txt,.md,.json,.js,.py"
+    ]
+  }
+}
+```
+
+**Windows:**
+```json
+{
+  "filesystem": {
+    "command": "mcp-server-filesystem",
+    "args": [
+      "--root", "C:\\Users\\username\\Projects",
+      "--allowed-extensions", ".txt,.md,.json,.js,.py"
+    ]
+  }
+}
+```
+
+### GitHub Integration
+
+```json
+{
+  "github": {
+    "command": "mcp-server-github",
+    "env": {
+      "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_your_token_here"
+    }
+  }
+}
+```
+
+### Database Connectivity
+
+```json
+{
+  "postgres": {
+    "command": "mcp-server-postgres",
+    "env": {
+      "DATABASE_URL": "postgresql://user:password@localhost:5432/database"
+    }
+  },
+  "sqlite": {
+    "command": "mcp-server-sqlite",
+    "args": ["--db-path", "./data/app.db"]
+  }
+}
+```
+
+### Web Search
+
+```json
+{
+  "brave_search": {
+    "command": "mcp-server-brave-search",
+    "env": {
+      "BRAVE_API_KEY": "your_brave_api_key"
+    }
+  }
+}
+```
+
+## Usage in Claude Desktop
+
+### Basic Interactions
+
+Once configured, you can use MCP tools naturally in conversations:
+
+```
+"List the files in my Projects directory"
+"Show me recent commits in my GitHub repository"
+"Query the users table in my database"
+"Search for recent news about AI"
+```
+
+### File Operations
+
+```
+"Create a new file called 'notes.md' with today's meeting notes"
+"Read the contents of my README.md file"
+"Find all Python files in my project"
+"Show me the directory structure"
+```
+
+### GitHub Operations
+
+```
+"Show me my recent GitHub activity"
+"Create a new issue in my repository"
+"List open pull requests"
+"Show commit history for the main branch"
+```
+
+### Database Queries
+
+```
+"Show me the schema of my database"
+"Count the number of users in the users table"
+"Find all orders from the last week"
+"Create a summary report of sales data"
+```
+
+## Troubleshooting
+
+### Configuration Issues
+
+**Mac:**
+```bash
+# Check if config file exists
+ls -la ~/Library/Application\ Support/Claude/
+
+# Validate JSON syntax
+python3 -m json.tool ~/Library/Application\ Support/Claude/claude_desktop_config.json
+
+# Check permissions
+chmod 644 ~/Library/Application\ Support/Claude/claude_desktop_config.json
+```
+
+**Windows:**
+```powershell
+# Check if config file exists
+Get-ChildItem "$env:APPDATA\Claude\"
+
+# Validate JSON syntax
+Get-Content "$env:APPDATA\Claude\claude_desktop_config.json" | ConvertFrom-Json
+
+# Check file permissions
+Get-Acl "$env:APPDATA\Claude\claude_desktop_config.json"
+```
+
+### Server Connection Issues
+
+**Check server installation:**
+```bash
+# Mac/Linux
+which mcp-server-filesystem
+npm list -g @modelcontextprotocol/server-filesystem
+
+# Windows
+where mcp-server-filesystem
+npm list -g @modelcontextprotocol/server-filesystem
+```
+
+**Test server manually:**
+```bash
+# Start server manually to test
+mcp-server-filesystem --root ~/Documents --test
+
+# Check if server responds
+curl -X POST http://localhost:3000/mcp/tools/list
+```
+
+### Environment Variable Issues
+
+**Mac:**
+```bash
+# Check environment variables
+echo $GITHUB_PERSONAL_ACCESS_TOKEN
+env | grep MCP
+
+# Reload shell configuration
+source ~/.zshrc
+```
+
+**Windows:**
+```powershell
+# Check environment variables
+$env:GITHUB_PERSONAL_ACCESS_TOKEN
+Get-ChildItem Env: | Where-Object Name -like "*MCP*"
+
+# Restart PowerShell to reload environment
+```
+
+### Permission Issues
+
+**Mac:**
+```bash
+# Grant Claude Desktop necessary permissions
+# System Preferences > Security & Privacy > Privacy
+# Add Claude Desktop to:
+# - Full Disk Access
+# - Files and Folders
+# - Developer Tools (if needed)
+```
+
+**Windows:**
+```powershell
+# Run Claude Desktop as Administrator (if needed)
+# Or adjust Windows Defender/Antivirus settings
+```
+
+## Advanced Configuration
+
+### Multiple Server Instances
+
+```json
+{
+  "mcpServers": {
+    "work_filesystem": {
+      "command": "mcp-server-filesystem",
+      "args": ["--root", "/Users/username/Work"]
+    },
+    "personal_filesystem": {
+      "command": "mcp-server-filesystem",
+      "args": ["--root", "/Users/username/Personal"]
+    },
+    "work_github": {
+      "command": "mcp-server-github",
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "work_token"
+      }
+    }
+  }
+}
+```
+
+### Custom Server Paths
+
+**Mac:**
+```json
+{
+  "custom_server": {
+    "command": "/usr/local/bin/node",
+    "args": ["/Users/username/custom-mcp-server/index.js"],
+    "cwd": "/Users/username/custom-mcp-server",
+    "env": {
+      "NODE_ENV": "development"
+    }
+  }
+}
+```
+
+**Windows:**
+```json
+{
+  "custom_server": {
+    "command": "C:\\Program Files\\nodejs\\node.exe",
+    "args": ["C:\\Users\\username\\custom-mcp-server\\index.js"],
+    "cwd": "C:\\Users\\username\\custom-mcp-server",
+    "env": {
+      "NODE_ENV": "development"
+    }
+  }
+}
+```
+
+## Security Best Practices
+
+### Token Management
+
+- Store tokens in environment variables
+- Use read-only tokens when possible
+- Regularly rotate access tokens
+- Never commit tokens to version control
+
+### File System Access
+
+- Limit filesystem server root directories
+- Use allowed file extensions
+- Avoid granting access to system directories
+- Regular audit of accessible files
+
+### Network Security
+
+- Use HTTPS for remote MCP servers
+- Implement proper authentication
+- Monitor MCP server network activity
+- Use VPN for remote server access
+
+## Related Guides
+
+- [Why MCPs Don't Show Up in Claude Desktop](/docs/mcp-not-showing)
+- [Fixing MCP Server Connection Refused](/docs/connection-refused)
+- [Using MCPs in Terminal (Universal CLI Setup)](/docs/terminal-cli)
+- [Connecting to Remote MCP Servers](/docs/remote-mcp)
+
+## FAQ
+
+### How many MCP servers can I run with Claude Desktop?
+
+Claude Desktop can handle multiple MCP servers simultaneously. Most users run 5-10 servers comfortably, depending on system resources and server complexity.
+
+### Do MCP servers work the same on Mac and Windows versions of Claude Desktop?
+
+Yes, MCP functionality is identical across platforms. The main differences are file paths, environment variable setup, and installation methods for the underlying tools.
+
+### Can I use the same MCP configuration on both Mac and Windows?
+
+The configuration format is the same, but you'll need to adjust file paths and possibly command names (e.g., `python3` vs `python`) for cross-platform compatibility.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [claude-desktop/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/claude-desktop/page.mdx)

@@ -1,0 +1,140 @@
+﻿---
+title: "Why MCPs Don't Show Up in Claude Desktop"
+description: "Diagnose why Claude Desktop cannot see your MCP servers on macOS or Windows and fix discovery issues."
+slug: "mcp-not-showing"
+category: "testing"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "Where does Claude Desktop read MCP configurations from?"
+    a: "The app scans the `~/.config/claude/mcp/` directory on macOS/Linux and `%APPDATA%\Claude\mcp\` on Windows."
+  - q: "Do I need to restart Claude Desktop after editing MCP configs?"
+    a: "Yes. Restart to reload the manifest, or use the in-app 'Reload MCPs' option in recent builds."
+  - q: "Why does the MCP appear but return errors?"
+    a: "The server might be running on a blocked port, missing permissions, or failing health checks. Open the logs to investigate."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="mcp-not-showing" />
+
+# Why MCPs Don't Show Up in Claude Desktop
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Where does Claude Desktop read MCP configurations from?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The app scans the ~/.config/claude/mcp/ directory on macOS/Linux and %APPDATA%\\Claude\\mcp\\ on Windows." }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need to restart Claude Desktop after editing MCP configs?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Restart to reload the manifest, or use the in-app 'Reload MCPs' option in recent builds." }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does the MCP appear but return errors?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The server might be running on a blocked port, missing permissions, or failing health checks. Open the logs to investigate." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+Claude Desktop automatically detects MCP servers defined in its configuration folder. If your server is missing from the MCP panel, follow this checklist for macOS and Windows to restore visibility.
+
+## Verify Configuration Paths
+
+| OS | Config Path |
+| --- | --- |
+| macOS | `~/Library/Application Support/Claude/mcp/` |
+| Windows | `%APPDATA%\Claude\mcp\` |
+| Linux | `~/.config/claude/mcp/` |
+
+Each MCP has a JSON or YAML manifest describing the command to run.
+
+```json
+{
+  "mcp_servers": {
+    "filesystem": {
+      "command": "/usr/local/bin/mcp-filesystem",
+      "args": ["--root", "~/Projects"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}
+```
+
+## Checklist
+
+1. **Confirm the manifest exists** in the correct directory.
+2. **Validate JSON/YAML syntax** with `jq` or `yamllint`.
+3. **Ensure the command path is executable** (`chmod +x` on macOS/Linux).
+4. **Check port conflicts** if the MCP binds to a TCP port.
+5. **Restart Claude Desktop** after changes.
+
+## macOS Specific Fixes
+
+```bash
+# Grant execute permission
+chmod +x /usr/local/bin/mcp-filesystem
+
+# Allow network access in macOS firewall
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add /usr/local/bin/mcp-filesystem
+```
+
+- If the MCP binary is quarantined (`com.apple.quarantine` attribute), remove it with `xattr -d`.
+- Use Activity Monitor to confirm the MCP process starts when Claude Desktop launches it.
+
+## Windows Specific Fixes
+
+```powershell
+# Unblock downloaded binaries
+Unblock-File "C:\\mcp\\server.exe"
+
+# Allow through Windows Defender
+netsh advfirewall firewall add rule name="MCP Server" dir=in action=allow program="C:\\mcp\\server.exe" enable=yes
+```
+
+- Run Claude Desktop as administrator if the MCP requires elevated filesystem access.
+- Ensure the manifest uses Windows paths (`C:\\path\\to\\server.exe`).
+
+## Logs & Diagnostics
+
+- Open Claude Desktop > Settings > MCP > "View Logs" to inspect startup failures.
+- Check the MCP server logs for stack traces or permission errors.
+- Use the MCP Inspector tooling to run a handshake manually and verify capabilities.
+
+## Related Guides
+
+- [Connecting MCPs in Claude Desktop (Mac & Windows)](/docs/claude-desktop)
+- [Fixing MCP Server Connection Refused](/docs/connection-refused)
+- [MCP Authentication & API Key Fixes](/docs/authentication-errors)
+- [How to Install and Use MCPs in Cursor IDE](/docs/cursor-setup)
+
+## FAQ
+
+### Where does Claude Desktop read MCP configurations from?
+
+macOS uses `~/Library/Application Support/Claude/mcp/`, Windows uses `%APPDATA%\Claude\mcp\`, and Linux uses `~/.config/claude/mcp/`.
+
+### Do I need to restart Claude Desktop after editing MCP configs?
+
+Yes. Restart or use the "Reload MCPs" control to refresh the manifest.
+
+### Why does the MCP appear but return errors?
+
+The server may lack permissions, fail to start, or bind to a blocked port. Inspect logs and apply the fixes above.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [mcp-not-showing/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/mcp-not-showing/page.mdx)

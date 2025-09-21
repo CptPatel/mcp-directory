@@ -1,0 +1,449 @@
+---
+title: "Getting Started with MCPs in Gemini CLI"
+description: "Step-by-step setup guide for integrating Model Context Protocol servers with Gemini CLI."
+slug: "gemini-cli-setup"
+category: "cli"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "Does Gemini CLI support all MCP server types?"
+    a: "Gemini CLI supports most standard MCP servers, but some advanced features may require specific configuration."
+  - q: "How do I authenticate Gemini CLI with Google services?"
+    a: "Use 'gemini auth login' to authenticate with your Google account and access Google services through MCPs."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="gemini-cli-setup" />
+
+# Getting Started with MCPs in Gemini CLI
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Does Gemini CLI support all MCP server types?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Gemini CLI supports most standard MCP servers, but some advanced features may require specific configuration." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I authenticate Gemini CLI with Google services?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Use 'gemini auth login' to authenticate with your Google account and access Google services through MCPs." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+Gemini CLI is Google's command-line interface for interacting with Gemini AI models. This guide shows you how to integrate MCP servers to extend Gemini's capabilities with custom tools and data sources.
+
+## Prerequisites
+
+- **Node.js 18+** or **Python 3.8+**
+- **Google Cloud account** with Gemini API access
+- **Terminal/Command Prompt** access
+- Basic understanding of YAML configuration
+
+## Installation
+
+### Step 1: Install Gemini CLI
+
+```bash
+# Using npm
+npm install -g @google/gemini-cli
+
+# Using pip
+pip install google-gemini-cli
+
+# Verify installation
+gemini --version
+```
+
+### Step 2: Authenticate with Google
+
+```bash
+# Login to your Google account
+gemini auth login
+
+# Set your project ID
+gemini config set project your-project-id
+
+# Verify authentication
+gemini auth status
+```
+
+### Step 3: Install MCP Servers
+
+```bash
+# Install Google Workspace MCP
+npm install -g @google/workspace-mcp-server
+
+# Install Calendar MCP
+npm install -g @modelcontextprotocol/server-calendar
+
+# Install Gmail MCP
+pip install gmail-mcp-server
+```
+
+## Configuration
+
+### Basic Configuration
+
+Create `~/.gemini/mcp.yaml`:
+
+```yaml
+mcp:
+  servers:
+    workspace:
+      command: workspace-mcp-server
+      args:
+        - --scopes=drive,docs,sheets
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: /path/to/credentials.json
+    
+    calendar:
+      command: calendar-mcp-server
+      args:
+        - --provider=google
+      env:
+        GOOGLE_CALENDAR_API_KEY: your_api_key
+    
+    gmail:
+      command: python
+      args:
+        - -m
+        - gmail_mcp_server
+      env:
+        GMAIL_CREDENTIALS: /path/to/gmail-credentials.json
+
+gemini:
+  model: gemini-pro
+  temperature: 0.7
+  max_tokens: 2048
+```
+
+### Advanced Configuration
+
+For complex setups with multiple Google services:
+
+```yaml
+mcp:
+  servers:
+    google_suite:
+      command: node
+      args:
+        - google-suite-mcp.js
+      env:
+        GOOGLE_CLIENT_ID: your_client_id
+        GOOGLE_CLIENT_SECRET: your_client_secret
+        GOOGLE_REFRESH_TOKEN: your_refresh_token
+      timeout: 30000
+      
+    cloud_storage:
+      command: gcs-mcp-server
+      args:
+        - --bucket=your-bucket-name
+        - --region=us-central1
+      env:
+        GOOGLE_CLOUD_PROJECT: your-project-id
+        GOOGLE_APPLICATION_CREDENTIALS: /path/to/service-account.json
+
+  global_settings:
+    timeout: 60000
+    retries: 3
+    log_level: info
+```
+
+## Usage Examples
+
+### Basic Operations
+
+```bash
+# Start Gemini with MCP servers
+gemini start --with-mcp
+
+# Query with workspace context
+gemini ask "Summarize my recent Google Docs" --mcp workspace
+
+# Calendar operations
+gemini ask "What meetings do I have today?" --mcp calendar
+```
+
+### Interactive Mode
+
+```bash
+# Start interactive session
+gemini interactive
+
+# In interactive mode:
+> Use the Gmail MCP to check my unread emails
+> Create a Google Doc summary using workspace MCP
+> Schedule a meeting using calendar MCP
+```
+
+### Batch Processing
+
+```bash
+# Process multiple documents
+gemini batch --input "*.md" --mcp workspace --prompt "Convert to Google Docs"
+
+# Analyze calendar data
+gemini analyze --mcp calendar --timeframe "last 30 days"
+```
+
+## Google Services Integration
+
+### Google Workspace
+
+```bash
+# List Google Drive files
+gemini mcp call workspace list_files --folder "Projects"
+
+# Create a new document
+gemini mcp call workspace create_doc --title "Meeting Notes" --content "..."
+
+# Share a document
+gemini mcp call workspace share_doc --doc_id "abc123" --email "user@example.com"
+```
+
+### Gmail Integration
+
+```bash
+# Check unread emails
+gemini mcp call gmail get_unread --limit 10
+
+# Send an email
+gemini mcp call gmail send_email --to "user@example.com" --subject "Hello" --body "..."
+
+# Search emails
+gemini mcp call gmail search --query "from:boss@company.com"
+```
+
+### Google Calendar
+
+```bash
+# Get today's events
+gemini mcp call calendar get_events --date today
+
+# Create an event
+gemini mcp call calendar create_event --title "Team Meeting" --start "2025-09-21T10:00:00"
+
+# Find available time slots
+gemini mcp call calendar find_free_time --duration 60 --participants "user1@example.com,user2@example.com"
+```
+
+## MCP Server Management
+
+### Server Control
+
+```bash
+# List configured MCP servers
+gemini mcp list
+
+# Start specific server
+gemini mcp start workspace
+
+# Stop server
+gemini mcp stop workspace
+
+# Restart all servers
+gemini mcp restart
+
+# Check server health
+gemini mcp health workspace
+```
+
+### Debugging
+
+```bash
+# Enable debug logging
+DEBUG=gemini:mcp gemini start
+
+# View server logs
+gemini mcp logs workspace --tail 50
+
+# Test server connection
+gemini mcp test workspace
+```
+
+## Authentication Setup
+
+### Service Account Setup
+
+1. Go to Google Cloud Console
+2. Create a new service account
+3. Download the JSON key file
+4. Set the environment variable:
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json"
+```
+
+### OAuth Setup
+
+```bash
+# Initialize OAuth flow
+gemini auth oauth-init
+
+# Complete OAuth setup
+gemini auth oauth-complete --code your_auth_code
+
+# Refresh tokens
+gemini auth refresh
+```
+
+## Troubleshooting
+
+### Authentication Issues
+
+```bash
+# Check authentication status
+gemini auth status
+
+# Re-authenticate
+gemini auth login --force
+
+# Clear cached credentials
+gemini auth clear-cache
+```
+
+### MCP Server Issues
+
+```bash
+# Validate configuration
+gemini config validate
+
+# Test MCP connectivity
+gemini mcp test-all
+
+# Reset MCP configuration
+gemini mcp reset
+```
+
+### API Quota Issues
+
+```bash
+# Check API usage
+gemini quota status
+
+# Set rate limiting
+gemini config set rate_limit 10
+
+# Monitor API calls
+gemini monitor --mcp workspace
+```
+
+## Best Practices
+
+### Security
+
+- Use service accounts for production
+- Rotate credentials regularly
+- Limit MCP server permissions
+- Store credentials securely
+
+### Performance
+
+- Cache frequently accessed data
+- Use batch operations when possible
+- Monitor API quota usage
+- Optimize MCP server responses
+
+### Development Workflow
+
+```bash
+# Development environment
+gemini config set environment dev
+gemini mcp start --dev-mode
+
+# Testing configuration
+gemini config test
+gemini mcp validate-all
+
+# Production deployment
+gemini config set environment prod
+gemini mcp start --production
+```
+
+## Integration Examples
+
+### Automated Workflows
+
+```yaml
+# workflow.yaml
+name: Daily Summary
+trigger: cron("0 9 * * *")
+steps:
+  - name: Get calendar events
+    mcp: calendar
+    action: get_events
+    params:
+      date: today
+  
+  - name: Check emails
+    mcp: gmail
+    action: get_unread
+    params:
+      limit: 20
+  
+  - name: Create summary
+    gemini: summarize
+    context: [calendar_events, unread_emails]
+```
+
+### Custom MCP Server
+
+```javascript
+// custom-gemini-mcp.js
+const { MCPServer } = require('@modelcontextprotocol/sdk');
+
+const server = new MCPServer({
+  name: 'custom-gemini-tools',
+  version: '1.0.0'
+});
+
+server.addTool('google_search', {
+  description: 'Search Google with custom parameters',
+  parameters: {
+    query: { type: 'string', required: true },
+    site: { type: 'string', required: false }
+  },
+  handler: async ({ query, site }) => {
+    // Custom Google search implementation
+    return { results: await customGoogleSearch(query, site) };
+  }
+});
+
+server.start();
+```
+
+## Related Guides
+
+- [How to Install and Use MCPs with Codex CLI](/docs/codex-cli-installation)
+- [Using MCPs in Terminal (Universal CLI Setup)](/docs/terminal-cli)
+- [Running MCPs with Claude CLI (Examples + Troubleshooting)](/docs/claude-cli)
+- [Connecting to Remote MCP Servers](/docs/remote-mcp)
+
+## FAQ
+
+### Does Gemini CLI support all MCP server types?
+
+Gemini CLI supports most standard MCP servers, but some advanced features may require specific configuration. Google-specific MCPs work best with Gemini CLI.
+
+### How do I authenticate Gemini CLI with Google services?
+
+Use `gemini auth login` to authenticate with your Google account. For programmatic access, set up service accounts and use the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
+
+### Can I use Gemini CLI with non-Google MCP servers?
+
+Yes, Gemini CLI can work with any MCP server that follows the standard protocol. However, Google service integrations work most seamlessly.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [gemini-cli-setup/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/gemini-cli-setup/page.mdx)

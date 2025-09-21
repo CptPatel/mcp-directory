@@ -1,0 +1,345 @@
+---
+title: "How to Install and Use MCPs with Codex CLI"
+description: "Complete guide to installing and configuring MCP servers with Codex CLI for AI-powered development."
+slug: "codex-cli-installation"
+category: "cli"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "What is Codex CLI and how does it work with MCPs?"
+    a: "Codex CLI is OpenAI's command-line interface that can be extended with MCP servers to provide additional functionality and context."
+  - q: "Can I use multiple MCP servers with Codex CLI simultaneously?"
+    a: "Yes, Codex CLI supports multiple MCP servers running concurrently, each providing different capabilities."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="codex-cli-installation" />
+
+# How to Install and Use MCPs with Codex CLI
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Codex CLI and how does it work with MCPs?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Codex CLI is OpenAI's command-line interface that can be extended with MCP servers to provide additional functionality and context." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use multiple MCP servers with Codex CLI simultaneously?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes, Codex CLI supports multiple MCP servers running concurrently, each providing different capabilities." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+Codex CLI provides a powerful command-line interface for AI-powered development. By integrating MCP servers, you can extend its capabilities with custom tools and context providers.
+
+## Prerequisites
+
+- **Node.js 18+** or **Python 3.8+**
+- **OpenAI API key** with Codex access
+- **Terminal/Command Prompt** access
+- Basic familiarity with command-line tools
+
+## Installation
+
+### Step 1: Install Codex CLI
+
+```bash
+# Using npm
+npm install -g @openai/codex-cli
+
+# Using pip
+pip install codex-cli
+
+# Verify installation
+codex --version
+```
+
+### Step 2: Configure OpenAI API
+
+```bash
+# Set your OpenAI API key
+export OPENAI_API_KEY="your_api_key_here"
+
+# Or create a config file
+codex config set api_key your_api_key_here
+```
+
+### Step 3: Install MCP Servers
+
+```bash
+# Install filesystem MCP server
+npm install -g @modelcontextprotocol/server-filesystem
+
+# Install GitHub MCP server
+npm install -g @modelcontextprotocol/server-github
+
+# Install database MCP server
+pip install mcp-server-database
+```
+
+## Configuration
+
+### Basic MCP Configuration
+
+Create a configuration file at `~/.codex/mcp.json`:
+
+```json
+{
+  "mcp_servers": {
+    "filesystem": {
+      "command": "mcp-server-filesystem",
+      "args": ["--root", "/your/project/path"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    "github": {
+      "command": "mcp-server-github",
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "your_github_token"
+      }
+    },
+    "database": {
+      "command": "python",
+      "args": ["-m", "mcp_server_database"],
+      "env": {
+        "DATABASE_URL": "postgresql://user:pass@localhost:5432/db"
+      }
+    }
+  }
+}
+```
+
+### Advanced Configuration
+
+For more complex setups:
+
+```json
+{
+  "mcp_servers": {
+    "custom_tools": {
+      "command": "node",
+      "args": ["./custom-mcp-server.js"],
+      "cwd": "/path/to/your/project",
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG": "mcp:*"
+      },
+      "timeout": 30000,
+      "retries": 3
+    }
+  },
+  "codex": {
+    "model": "code-davinci-002",
+    "max_tokens": 2048,
+    "temperature": 0.1
+  }
+}
+```
+
+## Usage Examples
+
+### Basic Code Generation
+
+```bash
+# Generate a function with MCP context
+codex generate "Create a function to read files using the filesystem MCP"
+
+# Generate with specific context
+codex generate --context filesystem "Create a file backup utility"
+```
+
+### Interactive Mode
+
+```bash
+# Start interactive session
+codex interactive
+
+# In interactive mode:
+> Use the GitHub MCP to show me recent commits
+> Create a database migration using the database MCP
+> Generate tests for the current file using filesystem MCP
+```
+
+### Batch Processing
+
+```bash
+# Process multiple files
+codex batch --input "*.js" --prompt "Add JSDoc comments using filesystem context"
+
+# Generate documentation
+codex docs --mcp filesystem --output ./docs/
+```
+
+## Common Commands
+
+### MCP Management
+
+```bash
+# List available MCP servers
+codex mcp list
+
+# Start specific MCP server
+codex mcp start filesystem
+
+# Stop MCP server
+codex mcp stop filesystem
+
+# Restart all MCP servers
+codex mcp restart
+
+# Check MCP server status
+codex mcp status
+```
+
+### Code Operations
+
+```bash
+# Explain code with MCP context
+codex explain --file app.js --mcp filesystem
+
+# Refactor code
+codex refactor --input src/ --mcp github --output refactored/
+
+# Generate tests
+codex test --file utils.js --mcp filesystem
+```
+
+## Troubleshooting
+
+### API Key Issues
+
+```bash
+# Verify API key
+codex auth check
+
+# Reset configuration
+codex config reset
+
+# Set new API key
+codex config set api_key new_key_here
+```
+
+### MCP Server Problems
+
+```bash
+# Check MCP server logs
+codex mcp logs filesystem
+
+# Test MCP server connection
+codex mcp test filesystem
+
+# Restart problematic server
+codex mcp restart filesystem
+```
+
+### Performance Issues
+
+```bash
+# Enable debug mode
+DEBUG=codex:* codex generate "your prompt"
+
+# Check resource usage
+codex stats
+
+# Optimize configuration
+codex config optimize
+```
+
+## Best Practices
+
+### Security
+
+- Store API keys in environment variables
+- Use read-only MCP servers when possible
+- Regularly rotate access tokens
+- Limit MCP server permissions
+
+### Performance
+
+- Use specific MCP contexts for better results
+- Cache frequently used MCP responses
+- Monitor MCP server resource usage
+- Optimize prompts for your use case
+
+### Development Workflow
+
+```bash
+# Development setup
+codex config set environment development
+codex mcp start --dev filesystem github
+
+# Production setup
+codex config set environment production
+codex mcp start filesystem github database
+```
+
+## Integration Examples
+
+### With Git Workflow
+
+```bash
+# Generate commit messages
+codex commit --mcp github
+
+# Create pull request descriptions
+codex pr --mcp github --template detailed
+
+# Generate release notes
+codex release --mcp github --version 1.2.0
+```
+
+### With CI/CD
+
+```yaml
+# .github/workflows/codex.yml
+name: Codex Code Generation
+on: [push]
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Codex
+        run: |
+          npm install -g @openai/codex-cli
+          codex config set api_key ${{ secrets.OPENAI_API_KEY }}
+      - name: Generate documentation
+        run: codex docs --mcp filesystem --output ./generated-docs/
+```
+
+## Related Guides
+
+- [Using MCPs in Terminal (Universal CLI Setup)](/docs/terminal-cli)
+- [Getting Started with MCPs in Gemini CLI](/docs/gemini-cli-setup)
+- [Running MCPs with Claude CLI (Examples + Troubleshooting)](/docs/claude-cli)
+- [MCPs in VSCode - Complete Setup Guide](/docs/vscode-integration)
+
+## FAQ
+
+### What is Codex CLI and how does it work with MCPs?
+
+Codex CLI is OpenAI's command-line interface that leverages the Codex model for code generation and analysis. MCP servers extend its capabilities by providing additional context and tools.
+
+### Can I use multiple MCP servers with Codex CLI simultaneously?
+
+Yes, Codex CLI supports running multiple MCP servers concurrently. Each server can provide different capabilities, and you can specify which servers to use for specific operations.
+
+### How do I create custom MCP servers for Codex CLI?
+
+You can create custom MCP servers using the MCP SDK. Follow the MCP specification and ensure your server implements the required protocol methods for Codex CLI integration.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [codex-cli-installation/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/codex-cli-installation/page.mdx)

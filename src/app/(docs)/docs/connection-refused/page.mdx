@@ -1,0 +1,137 @@
+﻿---
+title: "Fixing MCP Server Connection Refused"
+description: "Diagnose and resolve MCP connection refused errors across local, remote, and containerised environments."
+slug: "connection-refused"
+category: "testing"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "What causes an MCP connection refused error?"
+    a: "The server process is not listening, the port is blocked by a firewall, or the client is pointing to the wrong host/port."
+  - q: "How do I test whether an MCP port is open?"
+    a: "Use tools like `netstat`, `lsof`, `ss`, or `nc -vz host port` to confirm the listener is active and reachable."
+  - q: "Does container networking change the fix?"
+    a: "Yes. Ensure the container exposes the correct port, the host maps it, and any reverse proxies forward the connection."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="connection-refused" />
+
+# Fixing MCP Server Connection Refused
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What causes an MCP connection refused error?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The server process is not listening, the port is blocked by a firewall, or the client is pointing to the wrong host/port." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I test whether an MCP port is open?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Use tools like netstat, lsof, ss, or nc -vz host port to confirm the listener is active and reachable." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does container networking change the fix?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Ensure the container exposes the correct port, the host maps it, and any reverse proxies forward the connection." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+`ECONNREFUSED` or "connection refused" errors mean the MCP client cannot open a TCP or TLS connection to the server. The root cause is usually a listening port issue, firewall rule, or a configuration mismatch between client and server.
+
+This checklist walks through the fastest steps to get your MCP servers reachable again.
+
+## Quick Diagnostics
+
+```bash
+# 1. Verify the server process is running
+ps aux | grep mcp
+
+# 2. Confirm the listening port
+sudo lsof -iTCP -sTCP:LISTEN | grep mcp
+
+# 3. Test the connection from the client host
+nc -vz localhost 8000
+curl -I http://localhost:8000/health
+```
+
+If step 3 fails locally, the server is not reachable even before considering remote networking.
+
+## Local Environment Fixes
+
+1. **Port already in use** – choose another port or terminate the conflicting process.
+2. **Bound to wrong interface** – ensure the server listens on `0.0.0.0` when accessed from another machine.
+3. **Development proxy** – disable proxies like Charles/Fiddler or update the proxy rules.
+4. **Firewall** – on macOS run `sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off` temporarily to test; on Windows update Defender Firewall rules.
+
+## Container & Docker Fixes
+
+```yaml
+# docker-compose.yml snippet
+services:
+  mcp-server:
+    build: .
+    ports:
+      - "8000:8000"   # host:container mapping
+    environment:
+      MCP_PORT: 8000
+```
+
+- Use `docker exec mcp-server netstat -tlnp` to confirm the container listens internally.
+- Check that your reverse proxy (nginx, Traefik) forwards the correct port and hostname.
+- When using Kubernetes, ensure the `Service` targets the proper container port and that NetworkPolicies allow ingress.
+
+## Remote Networking Fixes
+
+- Open the firewall or security group for the MCP port (e.g., `aws ec2 authorize-security-group-ingress --port 8000 --protocol tcp`).
+- Set up an SSH tunnel for temporary access:
+
+```bash
+ssh -L 9000:localhost:8000 user@remote-host
+curl -I http://localhost:9000/health
+```
+
+- Use TLS termination at a load balancer and forward traffic to the MCP server.
+- Verify DNS is pointing to the right IP address with `dig` or `nslookup`.
+
+## Observability Tips
+
+- Enable verbose logging in the MCP server: `LOG_LEVEL=debug node server.js`.
+- Capture failed connection attempts with `tcpdump -i any port 8000`.
+- Export metrics (Prometheus, StatsD) showing active connections and errors.
+
+## Related Guides
+
+- [MCP Authentication & API Key Fixes](/docs/authentication-errors)
+- [Fixing MCP Deployment Issues in Docker/Vercel](/docs/deployment-errors)
+- [Debugging & Testing MCPs with MCP Inspector](/docs/testing-mcp)
+- [Why MCPs Don't Show Up in Claude Desktop](/docs/mcp-not-showing)
+
+## FAQ
+
+### What causes an MCP connection refused error?
+
+Common causes include the server not running, listening on a different port, or being blocked by firewall rules.
+
+### How do I test whether an MCP port is open?
+
+Use `nc -vz host port`, `lsof`, or `ss -tlnp` to check whether the port is listening and reachable.
+
+### Does container networking change the fix?
+
+Yes. Ensure container ports are exposed and mapped correctly, and that your orchestrator or reverse proxy forwards connections properly.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [connection-refused/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/connection-refused/page.mdx)

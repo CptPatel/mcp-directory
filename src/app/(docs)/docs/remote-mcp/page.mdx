@@ -1,0 +1,186 @@
+﻿---
+title: "Connecting to Remote MCP Servers"
+description: "Configure secure connections to remote Model Context Protocol servers over SSH, HTTPS, and VPN tunnels."
+slug: "remote-mcp"
+category: "deploy"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "What transport protocols can MCP use remotely?"
+    a: "Most MCP servers expose HTTPS, WebSocket, or gRPC endpoints. Some community servers also support SSH port forwarding for development."
+  - q: "How do I authenticate against a remote MCP?"
+    a: "Use API keys, OAuth tokens, or mutual TLS certificates. Never send plaintext credentials over the public internet."
+  - q: "How can I monitor latency between the client and a remote MCP server?"
+    a: "Log round-trip times inside the MCP client, add metrics exporters, and capture network traces with tools like `mtr` or `otelcol`."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="remote-mcp" />
+
+# Connecting to Remote MCP Servers
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What transport protocols can MCP use remotely?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Most MCP servers expose HTTPS, WebSocket, or gRPC endpoints. Some community servers also support SSH port forwarding for development." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I authenticate against a remote MCP?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Use API keys, OAuth tokens, or mutual TLS certificates. Never send plaintext credentials over the public internet." }
+    },
+    {
+      "@type": "Question",
+      "name": "How can I monitor latency between the client and a remote MCP server?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Log round-trip times inside the MCP client, add metrics exporters, and capture network traces with tools like mtr or otelcol." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+Remote MCP servers let teams expose internal data sources, code repositories, and automations to AI copilots without running everything locally. This guide covers connection patterns, security controls, and performance tuning so your remote MCPs stay fast and trustworthy.
+
+## Architecture Options
+
+| Scenario | Recommended Pattern |
+| --- | --- |
+| Internal MCP for engineering team | Private VPC with VPN or zero-trust proxy (Tailscale, Cloudflare Access). |
+| Public MCP for community use | HTTPS endpoint behind CDN with rate limiting and auth tokens. |
+| Hybrid setup | Local MCP for filesystem access plus remote MCP for cloud APIs. |
+
+## Prerequisites
+
+- MCP server running on a remote host (VM, Kubernetes pod, or serverless platform).
+- Network path from the client to the server (public internet, VPN, or SSH tunnel).
+- Authentication material (API keys, OAuth client, JWT, or TLS certificates).
+- Optional: Observability stack (Grafana, Datadog, OpenTelemetry collector).
+
+## Connection Methods
+
+### 1. HTTPS with API Keys
+
+```json
+{
+  "mcp_servers": {
+    "remote-search": {
+      "command": "mcp-client",
+      "args": [
+        "--endpoint", "https://api.example.com/mcp",
+        "--auth", "api-key",
+        "--token", "${MCP_API_KEY}"
+      ]
+    }
+  }
+}
+```
+
+### 2. Mutual TLS
+
+```bash
+# Generate client certificate
+openssl req -new -x509 -days 365 -nodes \
+  -out client.crt -keyout client.key \
+  -subj "/CN=mcp-client"
+
+# Invoke MCP client with certs
+mcp-client \
+  --endpoint https://mcp.example.corp \
+  --cert client.crt \
+  --key client.key \
+  --ca ca.bundle.pem
+```
+
+### 3. SSH Port Forwarding (Development)
+
+```bash
+ssh -L 9000:localhost:8000 devhost.example \
+  'docker compose up mcp-server'
+
+# Then point your IDE/CLI to http://localhost:9000
+```
+
+### 4. Zero-Trust Tunnels (Tailscale)
+
+```bash
+# Advertise MCP service via Tailscale funnel
+sudo tailscale serve https /mcp  localhost:8000
+
+# Clients connect using stable tailnet URLs
+tailscale status --json | jq '.Peer[] | select(.HostName=="mcp").DNSName'
+```
+
+## Hardening Remote MCP Servers
+
+- Enforce TLS 1.2+ and disable weak ciphers.
+- Require short-lived tokens (JWT, OAuth) or signed requests.
+- Apply IP allow-lists or zero-trust access for administrative endpoints.
+- Enable audit logging for every MCP tool invocation.
+- Rotate credentials automatically with secrets managers (AWS Secrets Manager, HashiCorp Vault).
+
+## Performance Tuning
+
+- Deploy servers geographically close to consumers or behind a CDN.
+- Enable HTTP/2 or WebSocket keep-alives to reduce handshake overhead.
+- Stream large payloads rather than buffering entire responses.
+- Cache frequently requested data (Redis, Cloudflare KV) and invalidate on schedule.
+- Add circuit breakers and retry policies in the MCP client configuration.
+
+## Troubleshooting Checklist
+
+```bash
+# Confirm connectivity
+curl -I https://api.example.com/mcp/health
+
+# Measure latency and loss
+mtr --report api.example.com
+
+# Inspect TLS handshake
+openssl s_client -connect api.example.com:443 -servername api.example.com
+
+# Verify token
+curl -H "Authorization: Bearer $MCP_API_KEY" https://api.example.com/mcp/ping
+```
+
+Common issues:
+
+| Symptom | Resolution |
+| --- | --- |
+| `ECONNREFUSED` | Endpoint down or port blocked; verify security groups and firewalls. |
+| TLS handshake failures | Ensure certificates are valid and check `Subject Alternative Name`. |
+| High latency | Deploy closer to users or enable caching. |
+| 401 Unauthorized | Rotate API keys and confirm clock skew under 5 minutes. |
+
+## Related Guides
+
+- [Serverless MCP Deployment on Vercel](/docs/vercel-deployment)
+- [Deploying MCPs on AWS Lambda](/docs/aws-lambda)
+- [Debugging & Testing MCPs with MCP Inspector](/docs/testing-mcp)
+- [10 Most Common MCP Setup Errors (and Fixes)](/docs/common-errors)
+
+## FAQ
+
+### What transport protocols can MCP use remotely?
+
+MCP servers frequently expose HTTPS or WebSocket endpoints. Some implementations support gRPC or SSH tunnelling for internal deployments.
+
+### How do I authenticate against a remote MCP?
+
+Use API keys, OAuth flows, or mutual TLS. Store secrets in a managed vault and rotate them automatically.
+
+### How can I monitor latency between the client and a remote MCP server?
+
+Log timing information in your MCP client, forward metrics to Prometheus or Datadog, and run network diagnostics (mtr, traceroute) from the same region as your users.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [remote-mcp/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/remote-mcp/page.mdx)

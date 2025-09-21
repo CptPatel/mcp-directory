@@ -1,0 +1,742 @@
+---
+title: "Deploying MCP Servers on Kubernetes Clusters"
+description: "Scale MCP servers on Kubernetes with deployment manifests, service discovery, and monitoring."
+slug: "kubernetes"
+category: "deploy"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "Can MCP servers auto-scale on Kubernetes?"
+    a: "Yes, MCP servers can use Horizontal Pod Autoscaler (HPA) based on CPU, memory, or custom metrics like request count."
+  - q: "How do I handle MCP server state in Kubernetes?"
+    a: "Use StatefulSets for stateful MCP servers, or design stateless servers with external state storage like Redis or databases."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="kubernetes" />
+
+# Deploying MCP Servers on Kubernetes Clusters
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can MCP servers auto-scale on Kubernetes?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes, MCP servers can use Horizontal Pod Autoscaler (HPA) based on CPU, memory, or custom metrics like request count." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I handle MCP server state in Kubernetes?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Use StatefulSets for stateful MCP servers, or design stateless servers with external state storage like Redis or databases." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+Kubernetes provides excellent orchestration for MCP servers, offering scalability, high availability, and automated management. This guide covers deployment strategies, service discovery, and monitoring.
+
+## Prerequisites
+
+- **Kubernetes cluster** (1.20+)
+- **kubectl** configured
+- **Docker** for building images
+- **Helm** (optional, for package management)
+- Basic Kubernetes knowledge
+
+## Container Preparation
+
+### Dockerfile for MCP Server
+
+```dockerfile
+FROM node:18-alpine
+
+# Create app directory
+WORKDIR /usr/src/app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy source code
+COPY . .
+
+# Create non-root user
+RUN addgroup -g 1001 -S mcp && \
+    adduser -S mcp -u 1001
+
+# Change ownership
+RUN chown -R mcp:mcp /usr/src/app
+USER mcp
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
+
+# Start the server
+CMD ["node", "dist/index.js"]
+```
+
+### Build and Push Image
+
+```bash
+# Build image
+docker build -t your-registry/mcp-server:v1.0.0 .
+
+# Push to registry
+docker push your-registry/mcp-server:v1.0.0
+
+# Or use multi-arch builds
+docker buildx build --platform linux/amd64,linux/arm64 \
+  -t your-registry/mcp-server:v1.0.0 --push .
+```
+
+## Kubernetes Manifests
+
+### Namespace
+
+```yaml
+# namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mcp-servers
+  labels:
+    name: mcp-servers
+```
+
+### ConfigMap
+
+```yaml
+# configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mcp-config
+  namespace: mcp-servers
+data:
+  config.json: |
+    {
+      "server": {
+        "port": 3000,
+        "host": "0.0.0.0"
+      },
+      "logging": {
+        "level": "info",
+        "format": "json"
+      },
+      "features": {
+        "filesystem": true,
+        "github": true,
+        "database": true
+      }
+    }
+  
+  nginx.conf: |
+    upstream mcp_backend {
+        server mcp-filesystem:3000;
+        server mcp-github:3001;
+        server mcp-database:3002;
+    }
+    
+    server {
+        listen 80;
+        location / {
+            proxy_pass http://mcp_backend;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+        }
+    }
+```
+
+### Secret
+
+```yaml
+# secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mcp-secrets
+  namespace: mcp-servers
+type: Opaque
+data:
+  github-token: <base64-encoded-token>
+  database-url: <base64-encoded-url>
+  openai-api-key: <base64-encoded-key>
+```
+
+### Deployment
+
+```yaml
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-filesystem
+  namespace: mcp-servers
+  labels:
+    app: mcp-filesystem
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mcp-filesystem
+  template:
+    metadata:
+      labels:
+        app: mcp-filesystem
+    spec:
+      containers:
+      - name: mcp-filesystem
+        image: your-registry/mcp-filesystem:v1.0.0
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: MCP_SERVER_NAME
+          value: "filesystem"
+        - name: CONFIG_PATH
+          value: "/etc/mcp/config.json"
+        envFrom:
+        - secretRef:
+            name: mcp-secrets
+        volumeMounts:
+        - name: config
+          mountPath: /etc/mcp
+        - name: data
+          mountPath: /data
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+      volumes:
+      - name: config
+        configMap:
+          name: mcp-config
+      - name: data
+        emptyDir: {}
+      securityContext:
+        fsGroup: 1001
+```
+
+### Service
+
+```yaml
+# service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-filesystem
+  namespace: mcp-servers
+  labels:
+    app: mcp-filesystem
+spec:
+  selector:
+    app: mcp-filesystem
+  ports:
+  - name: http
+    port: 80
+    targetPort: 3000
+    protocol: TCP
+  type: ClusterIP
+```
+
+### Ingress
+
+```yaml
+# ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mcp-ingress
+  namespace: mcp-servers
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+  - hosts:
+    - mcp.yourdomain.com
+    secretName: mcp-tls
+  rules:
+  - host: mcp.yourdomain.com
+    http:
+      paths:
+      - path: /filesystem
+        pathType: Prefix
+        backend:
+          service:
+            name: mcp-filesystem
+            port:
+              number: 80
+      - path: /github
+        pathType: Prefix
+        backend:
+          service:
+            name: mcp-github
+            port:
+              number: 80
+```
+
+## StatefulSet for Stateful MCPs
+
+```yaml
+# statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mcp-database
+  namespace: mcp-servers
+spec:
+  serviceName: mcp-database-headless
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mcp-database
+  template:
+    metadata:
+      labels:
+        app: mcp-database
+    spec:
+      containers:
+      - name: mcp-database
+        image: your-registry/mcp-database:v1.0.0
+        ports:
+        - containerPort: 3000
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: mcp-secrets
+              key: database-url
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Gi
+```
+
+## Auto-scaling
+
+### Horizontal Pod Autoscaler
+
+```yaml
+# hpa.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: mcp-filesystem-hpa
+  namespace: mcp-servers
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mcp-filesystem
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+```
+
+### Vertical Pod Autoscaler
+
+```yaml
+# vpa.yaml
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: mcp-filesystem-vpa
+  namespace: mcp-servers
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mcp-filesystem
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+    - containerName: mcp-filesystem
+      maxAllowed:
+        cpu: 2
+        memory: 2Gi
+      minAllowed:
+        cpu: 100m
+        memory: 128Mi
+```
+
+## Service Discovery
+
+### Service Mesh (Istio)
+
+```yaml
+# virtual-service.yaml
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: mcp-routing
+  namespace: mcp-servers
+spec:
+  hosts:
+  - mcp.yourdomain.com
+  http:
+  - match:
+    - uri:
+        prefix: /filesystem
+    route:
+    - destination:
+        host: mcp-filesystem
+        port:
+          number: 80
+  - match:
+    - uri:
+        prefix: /github
+    route:
+    - destination:
+        host: mcp-github
+        port:
+          number: 80
+    fault:
+      delay:
+        percentage:
+          value: 0.1
+        fixedDelay: 5s
+```
+
+### DNS-based Discovery
+
+```yaml
+# headless-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-discovery
+  namespace: mcp-servers
+spec:
+  clusterIP: None
+  selector:
+    app: mcp-server
+  ports:
+  - name: http
+    port: 3000
+    targetPort: 3000
+```
+
+## Monitoring and Observability
+
+### ServiceMonitor (Prometheus)
+
+```yaml
+# servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mcp-servers
+  namespace: mcp-servers
+  labels:
+    app: mcp-servers
+spec:
+  selector:
+    matchLabels:
+      app: mcp-filesystem
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+```
+
+### Grafana Dashboard
+
+```json
+{
+  "dashboard": {
+    "title": "MCP Servers",
+    "panels": [
+      {
+        "title": "Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(mcp_requests_total[5m])",
+            "legendFormat": "{{server}}"
+          }
+        ]
+      },
+      {
+        "title": "Response Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(mcp_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## Deployment Strategies
+
+### Rolling Update
+
+```yaml
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+```
+
+### Blue-Green Deployment
+
+```bash
+# Deploy green version
+kubectl apply -f deployment-green.yaml
+
+# Test green version
+kubectl port-forward svc/mcp-filesystem-green 8080:80
+
+# Switch traffic
+kubectl patch service mcp-filesystem -p '{"spec":{"selector":{"version":"green"}}}'
+
+# Clean up blue version
+kubectl delete deployment mcp-filesystem-blue
+```
+
+### Canary Deployment
+
+```yaml
+# canary-deployment.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: mcp-filesystem
+spec:
+  replicas: 5
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - pause: {}
+      - setWeight: 40
+      - pause: {duration: 10}
+      - setWeight: 60
+      - pause: {duration: 10}
+      - setWeight: 80
+      - pause: {duration: 10}
+  selector:
+    matchLabels:
+      app: mcp-filesystem
+  template:
+    metadata:
+      labels:
+        app: mcp-filesystem
+    spec:
+      containers:
+      - name: mcp-filesystem
+        image: your-registry/mcp-filesystem:v2.0.0
+```
+
+## Troubleshooting
+
+### Debug Pod Issues
+
+```bash
+# Check pod status
+kubectl get pods -n mcp-servers
+
+# Describe pod
+kubectl describe pod mcp-filesystem-xxx -n mcp-servers
+
+# Check logs
+kubectl logs mcp-filesystem-xxx -n mcp-servers
+
+# Execute into pod
+kubectl exec -it mcp-filesystem-xxx -n mcp-servers -- /bin/sh
+```
+
+### Network Debugging
+
+```bash
+# Test service connectivity
+kubectl run debug --image=nicolaka/netshoot -it --rm -- /bin/bash
+
+# Inside debug pod
+nslookup mcp-filesystem.mcp-servers.svc.cluster.local
+curl http://mcp-filesystem.mcp-servers.svc.cluster.local/health
+```
+
+### Resource Issues
+
+```bash
+# Check resource usage
+kubectl top pods -n mcp-servers
+kubectl top nodes
+
+# Check events
+kubectl get events -n mcp-servers --sort-by='.lastTimestamp'
+
+# Check resource quotas
+kubectl describe resourcequota -n mcp-servers
+```
+
+## Security Best Practices
+
+### Pod Security Standards
+
+```yaml
+# pod-security-policy.yaml
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: mcp-psp
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  requiredDropCapabilities:
+    - ALL
+  volumes:
+    - 'configMap'
+    - 'emptyDir'
+    - 'projected'
+    - 'secret'
+    - 'downwardAPI'
+    - 'persistentVolumeClaim'
+  runAsUser:
+    rule: 'MustRunAsNonRoot'
+  seLinux:
+    rule: 'RunAsAny'
+  fsGroup:
+    rule: 'RunAsAny'
+```
+
+### Network Policies
+
+```yaml
+# network-policy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mcp-network-policy
+  namespace: mcp-servers
+spec:
+  podSelector:
+    matchLabels:
+      app: mcp-filesystem
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 3000
+  egress:
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+```
+
+## FAQ
+
+### Can MCP servers auto-scale on Kubernetes?
+
+Yes, MCP servers can use Horizontal Pod Autoscaler (HPA) based on CPU, memory, or custom metrics. You can also use Vertical Pod Autoscaler (VPA) for right-sizing resources.
+
+### How do I handle MCP server state in Kubernetes?
+
+For stateful MCP servers, use StatefulSets with persistent volumes. For better scalability, design stateless servers that store state in external systems like Redis, databases, or object storage.
+
+### What's the best way to expose MCP servers externally?
+
+Use an Ingress controller with proper TLS termination and authentication. Consider using a service mesh like Istio for advanced traffic management and security policies.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [kubernetes/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/kubernetes/page.mdx)

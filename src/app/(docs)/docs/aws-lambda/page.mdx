@@ -1,0 +1,746 @@
+---
+title: "Deploying MCPs on AWS Lambda"
+description: "Run MCP servers on AWS Lambda with API Gateway integration and cost-effective scaling."
+slug: "aws-lambda"
+category: "deploy"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "What are the cost benefits of running MCPs on AWS Lambda?"
+    a: "Lambda's pay-per-request model can be very cost-effective for MCPs with variable usage, especially compared to always-on servers."
+  - q: "How do I handle cold starts with MCP servers on Lambda?"
+    a: "Use provisioned concurrency for critical MCPs, optimize bundle size, and implement connection pooling to minimize cold start impact."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="aws-lambda" />
+
+# Deploying MCPs on AWS Lambda
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What are the cost benefits of running MCPs on AWS Lambda?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Lambda's pay-per-request model can be very cost-effective for MCPs with variable usage, especially compared to always-on servers." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I handle cold starts with MCP servers on Lambda?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Use provisioned concurrency for critical MCPs, optimize bundle size, and implement connection pooling to minimize cold start impact." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+AWS Lambda provides serverless compute for MCP servers with automatic scaling, pay-per-request pricing, and integration with AWS services. This guide covers deployment, optimization, and best practices.
+
+## Prerequisites
+
+- **AWS Account** with appropriate permissions
+- **AWS CLI** configured
+- **Node.js 18+** or **Python 3.9+**
+- **Serverless Framework** or **AWS SAM** (recommended)
+
+## Project Setup
+
+### Serverless Framework Setup
+
+```bash
+# Install Serverless Framework
+npm install -g serverless
+
+# Create new project
+serverless create --template aws-nodejs --path mcp-lambda-server
+cd mcp-lambda-server
+
+# Install dependencies
+npm install @modelcontextprotocol/sdk aws-lambda
+```
+
+### Project Structure
+
+```
+mcp-lambda-server/
+├── src/
+│   ├── handlers/
+│   │   ├── mcp.js
+│   │   └── health.js
+│   ├── lib/
+│   │   ├── mcp-server.js
+│   │   └── utils.js
+│   └── layers/
+│       └── nodejs/
+├── serverless.yml
+├── package.json
+└── README.md
+```
+
+## Lambda Function Implementation
+
+### MCP Server Core (src/lib/mcp-server.js)
+
+```javascript
+const { MCPServer } = require('@modelcontextprotocol/sdk');
+const AWS = require('aws-sdk');
+
+class LambdaMCPServer {
+  constructor() {
+    this.server = new MCPServer({
+      name: 'lambda-mcp-server',
+      version: '1.0.0'
+    });
+    
+    this.s3 = new AWS.S3();
+    this.dynamodb = new AWS.DynamoDB.DocumentClient();
+    
+    this.setupTools();
+  }
+
+  setupTools() {
+    // S3 operations
+    this.server.addTool('s3_list_objects', {
+      description: 'List objects in S3 bucket',
+      parameters: {
+        bucket: { type: 'string', required: true },
+        prefix: { type: 'string', default: '' }
+      },
+      handler: async ({ bucket, prefix }) => {
+        const params = { Bucket: bucket, Prefix: prefix };
+        const result = await this.s3.listObjectsV2(params).promise();
+        return { objects: result.Contents };
+      }
+    });
+
+    // DynamoDB operations
+    this.server.addTool('dynamodb_query', {
+      description: 'Query DynamoDB table',
+      parameters: {
+        tableName: { type: 'string', required: true },
+        key: { type: 'object', required: true }
+      },
+      handler: async ({ tableName, key }) => {
+        const params = { TableName: tableName, Key: key };
+        const result = await this.dynamodb.get(params).promise();
+        return { item: result.Item };
+      }
+    });
+
+    // HTTP requests
+    this.server.addTool('http_request', {
+      description: 'Make HTTP requests',
+      parameters: {
+        url: { type: 'string', required: true },
+        method: { type: 'string', default: 'GET' }
+      },
+      handler: async ({ url, method }) => {
+        const https = require('https');
+        return new Promise((resolve, reject) => {
+          const req = https.request(url, { method }, (res) => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => resolve({ 
+              status: res.statusCode, 
+              data: JSON.parse(data) 
+            }));
+          });
+          req.on('error', reject);
+          req.end();
+        });
+      }
+    });
+  }
+
+  async handleRequest(event) {
+    try {
+      const request = JSON.parse(event.body);
+      const response = await this.server.handleRequest(request);
+      return response;
+    } catch (error) {
+      throw new Error(`MCP request failed: ${error.message}`);
+    }
+  }
+}
+
+module.exports = { LambdaMCPServer };
+```
+
+### Lambda Handler (src/handlers/mcp.js)
+
+```javascript
+const { LambdaMCPServer } = require('../lib/mcp-server');
+
+let mcpServer;
+
+const initializeServer = () => {
+  if (!mcpServer) {
+    mcpServer = new LambdaMCPServer();
+  }
+  return mcpServer;
+};
+
+exports.handler = async (event, context) => {
+  // Enable connection reuse
+  context.callbackWaitsForEmptyEventLoop = false;
+  
+  const server = initializeServer();
+  
+  try {
+    // Handle different HTTP methods
+    switch (event.httpMethod) {
+      case 'GET':
+        if (event.path === '/tools') {
+          const tools = await server.server.listTools();
+          return {
+            statusCode: 200,
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*'
+            },
+            body: JSON.stringify({ tools })
+          };
+        }
+        break;
+        
+      case 'POST':
+        if (event.path === '/call') {
+          const result = await server.handleRequest(event);
+          return {
+            statusCode: 200,
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*'
+            },
+            body: JSON.stringify(result)
+          };
+        }
+        break;
+        
+      case 'OPTIONS':
+        return {
+          statusCode: 200,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+          },
+          body: ''
+        };
+    }
+    
+    return {
+      statusCode: 404,
+      body: JSON.stringify({ error: 'Not found' })
+    };
+    
+  } catch (error) {
+    console.error('Lambda error:', error);
+    
+    return {
+      statusCode: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
+      body: JSON.stringify({ 
+        error: 'Internal server error',
+        message: error.message,
+        requestId: context.awsRequestId
+      })
+    };
+  }
+};
+```
+
+### Health Check Handler (src/handlers/health.js)
+
+```javascript
+exports.handler = async (event, context) => {
+  return {
+    statusCode: 200,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    },
+    body: JSON.stringify({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      version: process.env.VERSION || '1.0.0',
+      requestId: context.awsRequestId,
+      memoryLimit: context.memoryLimitInMB,
+      remainingTime: context.getRemainingTimeInMillis()
+    })
+  };
+};
+```
+
+## Serverless Configuration
+
+### serverless.yml
+
+```yaml
+service: mcp-lambda-server
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  memorySize: 512
+  timeout: 30
+  environment:
+    STAGE: ${self:provider.stage}
+    VERSION: ${env:VERSION, '1.0.0'}
+  
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:ListBucket
+          Resource:
+            - "arn:aws:s3:::your-bucket/*"
+            - "arn:aws:s3:::your-bucket"
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:Query
+            - dynamodb:Scan
+          Resource:
+            - "arn:aws:dynamodb:${self:provider.region}:*:table/mcp-*"
+
+functions:
+  mcp:
+    handler: src/handlers/mcp.handler
+    events:
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors: true
+    environment:
+      MCP_SERVER_NAME: lambda-mcp
+    reservedConcurrency: 10
+    
+  health:
+    handler: src/handlers/health.handler
+    events:
+      - http:
+          path: /health
+          method: get
+          cors: true
+
+layers:
+  mcpDependencies:
+    path: src/layers
+    name: mcp-dependencies-${self:provider.stage}
+    description: MCP server dependencies
+    compatibleRuntimes:
+      - nodejs18.x
+
+resources:
+  Resources:
+    # DynamoDB table for MCP data
+    MCPDataTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: mcp-data-${self:provider.stage}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        
+    # S3 bucket for MCP files
+    MCPFilesBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: mcp-files-${self:provider.stage}-${aws:accountId}
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+
+plugins:
+  - serverless-offline
+  - serverless-webpack
+  - serverless-prune-plugin
+
+custom:
+  webpack:
+    webpackConfig: webpack.config.js
+    includeModules: true
+  prune:
+    automatic: true
+    number: 3
+```
+
+## Optimization Strategies
+
+### Bundle Optimization (webpack.config.js)
+
+```javascript
+const path = require('path');
+
+module.exports = {
+  entry: {
+    mcp: './src/handlers/mcp.js',
+    health: './src/handlers/health.js'
+  },
+  target: 'node',
+  mode: 'production',
+  optimization: {
+    minimize: true
+  },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env']
+          }
+        }
+      }
+    ]
+  },
+  externals: {
+    'aws-sdk': 'aws-sdk'
+  },
+  resolve: {
+    extensions: ['.js', '.json']
+  }
+};
+```
+
+### Connection Pooling
+
+```javascript
+const AWS = require('aws-sdk');
+
+// Reuse connections outside handler
+const s3 = new AWS.S3({
+  maxRetries: 3,
+  httpOptions: {
+    timeout: 5000,
+    agent: new (require('https').Agent)({
+      keepAlive: true,
+      maxSockets: 50
+    })
+  }
+});
+
+const dynamodb = new AWS.DynamoDB.DocumentClient({
+  maxRetries: 3,
+  httpOptions: {
+    timeout: 5000
+  }
+});
+
+// Use in MCP server
+class OptimizedLambdaMCPServer {
+  constructor() {
+    this.s3 = s3;
+    this.dynamodb = dynamodb;
+    // ... rest of implementation
+  }
+}
+```
+
+### Provisioned Concurrency
+
+```yaml
+# In serverless.yml
+functions:
+  mcp:
+    handler: src/handlers/mcp.handler
+    provisionedConcurrency: 5  # Keep 5 instances warm
+    events:
+      - http:
+          path: /{proxy+}
+          method: ANY
+```
+
+## Deployment
+
+### Using Serverless Framework
+
+```bash
+# Deploy to development
+serverless deploy --stage dev
+
+# Deploy to production
+serverless deploy --stage prod
+
+# Deploy single function
+serverless deploy function --function mcp --stage prod
+
+# View logs
+serverless logs --function mcp --tail
+```
+
+### Using AWS SAM
+
+```yaml
+# template.yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Runtime: nodejs18.x
+    Timeout: 30
+    MemorySize: 512
+    Environment:
+      Variables:
+        NODE_ENV: production
+
+Resources:
+  MCPFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers/mcp.handler
+      Events:
+        MCPApi:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId: !Ref MCPApi
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref MCPBucket
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MCPTable
+
+  MCPApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
+
+  MCPBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'mcp-files-${AWS::StackName}'
+
+  MCPTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'mcp-data-${AWS::StackName}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+```
+
+```bash
+# Deploy with SAM
+sam build
+sam deploy --guided
+```
+
+## Monitoring and Logging
+
+### CloudWatch Integration
+
+```javascript
+const AWS = require('aws-sdk');
+const cloudwatch = new AWS.CloudWatch();
+
+// Custom metrics
+const putMetric = async (metricName, value, unit = 'Count') => {
+  const params = {
+    Namespace: 'MCP/Lambda',
+    MetricData: [{
+      MetricName: metricName,
+      Value: value,
+      Unit: unit,
+      Timestamp: new Date()
+    }]
+  };
+  
+  await cloudwatch.putMetricData(params).promise();
+};
+
+// In your handler
+exports.handler = async (event, context) => {
+  const startTime = Date.now();
+  
+  try {
+    // Your MCP logic
+    const result = await processMCPRequest(event);
+    
+    // Log success metric
+    await putMetric('MCPRequestSuccess', 1);
+    
+    return result;
+  } catch (error) {
+    // Log error metric
+    await putMetric('MCPRequestError', 1);
+    throw error;
+  } finally {
+    // Log duration
+    const duration = Date.now() - startTime;
+    await putMetric('MCPRequestDuration', duration, 'Milliseconds');
+  }
+};
+```
+
+### Structured Logging
+
+```javascript
+const log = (level, message, data = {}) => {
+  console.log(JSON.stringify({
+    timestamp: new Date().toISOString(),
+    level,
+    message,
+    requestId: context.awsRequestId,
+    ...data
+  }));
+};
+
+// Usage
+log('INFO', 'MCP tool called', { tool: 'get_weather', args: { city: 'NYC' } });
+log('ERROR', 'Database connection failed', { error: error.message });
+```
+
+## Security Best Practices
+
+### IAM Roles and Policies
+
+```yaml
+# Minimal IAM policy
+Resources:
+  MCPExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: MCPResourceAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub '${MCPBucket}/*'
+                  - !Ref MCPBucket
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:Query
+                Resource: !GetAtt MCPTable.Arn
+```
+
+### Environment Variables Encryption
+
+```yaml
+functions:
+  mcp:
+    handler: src/handlers/mcp.handler
+    environment:
+      API_KEY: ${ssm:/mcp/api-key~true}  # Encrypted parameter
+      DB_PASSWORD: ${ssm:/mcp/db-password~true}
+    kmsKeyArn: arn:aws:kms:region:account:key/key-id
+```
+
+## Cost Optimization
+
+### Request-Based Pricing
+
+```javascript
+// Optimize for Lambda pricing model
+const optimizeForLambda = {
+  // Batch operations when possible
+  batchS3Operations: async (operations) => {
+    const promises = operations.map(op => s3[op.method](op.params).promise());
+    return await Promise.all(promises);
+  },
+  
+  // Cache frequently accessed data
+  cache: new Map(),
+  
+  getCachedData: async (key, fetcher, ttl = 300000) => {
+    const cached = optimizeForLambda.cache.get(key);
+    if (cached && Date.now() - cached.timestamp < ttl) {
+      return cached.data;
+    }
+    
+    const data = await fetcher();
+    optimizeForLambda.cache.set(key, { data, timestamp: Date.now() });
+    return data;
+  }
+};
+```
+
+### Resource Right-Sizing
+
+```yaml
+# Different memory configs for different functions
+functions:
+  lightMCP:
+    handler: src/handlers/light.handler
+    memorySize: 128  # Minimal memory for simple operations
+    
+  heavyMCP:
+    handler: src/handlers/heavy.handler
+    memorySize: 1024  # More memory for complex operations
+    
+  batchMCP:
+    handler: src/handlers/batch.handler
+    memorySize: 3008  # Maximum memory for batch processing
+    timeout: 900     # 15 minutes for long operations
+```
+
+## FAQ
+
+### What are the cost benefits of running MCPs on AWS Lambda?
+
+Lambda's pay-per-request model can be very cost-effective for MCPs with variable or low usage patterns. You only pay for actual execution time, not idle server time, making it ideal for development environments and sporadic workloads.
+
+### How do I handle cold starts with MCP servers on Lambda?
+
+Use provisioned concurrency for critical MCPs, optimize your bundle size with webpack, implement connection pooling, and consider using Lambda layers for shared dependencies to reduce cold start times.
+
+### Can I run long-running MCP operations on Lambda?
+
+Lambda has a 15-minute maximum execution time. For longer operations, use Step Functions to orchestrate multiple Lambda invocations, or consider using SQS/SNS for asynchronous processing patterns.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [aws-lambda/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/aws-lambda/page.mdx)

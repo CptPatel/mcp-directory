@@ -1,0 +1,465 @@
+---
+title: "MCP Setup in JetBrains IDEs (PyCharm, IntelliJ, WebStorm)"
+description: "Configure Model Context Protocol servers in JetBrains IDEs including PyCharm, IntelliJ IDEA, and WebStorm."
+slug: "jetbrains-integration"
+category: "ide"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "Which JetBrains IDEs support MCP integration?"
+    a: "All major JetBrains IDEs support MCP through plugins: IntelliJ IDEA, PyCharm, WebStorm, PhpStorm, GoLand, and others."
+  - q: "Do I need different MCP configurations for different JetBrains IDEs?"
+    a: "The MCP configuration is largely the same across JetBrains IDEs, with minor differences based on language-specific features."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="jetbrains-integration" />
+
+# MCP Setup in JetBrains IDEs (PyCharm, IntelliJ, WebStorm)
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Which JetBrains IDEs support MCP integration?",
+      "acceptedAnswer": { "@type": "Answer", "text": "All major JetBrains IDEs support MCP through plugins: IntelliJ IDEA, PyCharm, WebStorm, PhpStorm, GoLand, and others." }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need different MCP configurations for different JetBrains IDEs?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The MCP configuration is largely the same across JetBrains IDEs, with minor differences based on language-specific features." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+JetBrains IDEs offer excellent support for Model Context Protocol through plugins and built-in integrations. This guide covers setup for IntelliJ IDEA, PyCharm, WebStorm, and other JetBrains IDEs.
+
+## Prerequisites
+
+- **JetBrains IDE** (2023.1 or later)
+- **JetBrains Toolbox** (recommended)
+- **Node.js 18+** or **Python 3.8+**
+- **JetBrains account** (for plugin access)
+
+## Installation
+
+### Step 1: Install MCP Plugin
+
+1. Open your JetBrains IDE
+2. Go to **File → Settings** (or **Preferences** on macOS)
+3. Navigate to **Plugins**
+4. Search for "Model Context Protocol"
+5. Install the **MCP Integration** plugin
+6. Restart the IDE
+
+### Step 2: Install MCP Servers
+
+```bash
+# For Java/Kotlin projects (IntelliJ IDEA)
+npm install -g @modelcontextprotocol/server-filesystem
+npm install -g @modelcontextprotocol/server-git
+
+# For Python projects (PyCharm)
+pip install mcp-server-python
+pip install mcp-server-database
+
+# For JavaScript/TypeScript projects (WebStorm)
+npm install -g @modelcontextprotocol/server-nodejs
+npm install -g @modelcontextprotocol/server-webpack
+```
+
+## IDE-Specific Configuration
+
+### IntelliJ IDEA
+
+**File → Settings → Tools → MCP Integration**
+
+```xml
+<mcp-configuration>
+  <servers>
+    <server name="filesystem" enabled="true">
+      <command>mcp-server-filesystem</command>
+      <args>
+        <arg>--root</arg>
+        <arg>${PROJECT_DIR}</arg>
+      </args>
+      <env>
+        <var name="JAVA_HOME" value="${JDK_HOME}" />
+      </env>
+    </server>
+    
+    <server name="maven" enabled="true">
+      <command>mcp-server-maven</command>
+      <args>
+        <arg>--pom</arg>
+        <arg>${PROJECT_DIR}/pom.xml</arg>
+      </args>
+    </server>
+    
+    <server name="git" enabled="true">
+      <command>mcp-server-git</command>
+      <args>
+        <arg>--repo</arg>
+        <arg>${PROJECT_DIR}</arg>
+      </args>
+    </server>
+  </servers>
+</mcp-configuration>
+```
+
+### PyCharm
+
+**File → Settings → Tools → MCP Integration**
+
+```xml
+<mcp-configuration>
+  <servers>
+    <server name="python" enabled="true">
+      <command>python</command>
+      <args>
+        <arg>-m</arg>
+        <arg>mcp_server_python</arg>
+        <arg>--project</arg>
+        <arg>${PROJECT_DIR}</arg>
+      </args>
+      <env>
+        <var name="PYTHONPATH" value="${PROJECT_DIR}" />
+        <var name="VIRTUAL_ENV" value="${VIRTUAL_ENV}" />
+      </env>
+    </server>
+    
+    <server name="database" enabled="true">
+      <command>mcp-server-database</command>
+      <env>
+        <var name="DATABASE_URL" value="${DATABASE_URL}" />
+      </env>
+    </server>
+    
+    <server name="django" enabled="true">
+      <command>python</command>
+      <args>
+        <arg>-m</arg>
+        <arg>mcp_server_django</arg>
+        <arg>--settings</arg>
+        <arg>${PROJECT_DIR}/settings.py</arg>
+      </args>
+    </server>
+  </servers>
+</mcp-configuration>
+```
+
+### WebStorm
+
+**File → Settings → Tools → MCP Integration**
+
+```xml
+<mcp-configuration>
+  <servers>
+    <server name="nodejs" enabled="true">
+      <command>mcp-server-nodejs</command>
+      <args>
+        <arg>--project</arg>
+        <arg>${PROJECT_DIR}</arg>
+      </args>
+      <env>
+        <var name="NODE_ENV" value="development" />
+        <var name="NPM_CONFIG_PREFIX" value="${NPM_PREFIX}" />
+      </env>
+    </server>
+    
+    <server name="webpack" enabled="true">
+      <command>mcp-server-webpack</command>
+      <args>
+        <arg>--config</arg>
+        <arg>${PROJECT_DIR}/webpack.config.js</arg>
+      </args>
+    </server>
+    
+    <server name="typescript" enabled="true">
+      <command>mcp-server-typescript</command>
+      <args>
+        <arg>--tsconfig</arg>
+        <arg>${PROJECT_DIR}/tsconfig.json</arg>
+      </args>
+    </server>
+  </servers>
+</mcp-configuration>
+```
+
+## Usage Features
+
+### Code Completion
+
+MCP servers enhance IntelliSense and code completion:
+
+```java
+// In IntelliJ IDEA
+Files.readAllLines(
+// MCP suggests files from filesystem server
+
+// Database queries in PyCharm
+cursor.execute(
+// MCP suggests tables and columns from database server
+```
+
+### AI Assistant Integration
+
+JetBrains AI Assistant uses MCP context:
+
+```
+// Ask JetBrains AI Assistant:
+"Refactor this class using filesystem MCP context"
+"Generate tests based on the current project structure"
+"Create a database migration using the database MCP schema"
+```
+
+### Tool Windows
+
+Access MCP features through dedicated tool windows:
+
+- **MCP Servers**: View and manage running servers
+- **MCP Logs**: Monitor server activity
+- **MCP Tools**: Quick access to MCP functions
+
+## Language-Specific Features
+
+### Java/Kotlin (IntelliJ IDEA)
+
+```xml
+<server name="spring" enabled="true">
+  <command>mcp-server-spring</command>
+  <args>
+    <arg>--project</arg>
+    <arg>${PROJECT_DIR}</arg>
+    <arg>--profile</arg>
+    <arg>dev</arg>
+  </args>
+  <env>
+    <var name="SPRING_PROFILES_ACTIVE" value="development" />
+  </env>
+</server>
+```
+
+### Python (PyCharm)
+
+```xml
+<server name="conda" enabled="true">
+  <command>mcp-server-conda</command>
+  <env>
+    <var name="CONDA_DEFAULT_ENV" value="${CONDA_ENV}" />
+  </env>
+</server>
+```
+
+### JavaScript/TypeScript (WebStorm)
+
+```xml
+<server name="react" enabled="true">
+  <command>mcp-server-react</command>
+  <args>
+    <arg>--src</arg>
+    <arg>${PROJECT_DIR}/src</arg>
+  </args>
+</server>
+```
+
+## Advanced Configuration
+
+### Project-Level Configuration
+
+Create `.idea/mcp.xml` in your project:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="MCPConfiguration">
+    <servers>
+      <server name="project-specific">
+        <command>node</command>
+        <args>
+          <arg>scripts/mcp-server.js</arg>
+        </args>
+        <workingDirectory>$PROJECT_DIR$</workingDirectory>
+      </server>
+    </servers>
+  </component>
+</project>
+```
+
+### Environment Variables
+
+Configure environment variables in **Run/Debug Configurations**:
+
+```xml
+<configuration>
+  <envs>
+    <env name="MCP_LOG_LEVEL" value="debug" />
+    <env name="DATABASE_URL" value="postgresql://localhost:5432/mydb" />
+    <env name="GITHUB_TOKEN" value="${GITHUB_TOKEN}" />
+  </envs>
+</configuration>
+```
+
+## Debugging MCP Servers
+
+### Debug Configuration
+
+1. Go to **Run → Edit Configurations**
+2. Add new **Node.js** or **Python** configuration
+3. Set **JavaScript file** or **Script path** to your MCP server
+4. Add breakpoints in your MCP server code
+5. Start debugging
+
+### Log Monitoring
+
+View MCP logs in the **MCP Logs** tool window:
+
+```
+[INFO] MCP Server started: filesystem
+[DEBUG] Tool called: list_files
+[ERROR] Connection failed: database server
+```
+
+### Network Inspection
+
+Use JetBrains' built-in network inspector:
+
+1. **Tools → MCP → Network Inspector**
+2. Monitor MCP protocol messages
+3. Analyze request/response patterns
+
+## Troubleshooting
+
+### Plugin Not Loading
+
+1. Check JetBrains IDE version compatibility
+2. Verify plugin installation in **Settings → Plugins**
+3. Restart IDE after installation
+4. Check IDE logs: **Help → Show Log in Explorer**
+
+### Server Connection Issues
+
+```bash
+# Test server manually
+mcp-server-filesystem --test
+
+# Check Java classpath (IntelliJ)
+echo $CLASSPATH
+
+# Check Python path (PyCharm)
+python -c "import sys; print(sys.path)"
+
+# Check Node.js path (WebStorm)
+which node
+npm config get prefix
+```
+
+### Performance Issues
+
+1. **Reduce MCP server count**: Only enable needed servers
+2. **Increase memory**: **Help → Edit Custom VM Options**
+   ```
+   -Xmx4g
+   -XX:ReservedCodeCacheSize=512m
+   ```
+3. **Optimize indexing**: **Settings → Build → Compiler → Exclude from indexing**
+
+## Best Practices
+
+### Configuration Management
+
+- Use project-specific configurations
+- Store sensitive data in environment variables
+- Version control MCP configurations (`.idea/mcp.xml`)
+- Document custom MCP setups in README
+
+### Development Workflow
+
+```java
+// Good: Use MCP context in code generation
+// Ask AI: "Generate a REST controller using the database MCP schema"
+
+// Better: Combine multiple MCPs
+// Ask AI: "Create integration tests using filesystem and database MCPs"
+```
+
+### Performance Optimization
+
+- Enable only necessary MCP servers
+- Use MCP server health checks
+- Monitor resource usage
+- Implement proper error handling
+
+## Integration Examples
+
+### Spring Boot (IntelliJ IDEA)
+
+```xml
+<server name="spring-boot" enabled="true">
+  <command>mcp-server-spring-boot</command>
+  <args>
+    <arg>--application-properties</arg>
+    <arg>${PROJECT_DIR}/src/main/resources/application.properties</arg>
+  </args>
+</server>
+```
+
+### Django (PyCharm)
+
+```xml
+<server name="django-models" enabled="true">
+  <command>python</command>
+  <args>
+    <arg>manage.py</arg>
+    <arg>mcp_server</arg>
+  </args>
+  <workingDirectory>${PROJECT_DIR}</workingDirectory>
+</server>
+```
+
+### React (WebStorm)
+
+```xml
+<server name="react-components" enabled="true">
+  <command>npx</command>
+  <args>
+    <arg>react-mcp-server</arg>
+    <arg>--src</arg>
+    <arg>src/components</arg>
+  </args>
+</server>
+```
+
+## Related Guides
+
+- [MCPs in VSCode - Complete Setup Guide](/docs/vscode-integration)
+- [Running MCPs in Windsurf IDE](/docs/windsurf-setup)
+- [How to Install and Use MCPs in Cursor IDE](/docs/cursor-setup)
+- [10 Most Common MCP Setup Errors (and Fixes)](/docs/common-errors)
+
+## FAQ
+
+### Which JetBrains IDEs support MCP integration?
+
+All major JetBrains IDEs support MCP through plugins: IntelliJ IDEA, PyCharm, WebStorm, PhpStorm, GoLand, CLion, Rider, and others. The plugin works consistently across the JetBrains platform.
+
+### Do I need different MCP configurations for different JetBrains IDEs?
+
+The core MCP configuration is the same across JetBrains IDEs. However, you may want language-specific MCP servers (e.g., Spring for Java, Django for Python, React for JavaScript).
+
+### Can I share MCP configurations across team members?
+
+Yes, commit the `.idea/mcp.xml` file to version control. Use environment variables for sensitive data and document setup requirements in your project README.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [jetbrains-integration/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/jetbrains-integration/page.mdx)

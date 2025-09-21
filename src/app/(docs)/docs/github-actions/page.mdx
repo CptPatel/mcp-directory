@@ -1,0 +1,279 @@
+﻿---
+title: "Automating MCP Workflows with GitHub Actions"
+description: "Build CI/CD workflows that install, test, and deploy Model Context Protocol servers using GitHub Actions."
+slug: "github-actions"
+category: "deploy"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "How do I keep MCP credentials safe in GitHub Actions?"
+    a: "Store secrets such as API keys or service tokens in GitHub Secrets and reference them with the `${{ secrets.KEY }}` syntax inside your workflow."
+  - q: "Can a single workflow deploy multiple MCP servers?"
+    a: "Yes. You can define matrix jobs or sequential steps that install and publish several MCP servers from the same repository."
+  - q: "How do I debug failed MCP jobs in Actions?"
+    a: "Use `actions/upload-artifact` to collect logs, add verbose flags to your MCP commands, and re-run the job locally with `act` when possible."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="github-actions" />
+
+# Automating MCP Workflows with GitHub Actions
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I keep MCP credentials safe in GitHub Actions?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Store secrets such as API keys or service tokens in GitHub Secrets and reference them with the ${{ secrets.KEY }} syntax inside your workflow." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can a single workflow deploy multiple MCP servers?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. You can define matrix jobs or sequential steps that install and publish several MCP servers from the same repository." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I debug failed MCP jobs in Actions?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Use actions/upload-artifact to collect logs, add verbose flags to your MCP commands, and re-run the job locally with act when possible." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+GitHub Actions lets you ship Model Context Protocol (MCP) servers without leaving your repository. With a few YAML steps you can install dependencies, run tests, publish artifacts, and even deploy to platforms like Vercel or AWS Lambda.
+
+This guide shows how to structure reusable workflows that:
+
+- Validate MCP servers with linting, unit tests, and contract checks.
+- Package MCP servers as npm packages, Docker images, or zip bundles.
+- Deploy to hosting targets such as Vercel, AWS Lambda, or a remote VM.
+- Report metrics back to the MCP Directory or your monitoring stack.
+
+## Prerequisites
+
+- A GitHub repository that contains your MCP server implementation.
+- Node.js 18+ or Python 3.9+ depending on the MCP runtime.
+- Package registry tokens (npm, PyPI, Docker Hub, GitHub Container Registry) when publishing artifacts.
+- Deployment credentials for your target platform (Vercel token, AWS credentials, SSH key, etc.).
+- GitHub Actions minutes or self-hosted runners with outbound network access.
+
+## Quick Start Workflow
+
+The following workflow installs dependencies, runs tests, and publishes an npm package when a release is created.
+
+```yaml
+# .github/workflows/mcp-release.yml
+name: Publish MCP Server
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run MCP tests
+        run: npm run test:mcp
+
+      - name: Lint MCP protocol implementation
+        run: npm run lint
+
+      - name: Publish package
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp-server-bundle
+          path: dist/
+```
+
+## Deploying MCP Servers
+
+### Deploy to Vercel
+
+```yaml
+- name: Deploy MCP edge functions
+  uses: amondnet/vercel-action@v25
+  with:
+    vercel-token: ${{ secrets.VERCEL_TOKEN }}
+    vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+    vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+    working-directory: apps/mcp-edge
+```
+
+### Deploy to AWS Lambda
+
+```yaml
+- name: Configure AWS credentials
+  uses: aws-actions/configure-aws-credentials@v4
+  with:
+    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    aws-region: us-east-1
+
+- name: Package Lambda
+  run: |
+    npm run build
+    zip -r lambda.zip dist/
+
+- name: Deploy function
+  run: |
+    aws lambda update-function-code \
+      --function-name mcp-server \
+      --zip-file fileb://lambda.zip
+```
+
+### Deploy to Remote VM via SSH
+
+```yaml
+- name: Copy bundle to server
+  uses: appleboy/scp-action@v0.1.7
+  with:
+    host: ${{ secrets.REMOTE_HOST }}
+    username: deploy
+    key: ${{ secrets.SSH_KEY }}
+    source: "dist/*"
+    target: "/srv/mcp"
+
+- name: Restart MCP service
+  uses: appleboy/ssh-action@v1.0.3
+  with:
+    host: ${{ secrets.REMOTE_HOST }}
+    username: deploy
+    key: ${{ secrets.SSH_KEY }}
+    script: |
+      sudo systemctl restart mcp-server
+      systemctl status mcp-server --no-pager
+```
+
+## Secrets & Environment Management
+
+| Secret | Purpose |
+| --- | --- |
+| `NPM_TOKEN` | Publish npm packages without exposing credentials. |
+| `VERCEL_TOKEN` | Deploy to Vercel programmatically. |
+| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | Deploy to AWS Lambda, ECS, or S3. |
+| `SSH_KEY` | Push artifacts to your own VM or container host. |
+| `MCP_API_KEY` | Authenticate with third-party MCP extensions. |
+
+Use [environment protection rules](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-environments) to require approvals before production deployments.
+
+## Workflow Recipes
+
+### Matrix testing across runtimes
+
+```yaml
+strategy:
+  matrix:
+    runtime: ["node@18", "node@20", "python@3.11"]
+steps:
+  - uses: actions/setup-node@v4
+    if: startsWith(matrix.runtime, 'node')
+    with:
+      node-version: ${{ matrix.runtime.split('@')[1] }}
+  - uses: actions/setup-python@v5
+    if: startsWith(matrix.runtime, 'python')
+    with:
+      python-version: ${{ matrix.runtime.split('@')[1] }}
+```
+
+### Automatic MCP catalog refresh
+
+```yaml
+- name: Download latest MCP catalog
+  run: |
+    curl -sS https://mcpdirectory.app/api/export > catalog.json
+
+- name: Validate against schema
+  run: npx ajv validate -s schema.json -d catalog.json
+```
+
+### Scheduled health checks
+
+```yaml
+on:
+  schedule:
+    - cron: "0 * * * *"
+
+jobs:
+  ping-mcp:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check MCP readiness
+        run: |
+          curl -sf https://your-mcp-host/health || exit 1
+```
+
+## Monitoring & Troubleshooting
+
+- Enable [job summaries](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#adding-a-job-summary) to surface MCP metrics inside the Actions UI.
+- Use `actions/upload-artifact` for log bundles, screenshots, or server dumps.
+- Re-run jobs with `workflow_dispatch` to test hotfixes without tagging a release.
+- Mirror workflows locally with [`act`](https://github.com/nektos/act) to debug environment differences.
+- Add notifications (Slack, Teams, email) via reusable actions when a deployment fails.
+
+### Common Failures
+
+| Symptom | Fix |
+| --- | --- |
+| `npm publish` fails with 403 | Ensure `NPM_TOKEN` has publish rights and the version is bumped. |
+| `aws lambda update-function-code` fails | Check IAM permissions and the function name. |
+| SSH deployment hangs | Enable `StrictHostKeyChecking=no` or pre-populate known hosts. |
+| Workflow cannot find MCP config | Cache or commit the MCP configuration file and reference it via `${{ github.workspace }}`. |
+
+## Best Practices
+
+- **Use reusable workflows** for shared MCP build logic across multiple repositories.
+- **Cache dependencies** with `actions/cache` or language-specific setup actions to speed up builds.
+- **Tag artifacts** with MCP version numbers so rollbacks are easy.
+- **Add smoke tests** after deployment to verify the MCP handshake succeeds.
+- **Document workflows** in `/docs` so contributors understand the release pipeline.
+
+## Related Guides
+
+- [Serverless MCP Deployment on Vercel](/docs/vercel-deployment)
+- [Deploying MCPs on AWS Lambda](/docs/aws-lambda)
+- [Connecting to Remote MCP Servers](/docs/remote-mcp)
+- [Debugging & Testing MCPs with MCP Inspector](/docs/testing-mcp)
+
+## FAQ
+
+### How do I keep MCP credentials safe in GitHub Actions?
+
+Store API keys and tokens in GitHub Secrets, scope deployment credentials to the minimal permissions required, and restrict environment access with required reviewers.
+
+### Can a single workflow deploy multiple MCP servers?
+
+Yes. Use matrix jobs or sequential steps to build and deploy multiple MCP packages within the same workflow. Keep outputs clearly named so downstream jobs can consume them.
+
+### How do I debug failed MCP jobs in Actions?
+
+Upload artifacts, enable verbose logging on your MCP commands, and run the workflow locally with `act` to reproduce issues. Consider adding temporary `sleep` or diagnostic steps when investigating flaky behaviour.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [github-actions/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/github-actions/page.mdx)

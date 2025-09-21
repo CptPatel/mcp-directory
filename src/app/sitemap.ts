@@ -1,11 +1,10 @@
-import type { MetadataRoute } from 'next'
+import { MetadataRoute } from 'next'
 import { DOCS } from '@/content/docs/manifest'
  
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://mcpdirectory.app'
   const currentDate = new Date()
-  
-  // Core pages
+ 
   const corePages = [
     {
       url: baseUrl,
@@ -40,8 +39,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${baseUrl}/docs`,
       lastModified: currentDate,
-      changeFrequency: 'daily' as const,
-      priority: 0.9,
+      changeFrequency: 'weekly' as const,
+      priority: 0.85,
     },
     {
       url: `${baseUrl}/community`,
@@ -50,8 +49,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
   ]
-
-  // Blog pages
+ 
   const blogPages = [
     {
       url: `${baseUrl}/blog`,
@@ -72,14 +70,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
   ]
-
-  // Documentation pages
-  const docsPages: MetadataRoute.Sitemap = DOCS.map(doc => ({
-    url: `${baseUrl}${doc.path}`,
-    lastModified: new Date(doc.updatedAt),
-    changeFrequency: 'weekly' as const,
-    priority: 0.7,
-  }))
-
-  return [...corePages, ...blogPages, ...docsPages]
+ 
+  const docPages = DOCS.map((doc) => {
+    const updated = doc.updatedAt ? new Date(doc.updatedAt) : currentDate
+    const priority = doc.category === 'cli' || doc.category === 'ide' ? 0.85 : doc.category === 'deploy' ? 0.8 : 0.75
+    return {
+      url: `${baseUrl}${doc.path}`,
+      lastModified: updated,
+      changeFrequency: 'monthly' as const,
+      priority,
+    }
+  })
+ 
+  return [...corePages, ...blogPages, ...docPages]
 }

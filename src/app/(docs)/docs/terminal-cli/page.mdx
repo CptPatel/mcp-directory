@@ -1,0 +1,530 @@
+---
+title: "Using MCPs in Terminal (Universal CLI Setup)"
+description: "Universal guide for setting up and using MCP servers in any terminal environment."
+slug: "terminal-cli"
+category: "cli"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "Can I use MCPs in any terminal or shell?"
+    a: "Yes, MCPs work in any terminal environment including bash, zsh, PowerShell, and Command Prompt."
+  - q: "How do I manage multiple MCP servers in terminal?"
+    a: "Use process managers like PM2, systemd, or simple background processes with job control."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="terminal-cli" />
+
+# Using MCPs in Terminal (Universal CLI Setup)
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can I use MCPs in any terminal or shell?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes, MCPs work in any terminal environment including bash, zsh, PowerShell, and Command Prompt." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I manage multiple MCP servers in terminal?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Use process managers like PM2, systemd, or simple background processes with job control." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+This guide covers setting up and using MCP servers in any terminal environment, regardless of your operating system or shell. Learn universal techniques that work across bash, zsh, PowerShell, and Command Prompt.
+
+## Prerequisites
+
+- **Terminal access** (any shell)
+- **Node.js 18+** or **Python 3.8+**
+- **curl** or **wget** for testing
+- Basic command-line knowledge
+
+## Universal Installation
+
+### Cross-Platform MCP Client
+
+```bash
+# Using npm (works on all platforms)
+npm install -g @modelcontextprotocol/cli
+
+# Using pip (works on all platforms)
+pip install mcp-cli
+
+# Verify installation
+mcp --version
+```
+
+### Platform-Specific Package Managers
+
+```bash
+# macOS with Homebrew
+brew install mcp-cli
+
+# Ubuntu/Debian
+sudo apt install mcp-cli
+
+# CentOS/RHEL
+sudo yum install mcp-cli
+
+# Windows with Chocolatey
+choco install mcp-cli
+
+# Windows with Scoop
+scoop install mcp-cli
+```
+
+## Basic Setup
+
+### Environment Configuration
+
+Create a universal configuration file:
+
+**Unix/Linux/macOS** (`~/.mcprc`):
+```bash
+#!/bin/bash
+export MCP_CONFIG_DIR="$HOME/.config/mcp"
+export MCP_LOG_LEVEL="info"
+export MCP_DEFAULT_PORT="3000"
+
+# Source this file in your shell profile
+# echo "source ~/.mcprc" >> ~/.bashrc
+# echo "source ~/.mcprc" >> ~/.zshrc
+```
+
+**Windows PowerShell** (`$PROFILE`):
+```powershell
+# PowerShell profile
+$env:MCP_CONFIG_DIR = "$env:USERPROFILE\.config\mcp"
+$env:MCP_LOG_LEVEL = "info"
+$env:MCP_DEFAULT_PORT = "3000"
+
+# Add to PowerShell profile
+# New-Item -Path $PROFILE -Type File -Force
+# Add-Content -Path $PROFILE -Value (Get-Content mcp-profile.ps1)
+```
+
+**Windows Command Prompt** (`mcp-env.bat`):
+```batch
+@echo off
+set MCP_CONFIG_DIR=%USERPROFILE%\.config\mcp
+set MCP_LOG_LEVEL=info
+set MCP_DEFAULT_PORT=3000
+
+REM Call this batch file before using MCP
+REM call mcp-env.bat
+```
+
+### Configuration File
+
+Create `~/.config/mcp/config.json` (or `%USERPROFILE%\.config\mcp\config.json` on Windows):
+
+```json
+{
+  "servers": {
+    "filesystem": {
+      "command": "mcp-server-filesystem",
+      "args": ["--root", "~/projects"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    "git": {
+      "command": "mcp-server-git",
+      "args": ["--repo", "."],
+      "env": {
+        "GIT_AUTHOR_NAME": "Your Name",
+        "GIT_AUTHOR_EMAIL": "you@example.com"
+      }
+    }
+  },
+  "global": {
+    "timeout": 30000,
+    "retries": 3,
+    "log_level": "info"
+  }
+}
+```
+
+## Universal Commands
+
+### Server Management
+
+```bash
+# Start all configured servers
+mcp start
+
+# Start specific server
+mcp start filesystem
+
+# Stop all servers
+mcp stop
+
+# Stop specific server
+mcp stop filesystem
+
+# Restart servers
+mcp restart
+
+# List running servers
+mcp list
+
+# Check server status
+mcp status filesystem
+```
+
+### Cross-Platform Process Management
+
+**Using built-in job control (Unix/Linux/macOS):**
+```bash
+# Start server in background
+mcp-server-filesystem --port 3000 &
+
+# List background jobs
+jobs
+
+# Bring job to foreground
+fg %1
+
+# Send job to background
+bg %1
+
+# Kill background job
+kill %1
+```
+
+**Using PowerShell jobs (Windows):**
+```powershell
+# Start server as background job
+Start-Job -ScriptBlock { mcp-server-filesystem --port 3000 }
+
+# List jobs
+Get-Job
+
+# Stop job
+Stop-Job -Id 1
+
+# Remove completed jobs
+Remove-Job -State Completed
+```
+
+**Using PM2 (cross-platform):**
+```bash
+# Install PM2
+npm install -g pm2
+
+# Start server with PM2
+pm2 start mcp-server-filesystem --name "mcp-fs"
+
+# List processes
+pm2 list
+
+# Stop process
+pm2 stop mcp-fs
+
+# Restart process
+pm2 restart mcp-fs
+
+# View logs
+pm2 logs mcp-fs
+```
+
+## Shell Integration
+
+### Bash/Zsh Functions
+
+Add to `~/.bashrc` or `~/.zshrc`:
+
+```bash
+# MCP helper functions
+mcp_start() {
+    local server=${1:-"all"}
+    echo "Starting MCP server: $server"
+    mcp start $server
+}
+
+mcp_call() {
+    local server=$1
+    local tool=$2
+    shift 2
+    curl -X POST "http://localhost:3000/mcp/$server/call" \
+         -H "Content-Type: application/json" \
+         -d "{\"tool\":\"$tool\",\"args\":{$@}}"
+}
+
+mcp_health() {
+    local server=${1:-"filesystem"}
+    curl -f "http://localhost:3000/mcp/$server/health" || echo "Server unhealthy"
+}
+
+# Auto-completion
+_mcp_complete() {
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    opts="start stop restart list status health"
+    
+    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+    return 0
+}
+complete -F _mcp_complete mcp
+```
+
+### PowerShell Functions
+
+Add to your PowerShell profile:
+
+```powershell
+# MCP helper functions
+function Start-MCPServer {
+    param([string]$Server = "all")
+    Write-Host "Starting MCP server: $Server"
+    mcp start $Server
+}
+
+function Invoke-MCPCall {
+    param(
+        [string]$Server,
+        [string]$Tool,
+        [hashtable]$Args = @{}
+    )
+    
+    $body = @{
+        tool = $Tool
+        args = $Args
+    } | ConvertTo-Json
+    
+    Invoke-RestMethod -Uri "http://localhost:3000/mcp/$Server/call" `
+                      -Method POST `
+                      -ContentType "application/json" `
+                      -Body $body
+}
+
+function Test-MCPHealth {
+    param([string]$Server = "filesystem")
+    
+    try {
+        Invoke-RestMethod -Uri "http://localhost:3000/mcp/$Server/health"
+        Write-Host "Server $Server is healthy" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "Server $Server is unhealthy" -ForegroundColor Red
+    }
+}
+
+# Aliases
+Set-Alias -Name mcps -Value Start-MCPServer
+Set-Alias -Name mcpc -Value Invoke-MCPCall
+Set-Alias -Name mcph -Value Test-MCPHealth
+```
+
+## Testing and Debugging
+
+### Universal Health Checks
+
+```bash
+# Test server connectivity (Unix/Linux/macOS)
+curl -f http://localhost:3000/health || echo "Server down"
+
+# Test server connectivity (Windows PowerShell)
+try { Invoke-RestMethod http://localhost:3000/health } catch { "Server down" }
+
+# Test server connectivity (Windows Command Prompt)
+curl -f http://localhost:3000/health || echo Server down
+```
+
+### Log Monitoring
+
+**Unix/Linux/macOS:**
+```bash
+# Follow logs
+tail -f ~/.config/mcp/logs/server.log
+
+# Search logs
+grep "ERROR" ~/.config/mcp/logs/server.log
+
+# Monitor multiple logs
+multitail ~/.config/mcp/logs/*.log
+```
+
+**Windows PowerShell:**
+```powershell
+# Follow logs
+Get-Content -Path "$env:USERPROFILE\.config\mcp\logs\server.log" -Wait
+
+# Search logs
+Select-String -Path "$env:USERPROFILE\.config\mcp\logs\server.log" -Pattern "ERROR"
+```
+
+### Network Debugging
+
+```bash
+# Check port usage (Unix/Linux/macOS)
+lsof -i :3000
+netstat -tulpn | grep :3000
+
+# Check port usage (Windows)
+netstat -ano | findstr :3000
+
+# Test connectivity
+telnet localhost 3000
+nc -zv localhost 3000  # Unix/Linux/macOS
+Test-NetConnection localhost -Port 3000  # PowerShell
+```
+
+## Automation Scripts
+
+### Startup Script (Unix/Linux/macOS)
+
+```bash
+#!/bin/bash
+# mcp-startup.sh
+
+set -e
+
+MCP_CONFIG_DIR="${MCP_CONFIG_DIR:-$HOME/.config/mcp}"
+MCP_LOG_DIR="${MCP_LOG_DIR:-$MCP_CONFIG_DIR/logs}"
+
+# Create directories
+mkdir -p "$MCP_LOG_DIR"
+
+# Start servers
+echo "Starting MCP servers..."
+mcp start > "$MCP_LOG_DIR/startup.log" 2>&1
+
+# Wait for servers to be ready
+sleep 5
+
+# Health check
+if mcp status > /dev/null 2>&1; then
+    echo "MCP servers started successfully"
+else
+    echo "Failed to start MCP servers"
+    exit 1
+fi
+```
+
+### Startup Script (Windows PowerShell)
+
+```powershell
+# mcp-startup.ps1
+
+$ErrorActionPreference = "Stop"
+
+$MCPConfigDir = if ($env:MCP_CONFIG_DIR) { $env:MCP_CONFIG_DIR } else { "$env:USERPROFILE\.config\mcp" }
+$MCPLogDir = "$MCPConfigDir\logs"
+
+# Create directories
+New-Item -ItemType Directory -Path $MCPLogDir -Force | Out-Null
+
+# Start servers
+Write-Host "Starting MCP servers..."
+mcp start > "$MCPLogDir\startup.log" 2>&1
+
+# Wait for servers to be ready
+Start-Sleep -Seconds 5
+
+# Health check
+try {
+    mcp status | Out-Null
+    Write-Host "MCP servers started successfully" -ForegroundColor Green
+}
+catch {
+    Write-Host "Failed to start MCP servers" -ForegroundColor Red
+    exit 1
+}
+```
+
+## System Integration
+
+### Systemd Service (Linux)
+
+```ini
+# /etc/systemd/system/mcp-servers.service
+[Unit]
+Description=MCP Servers
+After=network.target
+
+[Service]
+Type=simple
+User=mcp
+Group=mcp
+WorkingDirectory=/home/mcp
+ExecStart=/usr/local/bin/mcp start
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Windows Service
+
+```powershell
+# Install as Windows service using NSSM
+nssm install MCPServers "C:\Program Files\nodejs\node.exe"
+nssm set MCPServers Arguments "C:\Users\%USERNAME%\AppData\Roaming\npm\node_modules\@modelcontextprotocol\cli\bin\mcp.js start"
+nssm set MCPServers DisplayName "MCP Servers"
+nssm set MCPServers Description "Model Context Protocol Servers"
+nssm start MCPServers
+```
+
+### macOS LaunchAgent
+
+```xml
+<!-- ~/Library/LaunchAgents/com.mcp.servers.plist -->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.mcp.servers</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/mcp</string>
+        <string>start</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+</dict>
+</plist>
+```
+
+## Related Guides
+
+- [How to Install and Use MCPs with Codex CLI](/docs/codex-cli-installation)
+- [Getting Started with MCPs in Gemini CLI](/docs/gemini-cli-setup)
+- [Running MCPs with Claude CLI (Examples + Troubleshooting)](/docs/claude-cli)
+- [Automating MCP Workflows with GitHub Actions](/docs/github-actions)
+
+## FAQ
+
+### Can I use MCPs in any terminal or shell?
+
+Yes, MCPs work in any terminal environment including bash, zsh, fish, PowerShell, Command Prompt, and others. The MCP protocol is shell-agnostic.
+
+### How do I manage multiple MCP servers in terminal?
+
+Use process managers like PM2 for cross-platform support, systemd on Linux, or built-in job control in Unix shells. For Windows, use PowerShell jobs or Windows services.
+
+### What's the best way to automate MCP server startup?
+
+Use system-level services (systemd, Windows services, macOS LaunchAgents) for production, or shell startup scripts for development environments.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [terminal-cli/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/terminal-cli/page.mdx)

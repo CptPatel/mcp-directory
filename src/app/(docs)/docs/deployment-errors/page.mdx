@@ -1,0 +1,150 @@
+﻿---
+title: "Fixing MCP Deployment Issues in Docker/Vercel"
+description: "Troubleshoot MCP deployment failures in Docker containers and Vercel serverless environments."
+slug: "deployment-errors"
+category: "testing"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "Why does my MCP crash on Vercel?"
+    a: "Most MCP servers need persistent processes. Use Edge Functions or background jobs, set proper memory limits, and ensure the handler returns responses quickly."
+  - q: "How do I debug a failing Docker container?"
+    a: "Check `docker logs`, run an interactive shell with `docker exec -it`, and verify environment variables and exposed ports."
+  - q: "Can I share the same Docker image across staging and production?"
+    a: "Yes, but parameterise configuration via environment variables and secrets so each environment remains isolated."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="deployment-errors" />
+
+# Fixing MCP Deployment Issues in Docker/Vercel
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Why does my MCP crash on Vercel?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Most MCP servers need persistent processes. Use Edge Functions or background jobs, set proper memory limits, and ensure the handler returns responses quickly." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I debug a failing Docker container?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Check docker logs, run an interactive shell with docker exec -it, and verify environment variables and exposed ports." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I share the same Docker image across staging and production?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes, but parameterise configuration via environment variables and secrets so each environment remains isolated." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+Containerising MCP servers or running them on Vercel’s serverless platform offers convenient deployment, but misconfiguration can produce cold-start failures, timeouts, or missing environment variables. This guide covers the most frequent issues and their fixes.
+
+## Docker Deployment Checklist
+
+```dockerfile
+# Dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY . .
+ENV PORT=8000
+EXPOSE 8000
+CMD ["node", "dist/server.js"]
+```
+
+1. **Ensure dependencies install** (check network access, private registries).
+2. **Expose the MCP port** and map it when running: `docker run -p 8000:8000 mcp-server`.
+3. **Set env vars** through `--env-file` or your orchestrator.
+4. **Health checks**: add `/health` endpoint and configure Docker or Kubernetes readiness probes.
+
+## Vercel Deployment Checklist
+
+- Only lightweight MCP handlers work well in Edge Functions. For long-running tasks, use Vercel cron jobs or background functions.
+- Configure `vercel.json`:
+
+```json
+{
+  "functions": {
+    "api/mcp.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  }
+}
+```
+
+- Set environment variables for each environment (Preview, Production).
+- Use `next.config.js` to mark MCP routes as dynamic: `export const runtime = "edge";` when appropriate.
+
+## Debugging Techniques
+
+### Docker
+
+```bash
+# View logs
+docker logs mcp-server
+
+# Attach shell
+docker exec -it mcp-server /bin/sh
+
+# Inspect network
+docker inspect mcp-server --format '{{json .NetworkSettings.Ports}}'
+```
+
+### Vercel
+
+- Inspect deployment logs in the Vercel dashboard.
+- Run `vercel env pull .env.local` to keep local env vars in sync.
+- Use `vercel logs <deployment-url>` for realtime output.
+
+## Common Error Matrix
+
+| Symptom | Docker Fix | Vercel Fix |
+| --- | --- | --- |
+| `MODULE_NOT_FOUND` | Rebuild image after adding files to `COPY`. | Verify `vercel build` uses the correct entry point. |
+| Timeout | Increase `--timeout` or optimize queries. | Move heavy work to background job. |
+| `PORT` already in use | Change host port mapping or use `--init`. | Let Vercel manage the port; remove hard-coded values. |
+| Environment variable missing | Pass via `docker run --env`. | Set in Vercel dashboard and redeploy. |
+
+## Logging & Monitoring
+
+- Ship container logs to CloudWatch, Datadog, or Logflare.
+- Enable OpenTelemetry (OTLP) exporters inside the MCP server for traces.
+- Tag logs with deployment version and commit SHA for traceability.
+
+## Related Guides
+
+- [Running MCP Servers in Docker](/docs/docker-deployment)
+- [Serverless MCP Deployment on Vercel](/docs/vercel-deployment)
+- [Deploying MCPs on AWS Lambda](/docs/aws-lambda)
+- [Fixing MCP Server Connection Refused](/docs/connection-refused)
+
+## FAQ
+
+### Why does my MCP crash on Vercel?
+
+Ensure the MCP handler finishes within the max duration and uses supported APIs. For long-running servers, deploy to a container or background worker instead.
+
+### How do I debug a failing Docker container?
+
+Use `docker logs`, inspect the container with `docker exec`, and verify environment variables, network ports, and filesystem paths.
+
+### Can I share the same Docker image across staging and production?
+
+Yes—tag the image once, then supply environment-specific configuration via secrets or environment variables.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [deployment-errors/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/deployment-errors/page.mdx)

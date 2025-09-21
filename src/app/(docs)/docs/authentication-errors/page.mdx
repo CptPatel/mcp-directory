@@ -1,0 +1,135 @@
+﻿---
+title: "MCP Authentication & API Key Fixes"
+description: "Resolve authentication failures for MCP servers, including API keys, OAuth tokens, and service accounts."
+slug: "authentication-errors"
+category: "testing"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "Why does my MCP return 401 Unauthorized?"
+    a: "The token is missing, expired, scoped incorrectly, or the server clock is skewed."
+  - q: "How can I rotate MCP credentials without downtime?"
+    a: "Issue overlapping keys, reload the MCP server, then revoke the old credentials once clients confirm the new key works."
+  - q: "Do I need different keys for staging and production?"
+    a: "Yes. Isolate environments with separate credentials and secrets storage."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="authentication-errors" />
+
+# MCP Authentication & API Key Fixes
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Why does my MCP return 401 Unauthorized?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The token is missing, expired, scoped incorrectly, or the server clock is skewed." }
+    },
+    {
+      "@type": "Question",
+      "name": "How can I rotate MCP credentials without downtime?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Issue overlapping keys, reload the MCP server, then revoke the old credentials once clients confirm the new key works." }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need different keys for staging and production?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Isolate environments with separate credentials and secrets storage." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+Authentication errors block MCP servers from delivering the data your tools expect. Whether you're using API keys, OAuth, or JWTs, these steps help you restore access quickly while keeping security intact.
+
+## Common Symptoms
+
+| Error | Meaning |
+| --- | --- |
+| `401 Unauthorized` | Missing or invalid credentials. |
+| `403 Forbidden` | Credentials present but lack permissions. |
+| `419/440 Session Expired` | Token expired or CSRF protection triggered. |
+| `Clock skew detected` | Client and server system times differ significantly. |
+
+## Quick Fix Checklist
+
+```bash
+# Confirm environment variables are loaded
+printenv | grep MCP
+
+# Verify token expiration
+jwt decode $MCP_JWT
+
+# Sync server clock
+sudo chronyc makestep
+```
+
+1. Ensure secrets are available to the MCP process (`.env`, secrets manager, container runtime).
+2. Check that the token audience (`aud`) and issuer (`iss`) match the MCP server expectations.
+3. Regenerate credentials if the hash or signing key changed.
+4. Clear cached credentials on the client side.
+
+## API Key Troubleshooting
+
+```bash
+# Example: regenerate OpenRouter key
+curl -X POST https://openrouter.ai/api/v1/keys \
+  -H "Authorization: Bearer $OPENROUTER_ADMIN_TOKEN" \
+  -d '{"label":"mcp-server"}'
+```
+
+- Scope keys to least privilege (read-only vs read/write).
+- Store keys in GitHub Actions secrets, Vercel env vars, or AWS Secrets Manager.
+- Rotate on a schedule (e.g., every 90 days) and document the procedure.
+
+## OAuth & Service Accounts
+
+- For Google Cloud-based MCPs, download a service account JSON file and set `GOOGLE_APPLICATION_CREDENTIALS`.
+- Use refresh tokens to obtain new access tokens automatically.
+- When using Azure AD or Okta, configure the MCP callback URL and tenant ID correctly.
+
+```ts
+// Example token refresh inside an MCP server
+const oauthClient = new OAuth2Client(clientId, clientSecret, redirectUri);
+const { tokens } = await oauthClient.refreshToken(refreshToken);
+axios.defaults.headers.common.Authorization = `Bearer ${tokens.access_token}`;
+```
+
+## Secrets Management
+
+- Prefer runtime secret stores (AWS Secrets Manager, GCP Secret Manager, HashiCorp Vault).
+- In Kubernetes, mount secrets as files and reload the MCP server when they change.
+- Keep staging and production credentials isolated.
+
+## Related Guides
+
+- [Fixing MCP Server Connection Refused](/docs/connection-refused)
+- [Fixing MCP Deployment Issues in Docker/Vercel](/docs/deployment-errors)
+- [Debugging & Testing MCPs with MCP Inspector](/docs/testing-mcp)
+- [Why MCPs Don't Show Up in Claude Desktop](/docs/mcp-not-showing)
+
+## FAQ
+
+### Why does my MCP return 401 Unauthorized?
+
+Credentials might be missing, expired, or scoped incorrectly. Confirm the token is sent and matches what the server expects.
+
+### How can I rotate MCP credentials without downtime?
+
+Issue a new credential, update the MCP server to accept both old and new keys, test the new key, then revoke the old one.
+
+### Do I need different keys for staging and production?
+
+Absolutely. Separate environments prevent accidental cross-environment access and simplify incident response.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [authentication-errors/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/authentication-errors/page.mdx)

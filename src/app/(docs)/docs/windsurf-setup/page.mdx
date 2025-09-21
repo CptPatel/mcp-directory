@@ -1,0 +1,431 @@
+---
+title: "Running MCPs in Windsurf IDE"
+description: "Step-by-step guide to configure and use Model Context Protocol servers in Windsurf IDE."
+slug: "windsurf-setup"
+category: "ide"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "Is Windsurf IDE compatible with all MCP servers?"
+    a: "Windsurf supports most standard MCP servers, with excellent integration for development-focused MCPs."
+  - q: "How do I update MCP servers in Windsurf?"
+    a: "Use the built-in extension manager or update via command line, then restart Windsurf to reload configurations."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="windsurf-setup" />
+
+# Running MCPs in Windsurf IDE
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is Windsurf IDE compatible with all MCP servers?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Windsurf supports most standard MCP servers, with excellent integration for development-focused MCPs." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I update MCP servers in Windsurf?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Use the built-in extension manager or update via command line, then restart Windsurf to reload configurations." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+Windsurf IDE by Codeium is an AI-native development environment with excellent MCP support. This guide walks you through setting up and using MCP servers to enhance your development workflow.
+
+## Prerequisites
+
+- **Windsurf IDE** (latest version)
+- **Node.js 18+** or **Python 3.8+**
+- **Codeium account** (for AI features)
+- Basic familiarity with IDE configuration
+
+## Installation
+
+### Step 1: Install Windsurf IDE
+
+Download Windsurf from [codeium.com/windsurf](https://codeium.com/windsurf) and install for your platform.
+
+### Step 2: Install MCP Extension
+
+1. Open Windsurf IDE
+2. Go to Extensions (Ctrl+Shift+X)
+3. Search for "Model Context Protocol"
+4. Install the official MCP extension
+5. Restart Windsurf
+
+### Step 3: Install MCP Servers
+
+```bash
+# Install popular MCP servers
+npm install -g @modelcontextprotocol/server-filesystem
+npm install -g @modelcontextprotocol/server-github
+npm install -g @modelcontextprotocol/server-database
+
+# Or using uvx for Python servers
+uvx install mcp-server-git
+uvx install mcp-server-docker
+```
+
+## Configuration
+
+### Basic Configuration
+
+Open Windsurf settings and configure MCP servers:
+
+**Settings → Extensions → MCP Protocol**
+
+```json
+{
+  "mcp.servers": {
+    "filesystem": {
+      "command": "mcp-server-filesystem",
+      "args": ["--root", "${workspaceFolder}"],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    "github": {
+      "command": "mcp-server-github",
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_TOKEN}"
+      }
+    },
+    "database": {
+      "command": "mcp-server-database",
+      "env": {
+        "DATABASE_URL": "${env:DATABASE_URL}"
+      }
+    }
+  },
+  "mcp.autoStart": true,
+  "mcp.logLevel": "info"
+}
+```
+
+### Workspace-Specific Configuration
+
+Create `.windsurf/mcp.json` in your project root:
+
+```json
+{
+  "servers": {
+    "project_tools": {
+      "command": "node",
+      "args": ["./tools/mcp-server.js"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PROJECT_NAME": "${workspaceFolderBasename}",
+        "NODE_ENV": "development"
+      }
+    },
+    "docker": {
+      "command": "uvx",
+      "args": ["mcp-server-docker"],
+      "env": {
+        "DOCKER_HOST": "unix:///var/run/docker.sock"
+      }
+    }
+  }
+}
+```
+
+### Advanced Configuration
+
+For complex development environments:
+
+```json
+{
+  "mcp.servers": {
+    "development_stack": {
+      "command": "node",
+      "args": ["dev-mcp-server.js"],
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG": "mcp:*",
+        "API_BASE_URL": "http://localhost:3000"
+      },
+      "timeout": 30000,
+      "retries": 3,
+      "healthCheck": {
+        "enabled": true,
+        "interval": 30000
+      }
+    }
+  },
+  "mcp.ui": {
+    "showInStatusBar": true,
+    "showNotifications": true,
+    "theme": "auto"
+  }
+}
+```
+
+## Usage in Windsurf
+
+### AI Chat Integration
+
+Windsurf's AI chat automatically uses available MCP servers:
+
+```
+// In Windsurf AI Chat
+"Use the filesystem MCP to create a new React component"
+"Check the GitHub MCP for recent pull requests"
+"Query the database MCP for user statistics"
+```
+
+### Code Completion
+
+MCP servers enhance code completion:
+
+```javascript
+// Type this in your code
+fs.readFile(
+// Windsurf will suggest files from filesystem MCP
+
+// Or for database queries
+db.query(
+// Suggestions from database schema via MCP
+```
+
+### Command Palette
+
+Access MCP features via Command Palette (Ctrl+Shift+P):
+
+- `MCP: Start Server`
+- `MCP: Stop Server`
+- `MCP: Restart All Servers`
+- `MCP: Show Server Logs`
+- `MCP: Test Server Connection`
+
+## Development Workflow
+
+### Project Setup
+
+```bash
+# Initialize project with MCP support
+windsurf init --with-mcp
+
+# Or add to existing project
+windsurf mcp init
+```
+
+### Code Generation
+
+Use Windsurf's AI with MCP context:
+
+```javascript
+// Ask Windsurf AI:
+// "Generate a REST API using the database MCP schema"
+// "Create tests for the GitHub MCP integration"
+// "Build a Docker setup using the docker MCP"
+
+// Windsurf will generate contextually aware code
+```
+
+### Debugging
+
+Windsurf provides excellent MCP debugging tools:
+
+1. **MCP Panel**: View server status and logs
+2. **Debug Console**: Interactive MCP testing
+3. **Network Inspector**: Monitor MCP communications
+
+## Popular MCP Integrations
+
+### Git Integration
+
+```json
+{
+  "git_tools": {
+    "command": "mcp-server-git",
+    "args": ["--repo", "${workspaceFolder}"],
+    "capabilities": ["commit", "branch", "merge", "status"]
+  }
+}
+```
+
+Usage:
+```
+// In AI chat
+"Use git MCP to create a feature branch"
+"Show me the git status via MCP"
+"Generate a commit message using git MCP context"
+```
+
+### Docker Integration
+
+```json
+{
+  "docker": {
+    "command": "mcp-server-docker",
+    "env": {
+      "DOCKER_HOST": "unix:///var/run/docker.sock"
+    }
+  }
+}
+```
+
+Usage:
+```
+// In AI chat
+"List running containers using docker MCP"
+"Build and run this project with docker MCP"
+"Create a Dockerfile using docker MCP insights"
+```
+
+### Database Integration
+
+```json
+{
+  "database": {
+    "command": "mcp-server-database",
+    "env": {
+      "DATABASE_URL": "postgresql://localhost:5432/mydb"
+    }
+  }
+}
+```
+
+Usage:
+```
+// In AI chat
+"Show database schema using database MCP"
+"Generate migrations with database MCP context"
+"Create API endpoints based on database MCP schema"
+```
+
+## Troubleshooting
+
+### Server Not Starting
+
+1. Check the MCP panel for error messages
+2. Verify server installation:
+   ```bash
+   which mcp-server-filesystem
+   npm list -g @modelcontextprotocol/server-filesystem
+   ```
+3. Check environment variables
+4. Restart Windsurf IDE
+
+### Connection Issues
+
+1. Test server manually:
+   ```bash
+   mcp-server-filesystem --test
+   ```
+2. Check firewall settings
+3. Verify port availability
+4. Review server logs in MCP panel
+
+### Performance Issues
+
+1. Reduce MCP server timeout values
+2. Limit concurrent MCP operations
+3. Use MCP server caching
+4. Monitor resource usage in Task Manager
+
+## Best Practices
+
+### Configuration Management
+
+- Use workspace-specific configurations
+- Store sensitive data in environment variables
+- Version control MCP configurations
+- Document custom MCP setups
+
+### Development Workflow
+
+```javascript
+// Good: Use MCP context in AI prompts
+"Using the current project structure from filesystem MCP, 
+ create a new feature module"
+
+// Better: Combine multiple MCPs
+"Using git MCP history and database MCP schema, 
+ generate a migration for the recent changes"
+```
+
+### Performance Optimization
+
+- Enable MCP server caching
+- Use health checks for reliability
+- Implement proper error handling
+- Monitor MCP server resource usage
+
+## Custom MCP Development
+
+### Creating a Custom MCP for Windsurf
+
+```javascript
+// windsurf-mcp-server.js
+const { MCPServer } = require('@modelcontextprotocol/sdk');
+
+const server = new MCPServer({
+  name: 'windsurf-tools',
+  version: '1.0.0'
+});
+
+// Add Windsurf-specific tools
+server.addTool('create_component', {
+  description: 'Create a new React component with Windsurf conventions',
+  parameters: {
+    name: { type: 'string', required: true },
+    type: { type: 'string', enum: ['functional', 'class'] }
+  },
+  handler: async ({ name, type }) => {
+    // Generate component code
+    const component = generateComponent(name, type);
+    return { code: component, path: `src/components/${name}.tsx` };
+  }
+});
+
+server.start();
+```
+
+### Integration with Windsurf
+
+```json
+{
+  "windsurf_tools": {
+    "command": "node",
+    "args": ["windsurf-mcp-server.js"],
+    "description": "Custom tools for Windsurf development"
+  }
+}
+```
+
+## Related Guides
+
+- [How to Install and Use MCPs in Cursor IDE](/docs/cursor-setup)
+- [MCPs in VSCode - Complete Setup Guide](/docs/vscode-integration)
+- [MCP Setup in JetBrains IDEs (PyCharm, IntelliJ, WebStorm)](/docs/jetbrains-integration)
+- [Connecting to Remote MCP Servers](/docs/remote-mcp)
+
+## FAQ
+
+### Is Windsurf IDE compatible with all MCP servers?
+
+Windsurf supports most standard MCP servers and has excellent integration with development-focused MCPs. Some specialized MCPs may require additional configuration.
+
+### How do I update MCP servers in Windsurf?
+
+Update MCP servers using your package manager (npm, pip, uvx), then restart Windsurf to reload the configurations. The MCP extension will automatically detect updates.
+
+### Can I use multiple MCP servers simultaneously in Windsurf?
+
+Yes, Windsurf can run multiple MCP servers concurrently. Each server provides different capabilities that can be used together in AI interactions and code completion.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [windsurf-setup/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/windsurf-setup/page.mdx)

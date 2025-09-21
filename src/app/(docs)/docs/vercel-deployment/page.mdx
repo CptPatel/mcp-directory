@@ -1,0 +1,594 @@
+---
+title: "Serverless MCP Deployment on Vercel"
+description: "Deploy MCP servers as serverless functions on Vercel with edge computing and global distribution."
+slug: "vercel-deployment"
+category: "deploy"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "Can MCP servers maintain state in Vercel serverless functions?"
+    a: "Vercel functions are stateless by design. Use external storage like Vercel KV, databases, or Redis for persistent state."
+  - q: "What are the limitations of running MCPs on Vercel?"
+    a: "Main limitations include 10-second execution timeout, 50MB deployment size, and cold start latency for infrequent requests."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="vercel-deployment" />
+
+# Serverless MCP Deployment on Vercel
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can MCP servers maintain state in Vercel serverless functions?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Vercel functions are stateless by design. Use external storage like Vercel KV, databases, or Redis for persistent state." }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the limitations of running MCPs on Vercel?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Main limitations include 10-second execution timeout, 50MB deployment size, and cold start latency for infrequent requests." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+Vercel's serverless platform provides excellent hosting for MCP servers with automatic scaling, global edge distribution, and zero server management. This guide covers deployment strategies and best practices.
+
+## Prerequisites
+
+- **Vercel account** (free tier available)
+- **Node.js 18+** project
+- **Git repository** (GitHub, GitLab, or Bitbucket)
+- **Vercel CLI** (optional but recommended)
+
+## Project Structure
+
+```
+mcp-server/
+├── api/
+│   ├── mcp/
+│   │   ├── tools.js
+│   │   ├── resources.js
+│   │   └── prompts.js
+│   └── health.js
+├── lib/
+│   ├── mcp-server.js
+│   └── utils.js
+├── package.json
+├── vercel.json
+└── README.md
+```
+
+## Basic MCP Server Setup
+
+### package.json
+
+```json
+{
+  "name": "mcp-server-vercel",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step required'",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^2.1.0",
+    "@vercel/kv": "^1.0.0",
+    "axios": "^1.7.0"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
+```
+
+### vercel.json Configuration
+
+```json
+{
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs18.x",
+      "maxDuration": 10
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/mcp/(.*)",
+      "destination": "/api/mcp/$1"
+    }
+  ]
+}
+```
+
+## MCP Server Implementation
+
+### Core Server (lib/mcp-server.js)
+
+```javascript
+import { MCPServer } from '@modelcontextprotocol/sdk';
+
+export class VercelMCPServer {
+  constructor() {
+    this.server = new MCPServer({
+      name: 'vercel-mcp-server',
+      version: '1.0.0'
+    });
+    
+    this.setupTools();
+  }
+
+  setupTools() {
+    // File operations tool
+    this.server.addTool('read_file', {
+      description: 'Read file contents from Vercel storage',
+      parameters: {
+        path: { type: 'string', required: true }
+      },
+      handler: async ({ path }) => {
+        // Implementation using Vercel KV or external storage
+        return { content: await this.readFromStorage(path) };
+      }
+    });
+
+    // HTTP request tool
+    this.server.addTool('http_request', {
+      description: 'Make HTTP requests',
+      parameters: {
+        url: { type: 'string', required: true },
+        method: { type: 'string', default: 'GET' }
+      },
+      handler: async ({ url, method }) => {
+        const response = await fetch(url, { method });
+        return { 
+          status: response.status,
+          data: await response.json()
+        };
+      }
+    });
+  }
+
+  async readFromStorage(path) {
+    // Implement storage logic
+    return `Content from ${path}`;
+  }
+
+  async handleRequest(request) {
+    return await this.server.handleRequest(request);
+  }
+}
+```
+
+### API Endpoints
+
+**api/mcp/tools.js**
+```javascript
+import { VercelMCPServer } from '../../lib/mcp-server.js';
+
+const server = new VercelMCPServer();
+
+export default async function handler(req, res) {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  try {
+    if (req.method === 'GET') {
+      // List available tools
+      const tools = await server.server.listTools();
+      return res.status(200).json({ tools });
+    }
+
+    if (req.method === 'POST') {
+      // Call a tool
+      const { tool, args } = req.body;
+      const result = await server.server.callTool(tool, args);
+      return res.status(200).json(result);
+    }
+
+    return res.status(405).json({ error: 'Method not allowed' });
+  } catch (error) {
+    console.error('MCP Error:', error);
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      message: error.message 
+    });
+  }
+}
+```
+
+**api/health.js**
+```javascript
+export default function handler(req, res) {
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0',
+    environment: process.env.VERCEL_ENV || 'development'
+  });
+}
+```
+
+## Storage Integration
+
+### Vercel KV (Redis)
+
+```javascript
+import { kv } from '@vercel/kv';
+
+export class KVStorage {
+  async set(key, value, ttl = 3600) {
+    return await kv.set(key, value, { ex: ttl });
+  }
+
+  async get(key) {
+    return await kv.get(key);
+  }
+
+  async delete(key) {
+    return await kv.del(key);
+  }
+
+  async list(pattern = '*') {
+    return await kv.keys(pattern);
+  }
+}
+
+// Usage in MCP server
+const storage = new KVStorage();
+
+this.server.addTool('cache_set', {
+  description: 'Store data in cache',
+  parameters: {
+    key: { type: 'string', required: true },
+    value: { type: 'string', required: true },
+    ttl: { type: 'number', default: 3600 }
+  },
+  handler: async ({ key, value, ttl }) => {
+    await storage.set(key, value, ttl);
+    return { success: true };
+  }
+});
+```
+
+### Database Integration
+
+```javascript
+import { sql } from '@vercel/postgres';
+
+export class DatabaseMCP {
+  async query(queryText, params = []) {
+    try {
+      const result = await sql.query(queryText, params);
+      return result.rows;
+    } catch (error) {
+      throw new Error(`Database query failed: ${error.message}`);
+    }
+  }
+}
+
+// Add to MCP server
+this.server.addTool('db_query', {
+  description: 'Execute database query',
+  parameters: {
+    query: { type: 'string', required: true },
+    params: { type: 'array', default: [] }
+  },
+  handler: async ({ query, params }) => {
+    const db = new DatabaseMCP();
+    const results = await db.query(query, params);
+    return { results };
+  }
+});
+```
+
+## Environment Configuration
+
+### Environment Variables
+
+```bash
+# .env.local (for development)
+KV_REST_API_URL=your_kv_url
+KV_REST_API_TOKEN=your_kv_token
+POSTGRES_URL=your_postgres_url
+GITHUB_TOKEN=your_github_token
+OPENAI_API_KEY=your_openai_key
+```
+
+### Vercel Environment Variables
+
+```bash
+# Set production environment variables
+vercel env add KV_REST_API_URL
+vercel env add KV_REST_API_TOKEN
+vercel env add POSTGRES_URL
+vercel env add GITHUB_TOKEN
+
+# Or use Vercel dashboard
+# Project Settings > Environment Variables
+```
+
+## Deployment
+
+### Automatic Deployment
+
+```bash
+# Connect repository to Vercel
+vercel link
+
+# Deploy to preview
+git push origin feature-branch
+
+# Deploy to production
+git push origin main
+```
+
+### Manual Deployment
+
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Login to Vercel
+vercel login
+
+# Deploy
+vercel --prod
+```
+
+### GitHub Actions Deployment
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy to Vercel
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.ORG_ID }}
+          vercel-project-id: ${{ secrets.PROJECT_ID }}
+          vercel-args: '--prod'
+```
+
+## Performance Optimization
+
+### Cold Start Mitigation
+
+```javascript
+// Warm-up function
+export const config = {
+  runtime: 'nodejs18.x',
+  maxDuration: 10,
+};
+
+// Keep connections warm
+let cachedConnection = null;
+
+export default async function handler(req, res) {
+  // Reuse connections
+  if (!cachedConnection) {
+    cachedConnection = await createConnection();
+  }
+  
+  // Your MCP logic here
+}
+```
+
+### Edge Functions
+
+```javascript
+// api/edge/mcp.js
+export const config = {
+  runtime: 'edge',
+};
+
+export default async function handler(req) {
+  const { searchParams } = new URL(req.url);
+  const tool = searchParams.get('tool');
+  
+  // Lightweight MCP operations
+  const result = await processLightweightTool(tool);
+  
+  return new Response(JSON.stringify(result), {
+    headers: { 'content-type': 'application/json' },
+  });
+}
+```
+
+## Monitoring and Debugging
+
+### Vercel Analytics
+
+```javascript
+// Add to your MCP endpoints
+import { track } from '@vercel/analytics';
+
+export default async function handler(req, res) {
+  // Track MCP usage
+  track('mcp_tool_called', {
+    tool: req.body.tool,
+    user: req.headers['x-user-id']
+  });
+  
+  // Your MCP logic
+}
+```
+
+### Error Handling
+
+```javascript
+export default async function handler(req, res) {
+  try {
+    // MCP logic
+  } catch (error) {
+    // Log to Vercel
+    console.error('MCP Error:', {
+      error: error.message,
+      stack: error.stack,
+      request: {
+        method: req.method,
+        url: req.url,
+        body: req.body
+      }
+    });
+    
+    return res.status(500).json({
+      error: 'Internal server error',
+      requestId: req.headers['x-vercel-id']
+    });
+  }
+}
+```
+
+## Security Best Practices
+
+### API Key Validation
+
+```javascript
+export default async function handler(req, res) {
+  const apiKey = req.headers['x-api-key'];
+  
+  if (!apiKey || apiKey !== process.env.MCP_API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  // Continue with MCP logic
+}
+```
+
+### Rate Limiting
+
+```javascript
+import { kv } from '@vercel/kv';
+
+async function rateLimit(identifier, limit = 100, window = 3600) {
+  const key = `rate_limit:${identifier}`;
+  const current = await kv.incr(key);
+  
+  if (current === 1) {
+    await kv.expire(key, window);
+  }
+  
+  return current <= limit;
+}
+
+export default async function handler(req, res) {
+  const clientIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  
+  if (!(await rateLimit(clientIP))) {
+    return res.status(429).json({ error: 'Rate limit exceeded' });
+  }
+  
+  // Continue with MCP logic
+}
+```
+
+## Testing
+
+### Local Development
+
+```bash
+# Start Vercel dev server
+vercel dev
+
+# Test MCP endpoints
+curl http://localhost:3000/api/health
+curl -X POST http://localhost:3000/api/mcp/tools \
+  -H "Content-Type: application/json" \
+  -d '{"tool":"read_file","args":{"path":"test.txt"}}'
+```
+
+### Integration Tests
+
+```javascript
+// tests/mcp.test.js
+import { createMocks } from 'node-mocks-http';
+import handler from '../api/mcp/tools.js';
+
+describe('/api/mcp/tools', () => {
+  it('should list available tools', async () => {
+    const { req, res } = createMocks({
+      method: 'GET',
+    });
+
+    await handler(req, res);
+
+    expect(res._getStatusCode()).toBe(200);
+    const data = JSON.parse(res._getData());
+    expect(data.tools).toBeDefined();
+  });
+});
+```
+
+## FAQ
+
+### Can MCP servers maintain state in Vercel serverless functions?
+
+Vercel functions are stateless by design. Use external storage like Vercel KV (Redis), Vercel Postgres, or other databases for persistent state. Each function invocation starts fresh.
+
+### What are the limitations of running MCPs on Vercel?
+
+Main limitations include 10-second execution timeout, 50MB deployment size limit, and cold start latency. For long-running operations, consider using Vercel's background functions or external job queues.
+
+### How do I handle file uploads in Vercel MCP servers?
+
+Use Vercel Blob storage for file uploads, or integrate with cloud storage services like AWS S3. Vercel functions have memory and execution time limits that make them unsuitable for large file processing.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [vercel-deployment/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/vercel-deployment/page.mdx)
