@@ -6,18 +6,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, Star, Download, Shield, TrendingUp, Award } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "25 Best MCPs Every Developer Should Know in 2024 - Top Model Context Protocols",
-  description: "Discover the best MCPs for 2024. Our curated list of top Model Context Protocol configurations includes GitHub, database, cloud, and AI development tools that every developer needs.",
-  keywords: "best MCPs 2024, top MCPs, best Model Context Protocols, MCP recommendations, popular MCPs, essential MCPs, MCP directory, top MCP list",
+  title: "25 Best MCPs Every Developer Should Know in 2025 - Top Model Context Protocols",
+  description: "Discover the best MCPs for 2025. Our curated list of top Model Context Protocol configurations includes GitHub, database, cloud, and AI development tools that every developer needs.",
+  keywords: "best MCPs 2025, top MCPs, best Model Context Protocols, MCP recommendations, popular MCPs, essential MCPs, MCP directory, top MCP list",
   openGraph: {
-    title: "25 Best MCPs Every Developer Should Know in 2024",
+    title: "25 Best MCPs Every Developer Should Know in 2025",
     description: "Curated list of the most popular and useful Model Context Protocol configurations",
     type: "article",
-    url: "https://mcpdirectory.app/blog/best-mcps-2024",
+    url: "https://mcpdirectory.app/blog/best-mcps-2025",
   },
   twitter: {
     card: "summary_large_image",
-    title: "25 Best MCPs Every Developer Should Know in 2024",
+    title: "25 Best MCPs Every Developer Should Know in 2025",
     description: "Curated list of the most popular and useful Model Context Protocol configurations",
   },
 };
@@ -107,7 +107,7 @@ const categories = [
   }
 ];
 
-export default function BestMCPs2024Page() {
+export default function BestMCPs2025Page() {
   return (
     <div className="container px-4 py-8 mx-auto max-w-6xl">
       {/* Header */}
@@ -115,12 +115,12 @@ export default function BestMCPs2024Page() {
         <div className="flex justify-center gap-2 mb-4">
           <Badge variant="secondary" className="bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-800">
             <Award className="h-4 w-4 mr-1" />
-            Editor's Choice 2024
+            Editor's Choice 2025
           </Badge>
           <Badge variant="outline">Updated Monthly</Badge>
         </div>
         <h1 className="text-4xl md:text-5xl font-bold mb-4">
-          The 25 Best MCPs Every Developer Should Know in 2024
+          The 25 Best MCPs Every Developer Should Know in 2025
         </h1>
         <p className="text-xl text-muted-foreground mb-6 max-w-3xl mx-auto">
           Our curated list of the most popular, useful, and well-maintained Model Context Protocol 
@@ -156,7 +156,7 @@ export default function BestMCPs2024Page() {
 
       {/* Top 5 MCPs */}
       <section className="mb-12">
-        <h2 className="text-3xl font-bold mb-6 text-center">🏆 Top 5 MCPs of 2024</h2>
+        <h2 className="text-3xl font-bold mb-6 text-center">🏆 Top 5 MCPs of 2025</h2>
         <div className="space-y-6">
           {bestMCPs.map((mcp) => (
             <Card key={mcp.rank} className="hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-l-4 border-l-primary">

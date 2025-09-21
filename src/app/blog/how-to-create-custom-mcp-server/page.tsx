@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Code, Terminal, CheckCircle, Lightbulb } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "How to Create a Custom MCP Server from Scratch - Complete Guide 2024",
+  title: "How to Create a Custom MCP Server from Scratch - Complete Guide 2025",
   description: "Learn how to create a custom MCP server step-by-step. Complete tutorial with TypeScript and Python examples, best practices, and deployment guide for Model Context Protocol development.",
   keywords: "create custom MCP server, MCP server development, Model Context Protocol tutorial, custom MCP guide, MCP TypeScript, MCP Python, how to build MCP",
   openGraph: {
@@ -40,7 +40,7 @@ export default function CreateCustomMCPServerPage() {
           code examples, and best practices for both TypeScript and Python implementations.
         </p>
         <div className="text-sm text-muted-foreground">
-          Published on December 20, 2024 • Updated for MCP v2024.11
+          Published on December 20, 2024 • Updated for MCP v2025.01
         </div>
       </div>
 
@@ -405,7 +405,7 @@ if __name__ == "__main__":
           <Card className="hover:shadow-md transition-shadow">
             <CardContent className="p-4">
               <h4 className="font-semibold mb-2">
-                <Link href="/blog/best-mcps-2024" className="hover:text-primary">
+                <Link href="/blog/best-mcps-2025" className="hover:text-primary">
                   The 25 Best MCPs Every Developer Should Know
                 </Link>
               </h4>

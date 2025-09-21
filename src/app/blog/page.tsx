@@ -34,8 +34,8 @@ const blogPosts = [
     keywords: ["create custom MCP server", "MCP development", "Model Context Protocol tutorial"]
   },
   {
-    slug: "best-mcps-2024",
-    title: "The 25 Best MCPs Every Developer Should Know in 2024",
+    slug: "best-mcps-2025",
+    title: "The 25 Best MCPs Every Developer Should Know in 2025",
     excerpt: "Discover the most popular and useful Model Context Protocol configurations that will supercharge your AI development workflow.",
     category: "Guide",
     readTime: "12 min read",
