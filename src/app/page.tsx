@@ -5,11 +5,11 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: "MCP Directory - Create Custom Model Context Protocols with AI",
-  description: "Create custom MCP servers in minutes with AI, browse 2,500+ verified Model Context Protocols, and deploy one-click installations with ready-to-use scripts. Learn best practices from step-by-step Model Context Protocol tutorials in the MCP blog and stay ahead with fresh workflow guides.",
-  keywords: "Model Context Protocol, MCP Directory, create custom MCP, MCP servers, AI development tools, Claude MCP, VS Code MCP, MCP creator, Model Context Protocol tutorials, MCP blog, MCP guides, AI workflow automation",
+  description: "Create custom MCP servers in minutes with AI, browse 2,500+ verified Model Context Protocols, and deploy one-click installations. The ultimate MCP Directory for developers.",
+  keywords: "Model Context Protocol, MCP Directory, create custom MCP, MCP servers, AI development tools, Claude MCP, VS Code MCP",
   openGraph: {
     title: "MCP Directory - Create Custom Model Context Protocols with AI",
-    description: "Create custom MCP servers in minutes with AI, browse 2,500+ verified Model Context Protocols, deploy one-click installations, and master the workflow with tutorials from the MCP blog.",
+    description: "Create custom MCP servers in minutes with AI, browse 2,500+ verified Model Context Protocols, and deploy one-click installations.",
     type: "website",
     url: "https://mcpdirectory.app",
     siteName: "MCP Directory",
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "MCP Directory - Create Custom Model Context Protocols with AI",
-    description: "Create custom MCP servers in minutes, browse 2,500+ verified Model Context Protocols, and learn from our MCP tutorial library.",
+    description: "Create custom MCP servers in minutes with AI. Browse 2,500+ verified Model Context Protocols.",
     site: "@mcpdirectory",
   },
   alternates: {
