@@ -111,7 +111,7 @@ export default function DocsPage() {
     {quickLinkGroups.map((group) => (
       <Card key={group.title} className="h-full">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg">{group.title}</CardTitle>
+          <CardTitle className="text-lg" data-toc-ignore>{group.title}</CardTitle>
           <CardDescription>{group.description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
