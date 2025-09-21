@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search } from "@/components/docs/Search";
 import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
 import { CATEGORY_LABELS, getDocsByCategory } from "@/content/docs/manifest";
-import { FileText, Terminal, Code, Server, Bug } from "lucide-react";
+import { FileText, Terminal, Code, Server, Bug, ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "MCP Documentation - Complete Guide to Model Context Protocol",
@@ -35,6 +35,55 @@ const categoryIcons = {
   testing: Bug,
 };
 
+
+const quickLinkGroups = [
+  {
+    title: 'Deployment & Ops',
+    description: 'Deploy MCP servers across containers, serverless, and CI/CD tooling.',
+    links: [
+      { title: 'Running MCP Servers in Docker', href: '/docs/docker-deployment' },
+      { title: 'Deploying MCP Servers on Kubernetes Clusters', href: '/docs/kubernetes' },
+      { title: 'Serverless MCP Deployment on Vercel', href: '/docs/vercel-deployment' },
+      { title: 'Deploying MCPs on AWS Lambda', href: '/docs/aws-lambda' },
+      { title: 'Automating MCP Workflows with GitHub Actions', href: '/docs/github-actions' },
+      { title: 'Connecting to Remote MCP Servers', href: '/docs/remote-mcp' },
+    ],
+  },
+  {
+    title: 'Testing & Debugging',
+    description: 'Troubleshoot MCP connectivity, auth, and runtime reliability.',
+    links: [
+      { title: 'Debugging & Testing MCPs with MCP Inspector', href: '/docs/testing-mcp' },
+      { title: '10 Most Common MCP Setup Errors (and Fixes)', href: '/docs/common-errors' },
+      { title: 'Fixing MCP Server Connection Refused', href: '/docs/connection-refused' },
+      { title: 'MCP Authentication & API Key Fixes', href: '/docs/authentication-errors' },
+      { title: 'Fixing MCP Deployment Issues in Docker/Vercel', href: '/docs/deployment-errors' },
+      { title: "Why MCPs Don't Show Up in Claude Desktop", href: '/docs/mcp-not-showing' },
+    ],
+  },
+  {
+    title: 'CLI Tools',
+    description: 'Spin up MCP tooling inside command-line workflows.',
+    links: [
+      { title: 'How to Install and Use MCPs with Codex CLI', href: '/docs/codex-cli-installation' },
+      { title: 'Getting Started with MCPs in Gemini CLI', href: '/docs/gemini-cli-setup' },
+      { title: 'Running MCPs with Claude CLI (Examples + Troubleshooting)', href: '/docs/claude-cli' },
+      { title: 'Using MCPs in Terminal (Universal CLI Setup)', href: '/docs/terminal-cli' },
+    ],
+  },
+  {
+    title: 'IDEs',
+    description: 'Integrate MCP servers with AI-powered editors.',
+    links: [
+      { title: 'How to Install and Use MCPs in Cursor IDE', href: '/docs/cursor-setup' },
+      { title: 'Running MCPs in Windsurf IDE', href: '/docs/windsurf-setup' },
+      { title: 'MCPs in VSCode - Complete Setup Guide', href: '/docs/vscode-integration' },
+      { title: 'MCP Setup in JetBrains IDEs (PyCharm, IntelliJ, WebStorm)', href: '/docs/jetbrains-integration' },
+      { title: 'Connecting MCPs in Claude Desktop (Mac & Windows)', href: '/docs/claude-desktop' },
+    ],
+  },
+];
+
 export default function DocsPage() {
   const docsByCategory = getDocsByCategory();
 
@@ -53,6 +102,34 @@ export default function DocsPage() {
           <Search />
         </div>
       </div>
+
+
+<section className="mb-10">
+  <h2 className="text-2xl font-semibold mb-3">Quick Links</h2>
+  <p className="text-muted-foreground mb-5 max-w-3xl">Jump straight into our most requested Model Context Protocol guides across deployment, debugging, CLI tooling, and IDE integrations.</p>
+  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    {quickLinkGroups.map((group) => (
+      <Card key={group.title} className="h-full">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">{group.title}</CardTitle>
+          <CardDescription>{group.description}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <ul className="space-y-2 text-sm">
+            {group.links.map((link) => (
+              <li key={link.href}>
+                <Link href={link.href} className="inline-flex items-center gap-1 text-primary hover:underline">
+                  {link.title}
+                  <ArrowRight className="h-3 w-3" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+</section>
 
       <div className="grid gap-8">
         {Object.entries(docsByCategory).map(([category, docs]) => {
