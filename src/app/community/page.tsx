@@ -17,6 +17,10 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "MCP Community - Join 12,000+ Developers",
     description: "Join the thriving MCP community with 12,000+ developers sharing knowledge and building together",
+    site: "@mcpdirectory",
+  },
+  alternates: {
+    canonical: "https://mcpdirectory.app/community",
   },
 };
 

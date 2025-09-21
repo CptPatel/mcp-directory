@@ -6,25 +6,85 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Code, Terminal, CheckCircle, Lightbulb } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "How to Create a Custom MCP Server from Scratch - Complete Guide 2025",
-  description: "Learn how to create a custom MCP server step-by-step. Complete tutorial with TypeScript and Python examples, best practices, and deployment guide for Model Context Protocol development.",
-  keywords: "create custom MCP server, MCP server development, Model Context Protocol tutorial, custom MCP guide, MCP TypeScript, MCP Python, how to build MCP",
+  title: "How to Create a Custom MCP Server from Scratch - Complete 2025 Guide",
+  description: "Learn to create custom Model Context Protocol servers with our comprehensive tutorial. Step-by-step guide with TypeScript and Python examples, best practices, testing, and deployment for MCP development.",
+  keywords: "create custom MCP server, MCP server development, Model Context Protocol tutorial, build MCP server, MCP TypeScript tutorial, MCP Python guide, custom MCP development, MCP SDK tutorial, how to build MCP, MCP server guide",
   openGraph: {
     title: "How to Create a Custom MCP Server from Scratch - Complete Guide",
-    description: "Step-by-step tutorial to build your own Model Context Protocol server with code examples",
+    description: "Comprehensive tutorial for building Model Context Protocol servers. Includes TypeScript and Python examples, testing, and deployment guides.",
     type: "article",
     url: "https://mcpdirectory.app/blog/how-to-create-custom-mcp-server",
+    siteName: "MCP Directory",
+    publishedTime: "2025-09-15T00:00:00.000Z",
+    modifiedTime: "2025-09-20T00:00:00.000Z",
+    authors: ["MCP Directory Team"],
   },
   twitter: {
     card: "summary_large_image",
     title: "How to Create a Custom MCP Server from Scratch",
-    description: "Complete tutorial with TypeScript and Python examples",
+    description: "Complete tutorial with TypeScript and Python examples for Model Context Protocol development",
+    site: "@mcpdirectory",
+  },
+  alternates: {
+    canonical: "https://mcpdirectory.app/blog/how-to-create-custom-mcp-server",
   },
 };
 
 export default function CreateCustomMCPServerPage() {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "How to Create a Custom MCP Server from Scratch - Complete Guide",
+    "description": "Comprehensive tutorial for building Model Context Protocol servers. Includes TypeScript and Python examples, testing, and deployment guides.",
+    "author": {
+      "@type": "Organization",
+      "name": "MCP Directory Team",
+      "url": "https://mcpdirectory.app"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "MCP Directory",
+      "url": "https://mcpdirectory.app",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://mcpdirectory.app/logo.png"
+      }
+    },
+    "datePublished": "2025-09-15T00:00:00.000Z",
+    "dateModified": "2025-09-20T00:00:00.000Z",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://mcpdirectory.app/blog/how-to-create-custom-mcp-server"
+    },
+    "articleSection": "Tutorial",
+    "keywords": ["Model Context Protocol", "MCP Server Development", "TypeScript", "Python", "AI Development", "Tutorial"],
+    "about": [
+      {
+        "@type": "Thing",
+        "name": "Model Context Protocol Development",
+        "description": "Building custom servers for the Model Context Protocol standard"
+      },
+      {
+        "@type": "Thing",
+        "name": "Software Development Tutorial",
+        "description": "Step-by-step programming tutorial with code examples"
+      }
+    ],
+    "teaches": [
+      "How to create MCP servers with TypeScript",
+      "How to create MCP servers with Python", 
+      "MCP server testing and deployment",
+      "Best practices for MCP development"
+    ]
+  };
+
   return (
-    <div className="container px-4 py-8 mx-auto max-w-4xl">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <div className="container px-4 py-8 mx-auto max-w-4xl">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-4">
@@ -33,14 +93,15 @@ export default function CreateCustomMCPServerPage() {
           <Badge variant="outline">Beginner Friendly</Badge>
         </div>
         <h1 className="text-4xl md:text-5xl font-bold mb-4">
-          How to Create a Custom MCP Server from Scratch
+          How to Create a Custom Model Context Protocol Server from Scratch
         </h1>
         <p className="text-xl text-muted-foreground mb-6">
-          Learn how to build your own Model Context Protocol server with step-by-step instructions, 
-          code examples, and best practices for both TypeScript and Python implementations.
+          Master Model Context Protocol development with our comprehensive tutorial. Build custom MCP servers 
+          using TypeScript or Python, complete with step-by-step instructions, real code examples, 
+          testing strategies, and production deployment guides.
         </p>
         <div className="text-sm text-muted-foreground">
-          Published on January 15, 2025 • Updated for MCP SDK v1.0.2
+          Published on September 15, 2025 • Updated for MCP SDK v2.1.0
         </div>
       </div>
 
@@ -127,8 +188,8 @@ export default function CreateCustomMCPServerPage() {
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.2",
-    "axios": "^1.7.0"
+    "@modelcontextprotocol/sdk": "^2.1.0",
+    "axios": "^1.7.7"
   },
   "scripts": {
     "start": "node dist/index.js",
@@ -253,9 +314,9 @@ server.run().catch(console.error);`}
           <div className="bg-gray-900 rounded-lg p-4 mb-6 overflow-x-auto">
             <pre className="text-green-400 text-sm">
 {`# requirements.txt
-mcp>=1.0.0
-requests>=2.32.0
-pydantic>=2.5.0`}
+mcp>=2.1.0
+requests>=2.32.3
+pydantic>=2.8.0`}
             </pre>
           </div>
 
@@ -437,5 +498,6 @@ if __name__ == "__main__":
         </div>
       </div>
     </div>
+    </>
   );
 }

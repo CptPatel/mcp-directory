@@ -6,6 +6,9 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Dashboard - MCP Directory",
   description: "Manage your MCPs, packages, and AI creations in your personal dashboard.",
+  alternates: {
+    canonical: "https://mcpdirectory.app/dashboard",
+  },
 };
 
 export default async function DashboardPage() {
