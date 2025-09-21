@@ -31,6 +31,7 @@ export function AnimatedNavBar({ className }: AnimatedNavBarProps) {
     { name: "Browse", url: "/browse", icon: Search },
     { name: "Create", url: "/create", icon: Sparkles },
     { name: "Packages", url: "/packages", icon: Package },
+    { name: "Blog", url: "/blog", icon: BookOpen },
     { name: "Docs", url: "/docs", icon: BookOpen },
     { name: "Community", url: "/community", icon: Users },
   ];

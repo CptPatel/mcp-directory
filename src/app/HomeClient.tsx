@@ -55,7 +55,7 @@ export default function HomeClient() {
           </div>
           
           <h1 className={`text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 transition-all duration-1000 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <span className="inline-block">Setup Multiple MCPs in</span>{" "}
+            <span className="inline-block">Create Custom MCPs in</span>{" "}
             <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent animate-gradient-x bg-300% inline-block">
               Minutes
             </span>
@@ -63,9 +63,9 @@ export default function HomeClient() {
           </h1>
           
           <p className={`text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed transition-all duration-1000 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            Discover, bundle, and deploy Model Context Protocol configurations with our{" "}
-            <span className="text-foreground font-semibold">AI-powered creation tools</span> and one-click installation process. 
-            Join thousands of AI enthusiasts building better workflows.
+            Create custom MCP servers, discover the best MCPs, and deploy Model Context Protocol configurations with our{" "}
+            <span className="text-foreground font-semibold">AI-powered MCP creator</span> and one-click installation. 
+            The ultimate MCP Directory for developers building AI-powered workflows.
           </p>
           <div className={`flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center transition-all duration-1000 delay-600 relative z-20 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <SignedIn>

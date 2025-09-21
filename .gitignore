@@ -31,3 +31,9 @@ servers/supabase-mcp-official/
 # Optional local MCP config overrides (keep examples committed)
 mcp-configs/local.*.json
 
+# Development files
+TODO.md
+NOTES.md
+*.todo
+*.notes
+
