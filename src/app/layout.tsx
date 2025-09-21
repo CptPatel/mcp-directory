@@ -3,6 +3,7 @@ import { WebVitals } from "@/components/web-vitals";
 
 import { AnimatedNavBar } from "@/components/ui/animated-navbar";
 import { Toaster } from "@/components/ui/toaster";
+import Footer from "@/components/Footer";
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -129,11 +130,12 @@ export default function RootLayout({
         </head>
         <body className={inter.className}>
           <Providers>
-            <div className="min-h-screen bg-background">
+            <div className="min-h-screen bg-background flex flex-col">
               <AnimatedNavBar />
-              <div className="pt-16 md:pt-20">
+              <main className="flex-1 pt-16 md:pt-20">
                 {children}
-              </div>
+              </main>
+              <Footer />
             </div>
             <Toaster />
           </Providers>
