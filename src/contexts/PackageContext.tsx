@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
+import { trackMCPAdd, trackPackageSave, trackInstallScript } from '@/lib/analytics';
 
 export interface MCP {
   id: number;
@@ -88,6 +89,9 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       mcps: [...prev.mcps.filter(m => m.id !== mcp.id), mcp],
       lastModified: new Date().toISOString()
     }));
+    
+    // Track the event
+    trackMCPAdd(mcp.name);
   };
 
   const removeMCPFromPackage = (mcpId: number) => {
@@ -141,6 +145,9 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       lastModified: new Date().toISOString()
     };
     setSavedPackages(prev => [...prev, packageToSave]);
+    
+    // Track the event
+    trackPackageSave(packageToSave.name);
   };
 
   const loadPackage = async (packageId: string) => {
@@ -202,6 +209,8 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const generateInstallScript = () => {
+    // Track the event
+    trackInstallScript('bash');
     const mcpCommands = currentPackage.mcps.map(mcp => {
       if (mcp.installCommand && mcp.installCommand.trim().length > 0) {
         return `# Install ${mcp.name}\n${mcp.installCommand}`;
@@ -241,6 +250,8 @@ echo "All ${currentPackage.mcps.length} MCPs have been installed successfully."
   };
 
   const generateInstallScriptPS = () => {
+    // Track the event
+    trackInstallScript('powershell');
     const mcpCommands = currentPackage.mcps.map(mcp => {
       const name = mcp.name;
       if (mcp.installCommand && mcp.installCommand.trim().length > 0) {

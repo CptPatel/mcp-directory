@@ -1,5 +1,6 @@
 import { TempoInit } from "@/components/tempo-init";
 import { WebVitals } from "@/components/web-vitals";
+import { GoogleAnalytics } from "@/components/google-analytics";
 import { AnimatedNavBar } from "@/components/ui/animated-navbar";
 import { Toaster } from "@/components/ui/toaster";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -43,6 +44,9 @@ export const metadata: Metadata = {
   },
   verification: {
     google: "your-google-verification-code",
+  },
+  other: {
+    'google-analytics': 'G-TQC2G4XLXH',
   },
 };
 
@@ -112,6 +116,7 @@ export default function RootLayout({
           </Providers>
           <TempoInit />
           <WebVitals />
+          <GoogleAnalytics />
           <SpeedInsights />
           <Analytics />
         </body>
