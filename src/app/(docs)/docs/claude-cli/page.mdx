@@ -1,0 +1,348 @@
+---
+title: "Running MCPs with Claude CLI (Examples + Troubleshooting)"
+description: "Learn to run MCP servers with Claude CLI, including practical examples and common troubleshooting solutions."
+slug: "claude-cli"
+category: "cli"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "How do I start multiple MCP servers with Claude CLI?"
+    a: "Use separate terminal sessions or process managers like PM2 to run multiple servers on different ports."
+  - q: "What's the difference between local and remote MCP servers?"
+    a: "Local servers run on your machine, while remote servers are hosted elsewhere and accessed via network protocols."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="claude-cli" />
+
+# Running MCPs with Claude CLI (Examples + Troubleshooting)
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I start multiple MCP servers with Claude CLI?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Use separate terminal sessions or process managers like PM2 to run multiple servers on different ports." }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the difference between local and remote MCP servers?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Local servers run on your machine, while remote servers are hosted elsewhere and accessed via network protocols." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+Claude CLI provides a powerful command-line interface for interacting with MCP servers. This guide covers practical examples and troubleshooting for common scenarios.
+
+## Installation
+
+### Install Claude CLI
+
+```bash
+# Using npm
+npm install -g @anthropic-ai/claude-cli
+
+# Using pip
+pip install claude-cli
+
+# Using homebrew (macOS)
+brew install claude-cli
+```
+
+### Verify Installation
+
+```bash
+claude --version
+```
+
+## Basic Usage
+
+### Starting an MCP Server
+
+Start a basic filesystem MCP server:
+
+```bash
+# Start filesystem server
+claude mcp start filesystem --port 3000
+
+# Start with specific directory
+claude mcp start filesystem --port 3000 --root /path/to/directory
+```
+
+### Connecting to MCP Server
+
+Connect Claude CLI to your running MCP server:
+
+```bash
+# Connect to local server
+claude connect --mcp-server http://localhost:3000
+
+# Connect with authentication
+claude connect --mcp-server http://localhost:3000 --auth-token your_token
+```
+
+## Practical Examples
+
+### Example 1: File Operations
+
+Start a filesystem server and perform file operations:
+
+```bash
+# Terminal 1: Start MCP server
+claude mcp start filesystem --port 3000 --root ~/projects
+
+# Terminal 2: Connect and use
+claude connect --mcp-server http://localhost:3000
+> list files in current directory
+> create a new file called "test.txt" with content "Hello MCP"
+> read the contents of test.txt
+```
+
+### Example 2: GitHub Integration
+
+Set up GitHub MCP server:
+
+```bash
+# Set environment variable
+export GITHUB_PERSONAL_ACCESS_TOKEN="your_token_here"
+
+# Start GitHub MCP server
+claude mcp start github --port 3001
+
+# Connect and use
+claude connect --mcp-server http://localhost:3001
+> show me recent issues in my repository
+> create a new issue titled "Bug fix needed"
+```
+
+### Example 3: Database Operations
+
+Start a PostgreSQL MCP server:
+
+```bash
+# Set database connection
+export DATABASE_URL="postgresql://user:password@localhost:5432/mydb"
+
+# Start database MCP server
+claude mcp start postgresql --port 3002
+
+# Connect and query
+claude connect --mcp-server http://localhost:3002
+> show me all tables in the database
+> select * from users limit 10
+```
+
+## Advanced Configuration
+
+### Multiple Servers
+
+Run multiple MCP servers simultaneously:
+
+```bash
+# Start multiple servers
+claude mcp start filesystem --port 3000 --name fs-server &
+claude mcp start github --port 3001 --name github-server &
+claude mcp start postgresql --port 3002 --name db-server &
+
+# Connect to all servers
+claude connect --mcp-servers http://localhost:3000,http://localhost:3001,http://localhost:3002
+```
+
+### Configuration File
+
+Create a configuration file for easier management:
+
+```json
+// ~/.claude/mcp-config.json
+{
+  "servers": [
+    {
+      "name": "filesystem",
+      "port": 3000,
+      "type": "filesystem",
+      "config": {
+        "root": "~/projects"
+      }
+    },
+    {
+      "name": "github",
+      "port": 3001,
+      "type": "github",
+      "config": {
+        "token": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    }
+  ]
+}
+```
+
+Use the configuration:
+
+```bash
+claude mcp start --config ~/.claude/mcp-config.json
+```
+
+## Process Management
+
+### Using PM2
+
+For production deployments, use PM2 to manage MCP servers:
+
+```bash
+# Install PM2
+npm install -g pm2
+
+# Create ecosystem file
+cat > ecosystem.config.js << EOF
+module.exports = {
+  apps: [
+    {
+      name: 'mcp-filesystem',
+      script: 'claude',
+      args: 'mcp start filesystem --port 3000',
+      env: {
+        NODE_ENV: 'production'
+      }
+    },
+    {
+      name: 'mcp-github',
+      script: 'claude',
+      args: 'mcp start github --port 3001',
+      env: {
+        GITHUB_PERSONAL_ACCESS_TOKEN: 'your_token'
+      }
+    }
+  ]
+};
+EOF
+
+# Start all servers
+pm2 start ecosystem.config.js
+
+# Monitor servers
+pm2 status
+pm2 logs
+```
+
+## Troubleshooting
+
+### Server Won't Start
+
+If your MCP server fails to start:
+
+```bash
+# Check if port is already in use
+lsof -i :3000
+
+# Kill process using the port
+kill -9 $(lsof -t -i:3000)
+
+# Start with verbose logging
+claude mcp start filesystem --port 3000 --verbose
+```
+
+### Connection Issues
+
+For connection problems:
+
+```bash
+# Test server connectivity
+curl http://localhost:3000/health
+
+# Check server logs
+claude mcp logs filesystem
+
+# Verify server status
+claude mcp status
+```
+
+### Authentication Errors
+
+When facing auth issues:
+
+```bash
+# Verify token is set
+echo $GITHUB_PERSONAL_ACCESS_TOKEN
+
+# Test token validity
+curl -H "Authorization: token $GITHUB_PERSONAL_ACCESS_TOKEN" https://api.github.com/user
+
+# Regenerate token if needed
+# Go to GitHub Settings > Developer settings > Personal access tokens
+```
+
+### Performance Issues
+
+For slow performance:
+
+```bash
+# Monitor server resources
+claude mcp stats filesystem
+
+# Increase memory limit
+claude mcp start filesystem --port 3000 --memory 2048
+
+# Enable caching
+claude mcp start filesystem --port 3000 --cache-enabled
+```
+
+## Common CLI Commands
+
+### Server Management
+
+```bash
+# List running servers
+claude mcp list
+
+# Stop a server
+claude mcp stop filesystem
+
+# Restart a server
+claude mcp restart filesystem
+
+# View server logs
+claude mcp logs filesystem --tail 100
+
+# Check server health
+claude mcp health filesystem
+```
+
+### Debugging
+
+```bash
+# Enable debug mode
+claude --debug connect --mcp-server http://localhost:3000
+
+# Trace MCP protocol messages
+claude mcp trace filesystem
+
+# Export server configuration
+claude mcp export filesystem > filesystem-config.json
+```
+
+## FAQ
+
+### How do I start multiple MCP servers with Claude CLI?
+
+You can run multiple servers by using different ports and either separate terminal sessions or process managers like PM2. Each server needs its own port to avoid conflicts.
+
+### What's the difference between local and remote MCP servers?
+
+Local servers run on your machine and are accessed via localhost, while remote servers are hosted elsewhere and accessed via network protocols. Remote servers require proper authentication and network configuration.
+
+### How do I secure my MCP servers?
+
+Use authentication tokens, run servers on non-standard ports, implement rate limiting, and consider using HTTPS for remote connections. Never expose servers directly to the internet without proper security measures.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [claude-cli/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/claude-cli/page.mdx)

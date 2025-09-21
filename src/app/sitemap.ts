@@ -1,4 +1,5 @@
-import { MetadataRoute } from 'next'
+import type { MetadataRoute } from 'next'
+import { DOCS } from '@/content/docs/manifest'
  
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://mcpdirectory.app'
@@ -39,8 +40,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${baseUrl}/docs`,
       lastModified: currentDate,
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
+      changeFrequency: 'daily' as const,
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/community`,
@@ -72,5 +73,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ]
 
-  return [...corePages, ...blogPages]
+  // Documentation pages
+  const docsPages: MetadataRoute.Sitemap = DOCS.map(doc => ({
+    url: `${baseUrl}${doc.path}`,
+    lastModified: new Date(doc.updatedAt),
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }))
+
+  return [...corePages, ...blogPages, ...docsPages]
 }

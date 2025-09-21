@@ -1,0 +1,274 @@
+---
+title: "Debugging & Testing MCPs with MCP Inspector"
+description: "Debug and test MCP servers using MCP Inspector and other debugging tools for reliable development."
+slug: "testing-mcp"
+category: "testing"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "What is MCP Inspector and how do I use it?"
+    a: "MCP Inspector is a debugging tool that allows you to test MCP server functionality, inspect messages, and validate protocol compliance."
+  - q: "How do I test MCP servers locally before deployment?"
+    a: "Use MCP Inspector, unit tests, and local client connections to thoroughly test your MCP server before deploying to production."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="testing-mcp" />
+
+# Debugging & Testing MCPs with MCP Inspector
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is MCP Inspector and how do I use it?",
+      "acceptedAnswer": { "@type": "Answer", "text": "MCP Inspector is a debugging tool that allows you to test MCP server functionality, inspect messages, and validate protocol compliance." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I test MCP servers locally before deployment?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Use MCP Inspector, unit tests, and local client connections to thoroughly test your MCP server before deploying to production." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+Testing and debugging MCP servers is crucial for reliable AI integrations. This guide covers tools and techniques for comprehensive MCP testing.
+
+## MCP Inspector
+
+### Installation
+
+```bash
+# Install MCP Inspector
+npm install -g @modelcontextprotocol/inspector
+
+# Or use npx
+npx @modelcontextprotocol/inspector
+```
+
+### Basic Usage
+
+```bash
+# Start inspector with your MCP server
+mcp-inspector --server "node dist/server.js"
+
+# With specific port
+mcp-inspector --server "node dist/server.js" --port 3001
+
+# With environment variables
+GITHUB_TOKEN=your_token mcp-inspector --server "mcp-server-github"
+```
+
+### Web Interface
+
+1. Start MCP Inspector
+2. Open browser to `http://localhost:3000`
+3. Test server functionality interactively
+
+## Testing Strategies
+
+### Unit Testing
+
+```javascript
+// test/server.test.js
+import { MCPServer } from '@modelcontextprotocol/sdk';
+import { expect } from 'chai';
+
+describe('MCP Server', () => {
+  let server;
+
+  beforeEach(() => {
+    server = new MCPServer({
+      name: 'test-server',
+      version: '1.0.0'
+    });
+  });
+
+  it('should list available tools', async () => {
+    const tools = await server.listTools();
+    expect(tools).to.be.an('array');
+    expect(tools.length).to.be.greaterThan(0);
+  });
+
+  it('should execute tool correctly', async () => {
+    const result = await server.callTool('test-tool', {
+      param: 'value'
+    });
+    expect(result).to.have.property('content');
+  });
+});
+```
+
+### Integration Testing
+
+```javascript
+// test/integration.test.js
+import { MCPClient } from '@modelcontextprotocol/client';
+
+describe('MCP Integration', () => {
+  let client;
+
+  before(async () => {
+    client = new MCPClient();
+    await client.connect('http://localhost:3000');
+  });
+
+  it('should connect to server', async () => {
+    const info = await client.getServerInfo();
+    expect(info.name).to.equal('test-server');
+  });
+
+  it('should handle tool calls', async () => {
+    const result = await client.callTool('filesystem', 'list', {
+      path: '/tmp'
+    });
+    expect(result).to.have.property('files');
+  });
+});
+```
+
+## Debugging Techniques
+
+### Logging
+
+```javascript
+// Enable debug logging
+import debug from 'debug';
+const log = debug('mcp:server');
+
+class MCPServer {
+  async handleRequest(request) {
+    log('Received request:', request);
+    
+    try {
+      const result = await this.processRequest(request);
+      log('Request processed successfully:', result);
+      return result;
+    } catch (error) {
+      log('Request failed:', error);
+      throw error;
+    }
+  }
+}
+```
+
+### Protocol Validation
+
+```javascript
+// Validate MCP protocol compliance
+import { validateMCPMessage } from '@modelcontextprotocol/validator';
+
+function validateRequest(request) {
+  const validation = validateMCPMessage(request);
+  if (!validation.valid) {
+    throw new Error(`Invalid MCP message: ${validation.errors.join(', ')}`);
+  }
+}
+```
+
+### Performance Testing
+
+```javascript
+// Load testing with artillery
+// artillery.yml
+config:
+  target: 'http://localhost:3000'
+  phases:
+    - duration: 60
+      arrivalRate: 10
+
+scenarios:
+  - name: "Tool calls"
+    requests:
+      - post:
+          url: "/mcp/call"
+          json:
+            tool: "filesystem"
+            action: "list"
+            params: { path: "/" }
+```
+
+## Common Issues
+
+### Server Not Responding
+
+```bash
+# Check server status
+curl -f http://localhost:3000/health
+
+# Check process
+ps aux | grep mcp
+
+# Check logs
+tail -f /var/log/mcp/server.log
+```
+
+### Memory Leaks
+
+```javascript
+// Monitor memory usage
+setInterval(() => {
+  const usage = process.memoryUsage();
+  console.log('Memory usage:', {
+    rss: Math.round(usage.rss / 1024 / 1024) + 'MB',
+    heapUsed: Math.round(usage.heapUsed / 1024 / 1024) + 'MB',
+    heapTotal: Math.round(usage.heapTotal / 1024 / 1024) + 'MB'
+  });
+}, 10000);
+```
+
+## Automated Testing
+
+### CI/CD Pipeline
+
+```yaml
+# .github/workflows/test.yml
+name: Test MCP Server
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - run: npm install
+      - run: npm run build
+      - run: npm test
+      
+      - name: Start MCP server
+        run: npm start &
+        
+      - name: Wait for server
+        run: sleep 5
+        
+      - name: Test with MCP Inspector
+        run: mcp-inspector --test --server "http://localhost:3000"
+```
+
+## FAQ
+
+### What is MCP Inspector and how do I use it?
+
+MCP Inspector is a debugging tool that provides a web interface for testing MCP server functionality, inspecting protocol messages, and validating compliance with the MCP specification.
+
+### How do I test MCP servers locally before deployment?
+
+Use a combination of MCP Inspector for interactive testing, unit tests for individual components, integration tests for end-to-end functionality, and load tests for performance validation.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [testing-mcp/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/testing-mcp/page.mdx)

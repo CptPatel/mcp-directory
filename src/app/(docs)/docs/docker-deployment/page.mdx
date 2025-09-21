@@ -1,0 +1,501 @@
+---
+title: "Running MCP Servers in Docker"
+description: "Deploy and manage MCP servers using Docker containers with security best practices and examples."
+slug: "docker-deployment"
+category: "deploy"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "How do I persist MCP server data in Docker?"
+    a: "Use Docker volumes to mount persistent storage for your MCP server data and configuration files."
+  - q: "Can I run multiple MCP servers in one Docker container?"
+    a: "While possible, it's better practice to run one MCP server per container for better isolation and scaling."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="docker-deployment" />
+
+# Running MCP Servers in Docker
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I persist MCP server data in Docker?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Use Docker volumes to mount persistent storage for your MCP server data and configuration files." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I run multiple MCP servers in one Docker container?",
+      "acceptedAnswer": { "@type": "Answer", "text": "While possible, it's better practice to run one MCP server per container for better isolation and scaling." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+Docker provides an excellent way to deploy and manage MCP servers with consistent environments, easy scaling, and improved security through containerization.
+
+## Basic Dockerfile
+
+### Node.js MCP Server
+
+Create a Dockerfile for a Node.js-based MCP server:
+
+```dockerfile
+FROM node:18-alpine
+
+# Create app directory
+WORKDIR /usr/src/app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy source code
+COPY . .
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S mcp -u 1001
+
+# Change ownership
+RUN chown -R mcp:nodejs /usr/src/app
+USER mcp
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
+
+# Start the server
+CMD ["node", "dist/index.js"]
+```
+
+### Python MCP Server
+
+For Python-based MCP servers:
+
+```dockerfile
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy source code
+COPY . .
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash mcp
+RUN chown -R mcp:mcp /app
+USER mcp
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
+
+# Start the server
+CMD ["python", "-m", "mcp_server"]
+```
+
+## Docker Compose
+
+### Single Server Setup
+
+Create a `docker-compose.yml` for a single MCP server:
+
+```yaml
+version: '3.8'
+
+services:
+  mcp-filesystem:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - MCP_SERVER_NAME=filesystem
+    volumes:
+      - ./data:/app/data:ro
+      - ./config:/app/config:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mcp-network
+
+networks:
+  mcp-network:
+    driver: bridge
+```
+
+### Multiple Servers Setup
+
+For multiple MCP servers:
+
+```yaml
+version: '3.8'
+
+services:
+  mcp-filesystem:
+    build: ./servers/filesystem
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - MCP_SERVER_NAME=filesystem
+    volumes:
+      - ./data/filesystem:/app/data:ro
+    restart: unless-stopped
+    networks:
+      - mcp-network
+
+  mcp-github:
+    build: ./servers/github
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - MCP_SERVER_NAME=github
+      - GITHUB_PERSONAL_ACCESS_TOKEN=${GITHUB_TOKEN}
+    restart: unless-stopped
+    networks:
+      - mcp-network
+
+  mcp-database:
+    build: ./servers/database
+    ports:
+      - "3002:3000"
+    environment:
+      - NODE_ENV=production
+      - MCP_SERVER_NAME=database
+      - DATABASE_URL=${DATABASE_URL}
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - mcp-network
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=mcpdb
+      - POSTGRES_USER=mcp
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mcp-network
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - mcp-filesystem
+      - mcp-github
+      - mcp-database
+    restart: unless-stopped
+    networks:
+      - mcp-network
+
+volumes:
+  postgres_data:
+
+networks:
+  mcp-network:
+    driver: bridge
+```
+
+## Security Best Practices
+
+### Environment Variables
+
+Create a `.env` file for sensitive data:
+
+```bash
+# .env
+GITHUB_TOKEN=your_github_token_here
+DATABASE_URL=postgresql://mcp:password@postgres:5432/mcpdb
+POSTGRES_PASSWORD=secure_password_here
+JWT_SECRET=your_jwt_secret_here
+```
+
+### Nginx Configuration
+
+Create `nginx.conf` for reverse proxy:
+
+```nginx
+events {
+    worker_connections 1024;
+}
+
+http {
+    upstream mcp-filesystem {
+        server mcp-filesystem:3000;
+    }
+    
+    upstream mcp-github {
+        server mcp-github:3000;
+    }
+    
+    upstream mcp-database {
+        server mcp-database:3000;
+    }
+
+    server {
+        listen 80;
+        server_name your-domain.com;
+        
+        # Redirect HTTP to HTTPS
+        return 301 https://$server_name$request_uri;
+    }
+
+    server {
+        listen 443 ssl http2;
+        server_name your-domain.com;
+        
+        ssl_certificate /etc/nginx/ssl/cert.pem;
+        ssl_certificate_key /etc/nginx/ssl/key.pem;
+        
+        # Security headers
+        add_header X-Frame-Options DENY;
+        add_header X-Content-Type-Options nosniff;
+        add_header X-XSS-Protection "1; mode=block";
+        
+        location /mcp/filesystem/ {
+            proxy_pass http://mcp-filesystem/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+        
+        location /mcp/github/ {
+            proxy_pass http://mcp-github/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+        
+        location /mcp/database/ {
+            proxy_pass http://mcp-database/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+    }
+}
+```
+
+## Deployment Commands
+
+### Build and Run
+
+```bash
+# Build the image
+docker build -t mcp-server .
+
+# Run single container
+docker run -d \
+  --name mcp-filesystem \
+  -p 3000:3000 \
+  -e NODE_ENV=production \
+  -v $(pwd)/data:/app/data:ro \
+  mcp-server
+
+# Using Docker Compose
+docker-compose up -d
+
+# View logs
+docker-compose logs -f mcp-filesystem
+
+# Scale services
+docker-compose up -d --scale mcp-filesystem=3
+```
+
+### Management Commands
+
+```bash
+# Stop all services
+docker-compose down
+
+# Restart a service
+docker-compose restart mcp-filesystem
+
+# Update and restart
+docker-compose pull
+docker-compose up -d
+
+# Clean up
+docker-compose down -v
+docker system prune -a
+```
+
+## Monitoring and Logging
+
+### Health Checks
+
+Implement health check endpoints in your MCP server:
+
+```javascript
+// health.js
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    version: process.env.npm_package_version
+  });
+});
+```
+
+### Logging Configuration
+
+Configure structured logging:
+
+```yaml
+# docker-compose.yml
+services:
+  mcp-filesystem:
+    # ... other config
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+```
+
+### Monitoring with Prometheus
+
+Add monitoring to your setup:
+
+```yaml
+# docker-compose.yml
+services:
+  # ... existing services
+  
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - mcp-network
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - mcp-network
+
+volumes:
+  grafana_data:
+```
+
+## Troubleshooting
+
+### Container Won't Start
+
+Check container logs:
+
+```bash
+# View logs
+docker logs mcp-filesystem
+
+# Follow logs in real-time
+docker logs -f mcp-filesystem
+
+# Check container status
+docker ps -a
+```
+
+### Network Issues
+
+Debug network connectivity:
+
+```bash
+# Test container networking
+docker exec mcp-filesystem ping mcp-github
+
+# Check port bindings
+docker port mcp-filesystem
+
+# Inspect network
+docker network inspect mcp-network
+```
+
+### Performance Issues
+
+Monitor resource usage:
+
+```bash
+# Check resource usage
+docker stats
+
+# Limit resources
+docker run -d \
+  --name mcp-filesystem \
+  --memory="512m" \
+  --cpus="0.5" \
+  mcp-server
+```
+
+## FAQ
+
+### How do I persist MCP server data in Docker?
+
+Use Docker volumes to mount persistent storage. Map your host directories to container paths where your MCP server stores data and configuration files.
+
+### Can I run multiple MCP servers in one Docker container?
+
+While technically possible, it's better practice to run one MCP server per container. This provides better isolation, easier scaling, and simpler debugging.
+
+### How do I secure my Dockerized MCP servers?
+
+Use non-root users, implement proper authentication, use environment variables for secrets, set up reverse proxy with SSL, and keep your base images updated.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [docker-deployment/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/docker-deployment/page.mdx)

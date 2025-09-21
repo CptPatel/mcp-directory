@@ -1,0 +1,170 @@
+---
+title: "MCPs in VSCode – Complete Setup Guide"
+description: "Comprehensive guide for integrating MCP servers with Visual Studio Code for enhanced AI development."
+slug: "vscode-integration"
+category: "ide"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "Does VSCode support MCP servers natively?"
+    a: "VSCode requires extensions or configuration to work with MCP servers. Several community extensions are available."
+  - q: "Can I use multiple MCP servers in VSCode simultaneously?"
+    a: "Yes, you can configure multiple MCP servers to work together in VSCode through proper configuration."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="vscode-integration" />
+
+# MCPs in VSCode – Complete Setup Guide
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Does VSCode support MCP servers natively?",
+      "acceptedAnswer": { "@type": "Answer", "text": "VSCode requires extensions or configuration to work with MCP servers. Several community extensions are available." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use multiple MCP servers in VSCode simultaneously?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes, you can configure multiple MCP servers to work together in VSCode through proper configuration." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+Visual Studio Code can be enhanced with Model Context Protocol servers to provide powerful AI-assisted development capabilities. This guide covers installation, configuration, and usage.
+
+## Requirements
+
+- **Visual Studio Code** (latest version)
+- **Node.js 18+** or **Python 3.8+**
+- **MCP Extension** for VSCode
+- Basic familiarity with VSCode settings
+
+## Installation
+
+### Step 1: Install MCP Extension
+
+1. Open VSCode
+2. Go to Extensions (Ctrl+Shift+X)
+3. Search for "Model Context Protocol"
+4. Install the official MCP extension
+
+### Step 2: Install MCP Servers
+
+```bash
+# Install filesystem MCP server
+npm install -g @modelcontextprotocol/server-filesystem
+
+# Install GitHub MCP server
+npm install -g @modelcontextprotocol/server-github
+```
+
+## Configuration
+
+### VSCode Settings
+
+Add MCP configuration to your VSCode settings:
+
+```json
+{
+  "mcp.servers": {
+    "filesystem": {
+      "command": "mcp-server-filesystem",
+      "args": ["--root", "${workspaceFolder}"],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    "github": {
+      "command": "mcp-server-github",
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_TOKEN}"
+      }
+    }
+  },
+  "mcp.autoStart": true,
+  "mcp.logLevel": "info"
+}
+```
+
+### Workspace Configuration
+
+For project-specific settings, create `.vscode/settings.json`:
+
+```json
+{
+  "mcp.servers": {
+    "project-specific": {
+      "command": "node",
+      "args": ["./scripts/mcp-server.js"],
+      "cwd": "${workspaceFolder}"
+    }
+  }
+}
+```
+
+## Usage
+
+### Command Palette
+
+Access MCP features through the Command Palette (Ctrl+Shift+P):
+
+- `MCP: Start Server`
+- `MCP: Stop Server`
+- `MCP: Restart Server`
+- `MCP: Show Logs`
+
+### AI Assistant Integration
+
+Once configured, MCP tools are available in:
+- GitHub Copilot Chat
+- Code completion suggestions
+- Inline AI assistance
+
+## Common Tasks
+
+### File Operations
+
+```javascript
+// Ask AI to perform file operations
+"Create a new component file with TypeScript interfaces"
+"Refactor this function into separate modules"
+"Generate unit tests for this class"
+```
+
+### Git Integration
+
+```javascript
+// Git operations through MCP
+"Show me recent commits affecting this file"
+"Create a pull request for current changes"
+"Check code review status"
+```
+
+## Troubleshooting
+
+### Extension Not Loading
+
+1. Check VSCode version compatibility
+2. Restart VSCode after installation
+3. Check extension logs in Output panel
+
+### Server Connection Issues
+
+1. Verify server installation
+2. Check environment variables
+3. Review server logs
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [vscode-integration/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/vscode-integration/page.mdx)

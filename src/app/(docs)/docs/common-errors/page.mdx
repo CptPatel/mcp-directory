@@ -1,0 +1,420 @@
+---
+title: "10 Most Common MCP Setup Errors (and Fixes)"
+description: "Troubleshoot the most common MCP setup errors with step-by-step solutions and prevention tips."
+slug: "common-errors"
+category: "testing"
+updatedAt: "2025-09-21T00:00:00.000Z"
+faqs:
+  - q: "Why does my MCP server keep crashing?"
+    a: "Common causes include memory leaks, unhandled exceptions, or resource exhaustion. Check logs and implement proper error handling."
+  - q: "How do I fix 'MCP server not responding' errors?"
+    a: "Check if the server process is running, verify network connectivity, and ensure the server isn't overloaded with requests."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="common-errors" />
+
+# 10 Most Common MCP Setup Errors (and Fixes)
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Why does my MCP server keep crashing?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Common causes include memory leaks, unhandled exceptions, or resource exhaustion. Check logs and implement proper error handling." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I fix 'MCP server not responding' errors?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Check if the server process is running, verify network connectivity, and ensure the server isn't overloaded with requests." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+This guide covers the 10 most common MCP setup errors encountered by developers, along with step-by-step solutions and prevention strategies.
+
+## 1. Connection Refused Error
+
+**Error Message:**
+```
+Error: connect ECONNREFUSED 127.0.0.1:3000
+```
+
+**Cause:** The MCP server is not running or not listening on the expected port.
+
+**Solution:**
+```bash
+# Check if server is running
+ps aux | grep mcp
+
+# Check port usage
+lsof -i :3000
+
+# Start the server
+npm start
+# or
+python -m mcp_server
+```
+
+**Prevention:**
+- Always verify server status before connecting
+- Use process managers like PM2 for production
+- Implement health check endpoints
+
+## 2. Module Not Found Error
+
+**Error Message:**
+```
+Error: Cannot find module '@modelcontextprotocol/sdk'
+```
+
+**Cause:** Missing dependencies or incorrect installation.
+
+**Solution:**
+```bash
+# Install missing dependencies
+npm install @modelcontextprotocol/sdk
+
+# For Python
+pip install mcp
+
+# Clear cache and reinstall
+npm cache clean --force
+npm install
+```
+
+**Prevention:**
+- Always run `npm install` or `pip install -r requirements.txt`
+- Use lock files (package-lock.json, requirements.txt)
+- Verify Node.js/Python versions
+
+## 3. Authentication Failed
+
+**Error Message:**
+```
+Error: Authentication failed - invalid token
+```
+
+**Cause:** Missing, expired, or incorrect API tokens.
+
+**Solution:**
+```bash
+# Set environment variable
+export GITHUB_PERSONAL_ACCESS_TOKEN="your_token_here"
+
+# Verify token
+curl -H "Authorization: token $GITHUB_PERSONAL_ACCESS_TOKEN" https://api.github.com/user
+
+# Generate new token if needed
+# Go to GitHub Settings > Developer settings > Personal access tokens
+```
+
+**Prevention:**
+- Use environment variables for tokens
+- Implement token validation
+- Set up token rotation
+
+## 4. Port Already in Use
+
+**Error Message:**
+```
+Error: listen EADDRINUSE: address already in use :::3000
+```
+
+**Cause:** Another process is using the same port.
+
+**Solution:**
+```bash
+# Find process using the port
+lsof -i :3000
+
+# Kill the process
+kill -9 <PID>
+
+# Or use a different port
+MCP_PORT=3001 npm start
+```
+
+**Prevention:**
+- Use dynamic port allocation
+- Check port availability before starting
+- Use port management tools
+
+## 5. Permission Denied
+
+**Error Message:**
+```
+Error: EACCES: permission denied, open '/path/to/file'
+```
+
+**Cause:** Insufficient file system permissions.
+
+**Solution:**
+```bash
+# Fix file permissions
+chmod 644 /path/to/file
+chmod 755 /path/to/directory
+
+# Change ownership
+chown user:group /path/to/file
+
+# Run with appropriate user
+sudo -u mcp npm start
+```
+
+**Prevention:**
+- Use proper user accounts
+- Set correct file permissions
+- Avoid running as root
+
+## 6. Configuration File Not Found
+
+**Error Message:**
+```
+Error: Configuration file not found: mcp.config.json
+```
+
+**Cause:** Missing or incorrectly located configuration file.
+
+**Solution:**
+```bash
+# Create configuration file
+cat > mcp.config.json << EOF
+{
+  "servers": {
+    "filesystem": {
+      "command": "node",
+      "args": ["dist/index.js"]
+    }
+  }
+}
+EOF
+
+# Specify config path
+MCP_CONFIG_PATH=/path/to/mcp.config.json npm start
+```
+
+**Prevention:**
+- Use absolute paths for config files
+- Validate configuration on startup
+- Provide default configurations
+
+## 7. Memory Limit Exceeded
+
+**Error Message:**
+```
+Error: JavaScript heap out of memory
+```
+
+**Cause:** Insufficient memory allocation or memory leaks.
+
+**Solution:**
+```bash
+# Increase Node.js memory limit
+node --max-old-space-size=4096 dist/index.js
+
+# For Docker
+docker run -m 2g mcp-server
+
+# Monitor memory usage
+node --inspect dist/index.js
+```
+
+**Prevention:**
+- Implement proper memory management
+- Use streaming for large data
+- Monitor memory usage
+
+## 8. SSL/TLS Certificate Error
+
+**Error Message:**
+```
+Error: unable to verify the first certificate
+```
+
+**Cause:** Invalid or self-signed SSL certificates.
+
+**Solution:**
+```bash
+# For development (not recommended for production)
+export NODE_TLS_REJECT_UNAUTHORIZED=0
+
+# Use proper certificates
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365
+
+# Update certificate store
+npm config set cafile /path/to/certificate.pem
+```
+
+**Prevention:**
+- Use valid SSL certificates
+- Keep certificates updated
+- Implement certificate validation
+
+## 9. Timeout Error
+
+**Error Message:**
+```
+Error: Request timeout after 30000ms
+```
+
+**Cause:** Server taking too long to respond or network issues.
+
+**Solution:**
+```bash
+# Increase timeout
+MCP_TIMEOUT=60000 npm start
+
+# Check server performance
+curl -w "@curl-format.txt" -o /dev/null -s http://localhost:3000/health
+
+# Optimize server code
+# - Add caching
+# - Optimize database queries
+# - Use connection pooling
+```
+
+**Prevention:**
+- Implement proper timeout handling
+- Optimize server performance
+- Use caching strategies
+
+## 10. Version Compatibility Error
+
+**Error Message:**
+```
+Error: Unsupported MCP protocol version
+```
+
+**Cause:** Version mismatch between client and server.
+
+**Solution:**
+```bash
+# Check versions
+npm list @modelcontextprotocol/sdk
+
+# Update to compatible versions
+npm update @modelcontextprotocol/sdk
+
+# Use specific version
+npm install @modelcontextprotocol/sdk@^2.0.0
+```
+
+**Prevention:**
+- Pin dependency versions
+- Test compatibility before updates
+- Maintain version compatibility matrix
+
+## Debugging Tools
+
+### Log Analysis
+
+```bash
+# Enable debug logging
+DEBUG=mcp:* npm start
+
+# Tail logs
+tail -f /var/log/mcp/server.log
+
+# Search logs
+grep "ERROR" /var/log/mcp/server.log
+```
+
+### Network Debugging
+
+```bash
+# Test connectivity
+telnet localhost 3000
+
+# Check DNS resolution
+nslookup your-mcp-server.com
+
+# Monitor network traffic
+tcpdump -i any port 3000
+```
+
+### Process Monitoring
+
+```bash
+# Monitor processes
+htop
+
+# Check system resources
+free -h
+df -h
+
+# Monitor specific process
+pidstat -p <PID> 1
+```
+
+## Prevention Strategies
+
+### 1. Comprehensive Testing
+
+```bash
+# Unit tests
+npm test
+
+# Integration tests
+npm run test:integration
+
+# Load testing
+artillery run load-test.yml
+```
+
+### 2. Monitoring and Alerting
+
+```javascript
+// Health check endpoint
+app.get('/health', (req, res) => {
+  const health = {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage()
+  };
+  res.json(health);
+});
+```
+
+### 3. Error Handling
+
+```javascript
+// Global error handler
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+```
+
+## FAQ
+
+### Why does my MCP server keep crashing?
+
+Common causes include memory leaks, unhandled exceptions, or resource exhaustion. Check your logs for error messages, implement proper error handling, and monitor resource usage.
+
+### How do I fix 'MCP server not responding' errors?
+
+First, check if the server process is actually running. Then verify network connectivity and ensure the server isn't overloaded with requests. Consider implementing load balancing if needed.
+
+### What should I do if I get permission errors?
+
+Check file and directory permissions, ensure you're running with the correct user account, and avoid running servers as root. Use tools like `chmod` and `chown` to fix permissions.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [common-errors/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/common-errors/page.mdx)

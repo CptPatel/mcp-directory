@@ -1,0 +1,243 @@
+---
+title: "How to Install and Use MCPs in Cursor IDE"
+description: "Step-by-step guide to connect and run MCP servers from Cursor IDE with troubleshooting tips."
+slug: "cursor-setup"
+category: "ide"
+updatedAt: "2025-09-21T00:00:00.000Z"
+ogImage: "/og/docs-cursor.png"
+faqs:
+  - q: "Does Cursor support multiple MCP servers at once?"
+    a: "Yes. You can register multiple servers; ensure ports/paths do not conflict."
+  - q: "Why can't Cursor see my local MCP server?"
+    a: "Check that the server process is running, firewall allows local ports, and the config path matches."
+---
+
+import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
+import Script from "next/script";
+
+<Breadcrumbs slug="cursor-setup" />
+
+# How to Install and Use MCPs in Cursor IDE
+
+<Script id="faq-jsonld" type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Does Cursor support multiple MCP servers at once?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. You can register multiple servers; ensure ports/paths do not conflict." }
+    },
+    {
+      "@type": "Question", 
+      "name": "Why can't Cursor see my local MCP server?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Check that the server process is running, firewall allows local ports, and the config path matches." }
+    }
+  ]
+})}
+</Script>
+
+## Overview
+
+Cursor IDE provides excellent support for Model Context Protocol servers, allowing you to extend your AI coding experience with custom tools and integrations. This guide walks you through the complete setup process.
+
+## Requirements
+
+Before setting up MCPs in Cursor, ensure you have:
+
+- **Cursor IDE** installed (latest version recommended)
+- **Node.js 18+** or **Python 3.8+** (depending on your MCP server)
+- **Claude Desktop** or **MCP Inspector** (optional, for testing)
+- Basic familiarity with JSON configuration files
+
+## Installation
+
+### Step 1: Install MCP Server
+
+First, install your desired MCP server. For this example, we'll use the filesystem MCP:
+
+```bash
+# Using npm
+npm install -g @modelcontextprotocol/server-filesystem
+
+# Using uvx (Python)
+uvx install mcp-server-filesystem
+```
+
+### Step 2: Configure Cursor
+
+Create or edit your Cursor configuration file:
+
+**macOS/Linux:**
+```bash
+~/.cursor/mcp_servers.json
+```
+
+**Windows:**
+```bash
+%APPDATA%\Cursor\mcp_servers.json
+```
+
+Add your MCP server configuration:
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "node",
+      "args": ["/path/to/mcp-server-filesystem/dist/index.js"],
+      "env": {
+        "MCP_SERVER_NAME": "filesystem"
+      }
+    }
+  }
+}
+```
+
+### Step 3: Restart Cursor
+
+After saving the configuration, restart Cursor IDE to load the new MCP server.
+
+## Configuration
+
+### Advanced Configuration
+
+For more complex setups, you can configure multiple servers:
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "node",
+      "args": ["/path/to/mcp-server-filesystem/dist/index.js"],
+      "env": {
+        "MCP_SERVER_NAME": "filesystem"
+      }
+    },
+    "github": {
+      "command": "uvx",
+      "args": ["mcp-server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "your_token_here"
+      }
+    }
+  }
+}
+```
+
+### Environment Variables
+
+Set up environment variables for secure configuration:
+
+```bash
+# Add to your shell profile (.bashrc, .zshrc, etc.)
+export GITHUB_PERSONAL_ACCESS_TOKEN="your_token_here"
+export OPENAI_API_KEY="your_openai_key"
+```
+
+## Connect to Claude Desktop
+
+To test your MCP setup with Claude Desktop:
+
+1. Open Claude Desktop
+2. Go to Settings → Developer
+3. Add the same MCP server configuration
+4. Restart Claude Desktop
+5. Test MCP functionality in a conversation
+
+## Common Tasks
+
+### List Available Tools
+
+Once configured, you can ask Cursor's AI to show available MCP tools:
+
+```
+Show me what MCP tools are available
+```
+
+### File Operations
+
+Use the filesystem MCP to perform file operations:
+
+```
+Create a new file called "example.txt" with sample content
+```
+
+### GitHub Integration
+
+With the GitHub MCP configured:
+
+```
+Show me the latest issues in my repository
+```
+
+## Troubleshooting
+
+### Connection Refused
+
+If you see "connection refused" errors:
+
+1. **Check server process**: Ensure the MCP server is running
+2. **Verify paths**: Confirm all file paths in configuration are correct
+3. **Check permissions**: Ensure Cursor has permission to execute the server
+4. **Port conflicts**: Make sure no other process is using the same port
+
+### Server Not Found
+
+If Cursor can't find your MCP server:
+
+1. **Verify installation**: Check that the MCP server is properly installed
+2. **Check PATH**: Ensure the server executable is in your system PATH
+3. **Absolute paths**: Use absolute paths in your configuration
+4. **Node.js version**: Ensure you're using a compatible Node.js version
+
+### Permission Denied
+
+For permission-related issues:
+
+1. **File permissions**: Check that configuration files are readable
+2. **Execution permissions**: Ensure MCP server files are executable
+3. **Directory access**: Verify Cursor can access the configuration directory
+
+### Configuration Not Loading
+
+If your configuration isn't being loaded:
+
+1. **JSON syntax**: Validate your JSON configuration file
+2. **File location**: Ensure the config file is in the correct location
+3. **Restart required**: Always restart Cursor after configuration changes
+4. **Case sensitivity**: Check for case-sensitive path issues on Linux/macOS
+
+## FAQ
+
+### Does Cursor support multiple MCP servers at once?
+
+Yes. You can register multiple servers in your configuration file. Just ensure that ports and paths don't conflict between different servers.
+
+### Why can't Cursor see my local MCP server?
+
+This usually happens when:
+- The server process isn't running
+- Firewall is blocking local connections
+- Configuration path doesn't match the actual server location
+- Environment variables aren't properly set
+
+### How do I update an MCP server?
+
+To update an MCP server:
+
+1. Stop Cursor IDE
+2. Update the server using your package manager (npm, uvx, etc.)
+3. Update configuration if needed
+4. Restart Cursor IDE
+
+### Can I use custom MCP servers?
+
+Absolutely! You can use any MCP server that follows the Model Context Protocol specification. Just point to the correct executable in your configuration.
+
+---
+
+**Last updated:** September 21, 2025
+
+**Edit this page:** [cursor-setup/page.mdx](https://github.com/modelcontextprotocol/docs/edit/main/docs/cursor-setup/page.mdx)
