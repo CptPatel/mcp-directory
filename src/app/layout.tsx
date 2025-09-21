@@ -1,6 +1,6 @@
 import { TempoInit } from "@/components/tempo-init";
 import { WebVitals } from "@/components/web-vitals";
-import { GoogleAnalyticsServer } from "@/components/google-analytics-server";
+
 import { AnimatedNavBar } from "@/components/ui/animated-navbar";
 import { Toaster } from "@/components/ui/toaster";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -102,6 +102,30 @@ export default function RootLayout({
               })
             }}
           />
+          {/* Google Analytics */}
+          {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (process.env.NODE_ENV !== 'development' || process.env.NEXT_PUBLIC_GA_DEBUG) && (
+            <>
+              <script
+                async
+                src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
+              />
+              <script
+                nonce={nonce}
+                dangerouslySetInnerHTML={{
+                  __html: `
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}', {
+                      page_title: document.title,
+                      page_location: window.location.href,
+                      debug_mode: ${process.env.NODE_ENV === 'development'}
+                    });
+                  `,
+                }}
+              />
+            </>
+          )}
         </head>
         <body className={inter.className}>
           <Providers>
@@ -113,7 +137,6 @@ export default function RootLayout({
             </div>
             <Toaster />
           </Providers>
-          <GoogleAnalyticsServer />
           <TempoInit />
           <WebVitals />
           <VercelComponents />

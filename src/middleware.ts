@@ -27,10 +27,10 @@ export default clerkMiddleware((auth, req) => {
   const res = NextResponse.next();
 
   const nonce = generateNonce();
-  // Allow unsafe-eval in development for Next.js hot reload
+  // Allow unsafe-eval and unsafe-inline in development for Next.js hot reload and GA
   const isDevelopment = process.env.NODE_ENV === 'development';
   const scriptSrc = isDevelopment 
-    ? `'self' 'nonce-${nonce}' 'unsafe-eval' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.clerk.com https://*.clerk.accounts.dev https://www.googletagmanager.com`
+    ? `'self' 'nonce-${nonce}' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.clerk.com https://*.clerk.accounts.dev https://www.googletagmanager.com`
     : `'self' 'nonce-${nonce}' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.clerk.com https://*.clerk.accounts.dev https://www.googletagmanager.com`;
 
   const csp = [
