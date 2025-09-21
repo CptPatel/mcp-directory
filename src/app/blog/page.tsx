@@ -7,8 +7,8 @@ import { Calendar, Clock, ArrowRight, TrendingUp } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "MCP Blog - Learn to Create Custom MCP Servers | MCP Directory",
-  description: "Learn how to create custom MCP servers, discover the best MCPs, and master Model Context Protocol development with our comprehensive guides and tutorials.",
-  keywords: "create custom MCP, create custom MCP server, MCP tutorial, best MCPs, Model Context Protocol guide, MCP development, AI development tools",
+  description: "Learn how to create custom MCP servers, discover the best MCPs in 2025, and master Model Context Protocol development with our comprehensive guides using the latest MCP SDK v1.0.",
+  keywords: "create custom MCP, create custom MCP server, MCP tutorial, best MCPs 2025, Model Context Protocol guide, MCP development, AI development tools, MCP SDK",
   openGraph: {
     title: "MCP Blog - Learn to Create Custom MCP Servers",
     description: "Learn how to create custom MCP servers, discover the best MCPs, and master Model Context Protocol development",
@@ -26,60 +26,60 @@ const blogPosts = [
   {
     slug: "how-to-create-custom-mcp-server",
     title: "How to Create a Custom MCP Server from Scratch",
-    excerpt: "Step-by-step guide to building your own Model Context Protocol server with TypeScript and Python examples.",
+    excerpt: "Step-by-step guide to building your own Model Context Protocol server with TypeScript and Python examples using the latest MCP SDK v1.0.",
     category: "Tutorial",
     readTime: "15 min read",
-    publishedAt: "2024-12-20",
+    publishedAt: "2025-01-15",
     featured: true,
     keywords: ["create custom MCP server", "MCP development", "Model Context Protocol tutorial"]
   },
   {
     slug: "best-mcps-2025",
     title: "The 25 Best MCPs Every Developer Should Know in 2025",
-    excerpt: "Discover the most popular and useful Model Context Protocol configurations that will supercharge your AI development workflow.",
+    excerpt: "Discover the most popular and useful Model Context Protocol configurations that will supercharge your AI development workflow in 2025.",
     category: "Guide",
     readTime: "12 min read",
-    publishedAt: "2024-12-18",
+    publishedAt: "2025-01-12",
     featured: true,
     keywords: ["best MCPs", "top MCPs", "MCP recommendations"]
   },
   {
     slug: "mcp-directory-complete-guide",
     title: "MCP Directory: The Complete Guide to Model Context Protocols",
-    excerpt: "Everything you need to know about MCPs, from basic concepts to advanced implementation strategies.",
+    excerpt: "Everything you need to know about MCPs, from basic concepts to advanced implementation strategies with the latest 2025 updates.",
     category: "Guide",
     readTime: "20 min read",
-    publishedAt: "2024-12-15",
+    publishedAt: "2025-01-10",
     featured: true,
     keywords: ["MCP Directory", "Model Context Protocol", "MCP guide"]
   },
   {
     slug: "create-custom-mcp-ai-assistant",
     title: "Create a Custom MCP for Your AI Assistant in 10 Minutes",
-    excerpt: "Quick tutorial on building a custom MCP that integrates with Claude, ChatGPT, and other AI assistants.",
+    excerpt: "Quick tutorial on building a custom MCP that integrates with Claude Desktop, VS Code, Cursor, and other AI assistants using the latest tools.",
     category: "Quick Start",
     readTime: "10 min read",
-    publishedAt: "2024-12-12",
+    publishedAt: "2025-01-08",
     featured: false,
     keywords: ["create custom MCP", "AI assistant MCP", "MCP integration"]
   },
   {
     slug: "mcp-vs-plugins-comparison",
     title: "MCPs vs Traditional Plugins: Why MCPs Are the Future",
-    excerpt: "Compare Model Context Protocols with traditional plugin systems and understand why MCPs are revolutionizing AI development.",
+    excerpt: "Compare Model Context Protocols with traditional plugin systems and understand why MCPs are revolutionizing AI development in 2025.",
     category: "Analysis",
     readTime: "8 min read",
-    publishedAt: "2024-12-10",
+    publishedAt: "2025-01-05",
     featured: false,
     keywords: ["MCP vs plugins", "Model Context Protocol benefits", "AI development"]
   },
   {
     slug: "top-mcp-use-cases",
     title: "Top 10 Use Cases for Custom MCPs in Enterprise Development",
-    excerpt: "Real-world examples of how companies are using custom MCPs to streamline their development workflows.",
+    excerpt: "Real-world examples of how companies are using custom MCPs to streamline their development workflows with latest enterprise implementations.",
     category: "Case Study",
     readTime: "14 min read",
-    publishedAt: "2024-12-08",
+    publishedAt: "2025-01-03",
     featured: false,
     keywords: ["MCP use cases", "enterprise MCPs", "custom MCP examples"]
   }

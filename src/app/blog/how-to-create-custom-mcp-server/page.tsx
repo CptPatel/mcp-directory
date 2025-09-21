@@ -40,7 +40,7 @@ export default function CreateCustomMCPServerPage() {
           code examples, and best practices for both TypeScript and Python implementations.
         </p>
         <div className="text-sm text-muted-foreground">
-          Published on December 20, 2024 • Updated for MCP v2025.01
+          Published on January 15, 2025 • Updated for MCP SDK v1.0.2
         </div>
       </div>
 
@@ -103,7 +103,7 @@ export default function CreateCustomMCPServerPage() {
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-600" />
-              An AI assistant that supports MCPs (Claude, VS Code, etc.)
+              An AI assistant that supports MCPs (Claude Desktop, VS Code, Cursor, Windsurf, etc.)
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-600" />
@@ -127,12 +127,17 @@ export default function CreateCustomMCPServerPage() {
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.4.0",
-    "axios": "^1.6.0"
+    "@modelcontextprotocol/sdk": "^1.0.2",
+    "axios": "^1.7.0"
   },
   "scripts": {
     "start": "node dist/index.js",
-    "build": "tsc"
+    "build": "tsc",
+    "dev": "tsx src/index.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
   }
 }`}
             </pre>
@@ -248,8 +253,9 @@ server.run().catch(console.error);`}
           <div className="bg-gray-900 rounded-lg p-4 mb-6 overflow-x-auto">
             <pre className="text-green-400 text-sm">
 {`# requirements.txt
-mcp>=0.4.0
-requests>=2.31.0`}
+mcp>=1.0.0
+requests>=2.32.0
+pydantic>=2.5.0`}
             </pre>
           </div>
 
@@ -342,10 +348,12 @@ if __name__ == "__main__":
             To share your custom MCP server with others, you can:
           </p>
           <ul className="list-disc list-inside space-y-2 mb-6">
-            <li>Publish to npm (for TypeScript/JavaScript MCPs)</li>
-            <li>Publish to PyPI (for Python MCPs)</li>
-            <li>Create a GitHub repository with installation instructions</li>
-            <li>Submit to the MCP Directory for broader discovery</li>
+            <li>Publish to npm (for TypeScript/JavaScript MCPs) with @modelcontextprotocol scope</li>
+            <li>Publish to PyPI (for Python MCPs) with proper MCP metadata</li>
+            <li>Create a GitHub repository with installation instructions and MCP manifest</li>
+            <li>Submit to the official MCP servers repository on GitHub</li>
+            <li>List in the MCP Directory for broader community discovery</li>
+            <li>Use the MCP installer tools for easy distribution</li>
           </ul>
         </section>
 

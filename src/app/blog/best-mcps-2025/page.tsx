@@ -25,85 +25,85 @@ export const metadata: Metadata = {
 const bestMCPs = [
   {
     rank: 1,
-    name: "GitHub Integration MCP",
-    description: "Complete GitHub integration with repository management, issue tracking, and PR automation",
+    name: "Filesystem MCP",
+    description: "Official MCP server for secure file system operations with read/write capabilities and directory traversal",
     category: "Development",
-    downloads: "45.2k",
+    downloads: "125.3k",
     rating: 4.9,
     verified: true,
-    features: ["Repository management", "Issue tracking", "PR automation", "Code review"],
-    useCase: "Essential for any developer working with GitHub repositories"
+    features: ["File operations", "Directory traversal", "Content search", "Security controls"],
+    useCase: "Essential for any AI assistant that needs to work with local files and directories"
   },
   {
     rank: 2,
-    name: "Database Query MCP",
-    description: "Universal database connector supporting PostgreSQL, MySQL, MongoDB, and Redis",
-    category: "Database",
-    downloads: "38.7k",
+    name: "GitHub MCP",
+    description: "Official GitHub MCP server for repository management, issue tracking, and pull request automation",
+    category: "Development", 
+    downloads: "98.7k",
     rating: 4.8,
     verified: true,
-    features: ["Multi-database support", "Query optimization", "Schema introspection", "Data visualization"],
-    useCase: "Perfect for database administrators and backend developers"
+    features: ["Repository management", "Issue tracking", "PR automation", "Search functionality"],
+    useCase: "Must-have for developers working with GitHub repositories and project management"
   },
   {
     rank: 3,
-    name: "AWS CLI Helper MCP",
-    description: "Simplified AWS operations with natural language commands for all major services",
-    category: "Cloud",
-    downloads: "32.1k",
-    rating: 4.7,
+    name: "PostgreSQL MCP",
+    description: "Database MCP server for PostgreSQL with query execution, schema inspection, and data analysis",
+    category: "Database",
+    downloads: "87.1k",
+    rating: 4.9,
     verified: true,
-    features: ["EC2 management", "S3 operations", "Lambda deployment", "Cost monitoring"],
-    useCase: "Must-have for cloud engineers and DevOps professionals"
+    features: ["SQL queries", "Schema inspection", "Data analysis", "Connection pooling"],
+    useCase: "Perfect for database administrators and backend developers using PostgreSQL"
   },
   {
     rank: 4,
-    name: "Docker Manager MCP",
-    description: "Container lifecycle management with Docker and Docker Compose integration",
-    category: "DevOps",
-    downloads: "29.8k",
-    rating: 4.8,
+    name: "Brave Search MCP",
+    description: "Web search capabilities using Brave Search API for real-time information retrieval",
+    category: "Search",
+    downloads: "76.4k",
+    rating: 4.7,
     verified: true,
-    features: ["Container management", "Image building", "Compose orchestration", "Health monitoring"],
-    useCase: "Essential for containerized application development"
+    features: ["Web search", "Real-time results", "Privacy-focused", "API integration"],
+    useCase: "Essential for AI assistants that need current web information and search capabilities"
   },
   {
     rank: 5,
-    name: "Slack Workspace MCP",
-    description: "Team communication automation with message sending and channel management",
+    name: "Slack MCP",
+    description: "Official Slack MCP server for team communication, channel management, and message automation",
     category: "Communication",
-    downloads: "27.3k",
+    downloads: "65.8k",
     rating: 4.6,
     verified: true,
-    features: ["Message automation", "Channel management", "User notifications", "Bot integration"],
-    useCase: "Great for team collaboration and automated notifications"
+    features: ["Message sending", "Channel management", "User lookup", "File sharing"],
+    useCase: "Great for team collaboration and automated Slack workflows"
   }
 ];
 
 const categories = [
   {
     name: "Development Tools",
-    count: 8,
+    count: 12,
     description: "MCPs for code management, version control, and development workflows",
-    topMCPs: ["GitHub Integration", "VS Code Manager", "Git Helper", "Code Review Assistant"]
+    topMCPs: ["Filesystem MCP", "GitHub MCP", "Git MCP", "VS Code MCP"]
   },
   {
     name: "Database & Storage",
-    count: 6,
+    count: 8,
     description: "Database connectors, query builders, and data management tools",
-    topMCPs: ["Database Query MCP", "Redis Manager", "MongoDB Helper", "SQL Builder"]
+    topMCPs: ["PostgreSQL MCP", "SQLite MCP", "MySQL MCP", "Redis MCP"]
   },
   {
-    name: "Cloud & Infrastructure",
-    count: 7,
-    description: "Cloud platform integrations and infrastructure management",
-    topMCPs: ["AWS CLI Helper", "Azure Manager", "GCP Tools", "Kubernetes Controller"]
+    name: "Search & Information",
+    count: 6,
+    description: "Web search, information retrieval, and knowledge access tools",
+    topMCPs: ["Brave Search MCP", "Google Search MCP", "Wikipedia MCP", "Web Scraper MCP"]
   },
   {
-    name: "Communication",
-    count: 4,
-    description: "Team communication and notification systems",
-    topMCPs: ["Slack Workspace", "Discord Bot", "Email Assistant", "Teams Integration"]
+    name: "Communication & Productivity",
+    count: 9,
+    description: "Team communication, productivity, and workflow automation",
+    topMCPs: ["Slack MCP", "Email MCP", "Calendar MCP", "Notion MCP"]
   }
 ];
 
@@ -129,7 +129,7 @@ export default function BestMCPs2025Page() {
         <div className="flex justify-center gap-4 flex-wrap">
           <Badge variant="secondary" className="text-sm">
             <TrendingUp className="h-4 w-4 mr-1" />
-            45M+ Total Downloads
+            500K+ Total Downloads
           </Badge>
           <Badge variant="secondary" className="text-sm">
             <Shield className="h-4 w-4 mr-1" />
@@ -137,6 +137,9 @@ export default function BestMCPs2025Page() {
           </Badge>
           <Badge variant="secondary" className="text-sm">
             4.8+ Average Rating
+          </Badge>
+          <Badge variant="secondary" className="text-sm">
+            35+ Official MCPs
           </Badge>
         </div>
       </div>
