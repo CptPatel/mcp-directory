@@ -45,69 +45,9 @@ const blogPosts = [
     category: "Guide",
     readTime: "12 min read",
     publishedAt: "2025-09-18",
-    featured: true,
+    featured: false,
     keywords: ["best MCPs", "top MCPs", "MCP recommendations"]
   },
-  {
-    slug: "mcp-directory-complete-guide",
-    title: "MCP Directory: The Complete Guide to Model Context Protocols",
-    excerpt: "Everything you need to know about MCPs, from basic concepts to advanced implementation strategies with the latest September 2025 updates.",
-    category: "Guide",
-    readTime: "20 min read",
-    publishedAt: "2025-09-10",
-    featured: true,
-    keywords: ["MCP Directory", "Model Context Protocol", "MCP guide"]
-  },
-  {
-    slug: "create-custom-mcp-ai-assistant",
-    title: "Create a Custom MCP for Your AI Assistant in 10 Minutes",
-    excerpt: "Quick tutorial on building a custom MCP that integrates with Claude Desktop, VS Code, Cursor, Windsurf, and other AI assistants using the latest 2025 tools.",
-    category: "Quick Start",
-    readTime: "10 min read",
-    publishedAt: "2025-09-12",
-    featured: false,
-    keywords: ["create custom MCP", "AI assistant MCP", "MCP integration"]
-  },
-  {
-    slug: "mcp-vs-plugins-comparison",
-    title: "MCPs vs Traditional Plugins: Why MCPs Dominated 2025",
-    excerpt: "Compare Model Context Protocols with traditional plugin systems and understand how MCPs revolutionized AI development throughout 2025.",
-    category: "Analysis",
-    readTime: "8 min read",
-    publishedAt: "2025-09-08",
-    featured: false,
-    keywords: ["MCP vs plugins", "Model Context Protocol benefits", "AI development"]
-  },
-  {
-    slug: "mcp-setup-guide-vscode",
-    title: "Complete MCP Setup Guide for VS Code and Claude Desktop",
-    excerpt: "Detailed walkthrough for setting up Model Context Protocol servers in VS Code, Claude Desktop, and other popular development environments in 2025.",
-    category: "Setup Guide",
-    readTime: "12 min read",
-    publishedAt: "2025-09-05",
-    featured: false,
-    keywords: ["MCP setup", "VS Code MCP", "Claude Desktop MCP", "MCP installation"]
-  },
-  {
-    slug: "what-is-model-context-protocol",
-    title: "What is the Model Context Protocol? Complete 2025 Guide",
-    excerpt: "Comprehensive introduction to Model Context Protocol (MCP) - what it is, how it works, and why it transformed AI development workflows in 2025.",
-    category: "Beginner Guide",
-    readTime: "18 min read",
-    publishedAt: "2025-09-01",
-    featured: false,
-    keywords: ["what is MCP", "Model Context Protocol explained", "MCP beginner guide"]
-  },
-  {
-    slug: "top-mcp-use-cases",
-    title: "Top 15 Use Cases for Custom MCPs in Enterprise Development",
-    excerpt: "Real-world examples of how companies used custom MCPs to streamline their development workflows throughout 2025 with proven enterprise implementations.",
-    category: "Case Study",
-    readTime: "14 min read",
-    publishedAt: "2025-08-28",
-    featured: false,
-    keywords: ["MCP use cases", "enterprise MCPs", "custom MCP examples"]
-  }
 ];
 
 export default function BlogPage() {

@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, Download, Zap, Shield, Users, ArrowRight, CheckCircle, TrendingUp, Sparkles, Bot, Cpu } from "lucide-react";
+import { Star, Download, Zap, Shield, Users, ArrowRight, CheckCircle, TrendingUp, Sparkles, Bot, Cpu, BookOpen } from "lucide-react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -64,8 +64,12 @@ export default function HomeClient() {
           
           <p className={`text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed transition-all duration-1000 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             Create custom MCP servers, discover the best MCPs, and deploy Model Context Protocol configurations with our{" "}
-            <span className="text-foreground font-semibold">AI-powered MCP creator</span> and one-click installation. 
-            The ultimate MCP Directory for developers building AI-powered workflows.
+            <span className="text-foreground font-semibold">AI-powered MCP creator</span> and one-click installation.
+            The ultimate MCP Directory for developers building AI-powered workflows.{" "}
+            <Link href="/blog" className="text-foreground font-semibold underline-offset-4 hover:underline">
+              Explore MCP tutorials and guides
+            </Link>{" "}
+            to learn deployment best practices and SEO-friendly MCP setup tips.
           </p>
           <div className={`flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center transition-all duration-1000 delay-600 relative z-20 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <SignedIn>
@@ -110,6 +114,18 @@ export default function HomeClient() {
               </Link>
             </Button>
             
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="text-lg px-10 py-4 border-2 hover:bg-muted/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 hover:-translate-y-1 group" 
+              asChild
+            >
+              <Link href="/blog">
+                <BookOpen className="h-5 w-5 mr-3 group-hover:animate-pulse" />
+                MCP Blog
+              </Link>
+            </Button>
+
             <Button 
               variant="outline" 
               size="lg" 
@@ -415,3 +431,4 @@ export default function HomeClient() {
     </div>
   );
 }
+
