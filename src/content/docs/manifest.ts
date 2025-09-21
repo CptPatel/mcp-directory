@@ -257,7 +257,7 @@ export const DOCS: DocEntry[] = [
   {
     slug: 'mcp-not-showing',
     path: '/docs/mcp-not-showing',
-    title: "Why MCPs Don't Show Up in Claude Desktop",
+    title: 'Why MCPs Don\'t Show Up in Claude Desktop',
     description: 'Diagnose and fix issues when MCP servers are not appearing or working in Claude Desktop application.',
     category: 'testing',
     updatedAt: '2025-09-21T00:00:00.000Z',
