@@ -20,7 +20,7 @@ if (-not (Test-Path "package.json")) {
 # Get repository URL from user
 Write-Host ""
 Write-Host "Please enter your GitHub repository URL:" -ForegroundColor Yellow
-Write-Host "Example: https://github.com/username/mcp-directory.git" -ForegroundColor Gray
+Write-Host "Example: https://github.com/username/mcpdirectory.git" -ForegroundColor Gray
 $repo_url = Read-Host "Repository URL"
 
 if ([string]::IsNullOrWhiteSpace($repo_url)) {

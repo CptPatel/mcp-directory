@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     title: "AI MCP Creator - Generate Custom MCPs with AI",
     description: "Create custom Model Context Protocol configurations using natural language and AI",
     type: "website",
-    url: "https://mcp-directory.com/create",
+    url: "https://mcpdirectory.app/create",
   },
   twitter: {
     card: "summary_large_image",

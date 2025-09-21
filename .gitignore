@@ -2,9 +2,14 @@
 node_modules/
 npm-debug.log*
 
-# Env files
+# Environment files - NEVER commit these!
+.env
 .env.local
+.env.development
+.env.production
 .env.*.local
+.env.*.development
+.env.*.production
 
 # OS junk
 .DS_Store

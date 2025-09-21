@@ -13,7 +13,7 @@ This guide covers deploying the MCP Directory to Vercel and connecting it to Git
 
 ### Create Repository
 1. Go to [GitHub](https://github.com) and create a new repository
-2. Name it `mcp-directory` or your preferred name
+2. Name it `mcpdirectory` or your preferred name
 3. Make it public or private as needed
 4. Don't initialize with README (we already have one)
 
@@ -69,7 +69,7 @@ vercel
 
 # Follow prompts:
 # - Link to existing project? No
-# - Project name: mcp-directory
+# - Project name: mcpdirectory
 # - Directory: ./
 # - Override settings? No
 ```

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     title: "Documentation - MCP Directory Setup Guide",
     description: "Complete setup instructions for Model Context Protocol configurations across all major development environments",
     type: "website",
-    url: "https://mcp-directory.com/docs",
+    url: "https://mcpdirectory.app/docs",
   },
   twitter: {
     card: "summary_large_image",

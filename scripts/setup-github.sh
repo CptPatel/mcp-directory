@@ -21,7 +21,7 @@ fi
 # Get repository URL from user
 echo ""
 echo "📝 Please enter your GitHub repository URL:"
-echo "   Example: https://github.com/username/mcp-directory.git"
+echo "   Example: https://github.com/username/mcpdirectory.git"
 read -p "Repository URL: " repo_url
 
 if [ -z "$repo_url" ]; then

@@ -435,7 +435,7 @@ export default function DocsPage() {
               </Link>
             </Button>
             <Button variant="outline" className="w-full justify-start" asChild>
-              <a href="https://github.com/mcp-directory/issues" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/mcpdirectory/mcpdirectory/issues" target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Report Issues on GitHub
               </a>

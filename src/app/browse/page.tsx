@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: "Browse MCPs - 1,200+ Verified Model Context Protocols",
     description: "Discover and browse over 1,200 verified Model Context Protocol configurations",
     type: "website",
-    url: "https://mcp-directory.com/browse",
+    url: "https://mcpdirectory.app/browse",
   },
   twitter: {
     card: "summary_large_image",

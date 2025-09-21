@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/private/', '/admin/'],
     },
-    sitemap: 'https://mcp-directory.com/sitemap.xml',
+    sitemap: 'https://mcpdirectory.app/sitemap.xml',
   }
 }

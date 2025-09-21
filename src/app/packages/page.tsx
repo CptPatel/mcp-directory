@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: "Package Builder - Create Custom MCP Bundles",
     description: "Build custom MCP packages with our intuitive package builder",
     type: "website",
-    url: "https://mcp-directory.com/packages",
+    url: "https://mcpdirectory.app/packages",
   },
   twitter: {
     card: "summary_large_image",

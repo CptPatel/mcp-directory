@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: "MCP Community - Join 12,000+ Developers",
     description: "Join the thriving MCP community with 12,000+ developers sharing knowledge and building together",
     type: "website",
-    url: "https://mcp-directory.com/community",
+    url: "https://mcpdirectory.app/community",
   },
   twitter: {
     card: "summary_large_image",

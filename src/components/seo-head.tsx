@@ -15,8 +15,8 @@ export function SEOHead({
   title = "MCP Directory - Setup Multiple MCPs in Minutes, Not Hours",
   description = "Discover, bundle, and deploy Model Context Protocol configurations with one-click installation. Browse verified MCPs, create custom packages, and streamline your AI workflow setup.",
   keywords = "MCP, Model Context Protocol, AI tools, automation, package manager, one-click install, AI workflow, development tools, productivity",
-  image = "https://mcp-directory.com/og-image.png",
-  url = "https://mcp-directory.com",
+  image = "https://mcpdirectory.app/og-image.png",
+  url = "https://mcpdirectory.app",
   type = "website",
   noindex = false,
   canonical

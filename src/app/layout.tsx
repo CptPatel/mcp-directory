@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://mcp-directory.com",
+    url: "https://mcpdirectory.app",
     title: "MCP Directory - Setup Multiple MCPs in Minutes",
     description: "The ultimate directory for Model Context Protocol configurations. Discover, bundle, and deploy MCPs with ease.",
     siteName: "MCP Directory",
@@ -66,7 +66,7 @@ export default function RootLayout({
                 "@type": "WebApplication",
                 "name": "MCP Directory",
                 "description": "Discover, bundle, and deploy Model Context Protocol configurations with one-click installation. AI-powered MCP creation tools included.",
-                "url": "https://mcp-directory.com",
+                "url": "https://mcpdirectory.app",
                 "applicationCategory": "DeveloperApplication",
                 "operatingSystem": "Any",
                 "browserRequirements": "Requires JavaScript. Requires HTML5.",
@@ -80,7 +80,7 @@ export default function RootLayout({
                 "author": {
                   "@type": "Organization",
                   "name": "MCP Directory Team",
-                  "url": "https://mcp-directory.com"
+                  "url": "https://mcpdirectory.app"
                 },
                 "featureList": [
                   "1,200+ verified MCPs",
@@ -90,7 +90,7 @@ export default function RootLayout({
                   "Package builder",
                   "Community features"
                 ],
-                "screenshot": "https://mcp-directory.com/og-image.png",
+                "screenshot": "https://mcpdirectory.app/og-image.png",
                 "aggregateRating": {
                   "@type": "AggregateRating",
                   "ratingValue": "4.8",

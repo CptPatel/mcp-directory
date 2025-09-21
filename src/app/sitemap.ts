@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
  
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://mcp-directory.com'
+  const baseUrl = 'https://mcpdirectory.app'
   
   return [
     {
