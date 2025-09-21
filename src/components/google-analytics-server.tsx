@@ -1,43 +1,25 @@
-'use client';
-
 import Script from 'next/script';
-import { useEffect, useState } from 'react';
+import { cookies } from 'next/headers';
 
-export function GoogleAnalytics() {
+export function GoogleAnalyticsServer() {
   const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
-  const [nonce, setNonce] = useState<string>('');
-
-  useEffect(() => {
-    // Get nonce from cookie for CSP compliance
-    const cookies = document.cookie.split(';');
-    const nonceCookie = cookies.find(cookie => cookie.trim().startsWith('csp-nonce='));
-    if (nonceCookie) {
-      setNonce(nonceCookie.split('=')[1]);
-    }
-  }, []);
-
+  
   // Don't load in development unless explicitly enabled
   if (process.env.NODE_ENV === 'development' && !process.env.NEXT_PUBLIC_GA_DEBUG) {
-    console.log('Google Analytics disabled in development. Set NEXT_PUBLIC_GA_DEBUG=true to enable.');
     return null;
   }
 
   if (!GA_MEASUREMENT_ID) {
-    console.warn('Google Analytics: NEXT_PUBLIC_GA_MEASUREMENT_ID not found');
     return null;
   }
+
+  const nonce = cookies().get('csp-nonce')?.value;
 
   return (
     <>
       <Script
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
         strategy="afterInteractive"
-        onLoad={() => {
-          console.log('Google Analytics loaded successfully');
-        }}
-        onError={(e) => {
-          console.error('Google Analytics failed to load:', e);
-        }}
       />
       <Script 
         id="google-analytics" 
@@ -53,7 +35,6 @@ export function GoogleAnalytics() {
             page_location: window.location.href,
             debug_mode: ${process.env.NODE_ENV === 'development'}
           });
-          console.log('Google Analytics configured with ID: ${GA_MEASUREMENT_ID}');
         `}
       </Script>
     </>

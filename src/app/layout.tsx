@@ -1,6 +1,6 @@
 import { TempoInit } from "@/components/tempo-init";
 import { WebVitals } from "@/components/web-vitals";
-import { GoogleAnalytics } from "@/components/google-analytics";
+import { GoogleAnalyticsServer } from "@/components/google-analytics-server";
 import { AnimatedNavBar } from "@/components/ui/animated-navbar";
 import { Toaster } from "@/components/ui/toaster";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -113,9 +113,9 @@ export default function RootLayout({
             </div>
             <Toaster />
           </Providers>
+          <GoogleAnalyticsServer />
           <TempoInit />
           <WebVitals />
-          <GoogleAnalytics />
           <VercelComponents />
         </body>
       </html>
