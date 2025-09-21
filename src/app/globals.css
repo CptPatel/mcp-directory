@@ -105,6 +105,45 @@
 }
 
 @keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-gradient-x {
+  animation: gradient-x 3s ease infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+}
+
+.bg-gradient-radial {
+  background: radial-gradient(circle, var(--tw-gradient-stops));
+}
+
+.bg-300\% {
+  background-size: 300% 300%;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes fadeInUp {
   from {
     opacity: 0;
     transform: translateY(30px);

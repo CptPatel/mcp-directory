@@ -3,8 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, Download, Zap, Shield, Users, ArrowRight, CheckCircle, TrendingUp, Sparkles, Bot, Cpu, BookOpen } from "lucide-react";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { Star, Download, Zap, Shield, ArrowRight, CheckCircle, Sparkles, Bot, Cpu, BookOpen } from "lucide-react";
+import { SignedIn, SignedOut } from "@clerk/nextjs";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -64,81 +64,65 @@ export default function HomeClient() {
           
           <p className={`text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed transition-all duration-1000 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             Create custom MCP servers, discover the best MCPs, and deploy Model Context Protocol configurations with our{" "}
-            <span className="text-foreground font-semibold">AI-powered MCP creator</span> and one-click installation.
-            The ultimate MCP Directory for developers building AI-powered workflows.{" "}
-            <Link href="/blog" className="text-foreground font-semibold underline-offset-4 hover:underline">
-              Explore MCP tutorials and guides
-            </Link>{" "}
-            to learn deployment best practices and SEO-friendly MCP setup tips.
+            <span className="text-foreground font-semibold">AI-powered MCP creator</span> and one-click installation. 
+            The ultimate MCP Directory for developers building AI-powered workflows.
           </p>
-          <div className={`flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center transition-all duration-1000 delay-600 relative z-20 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <SignedIn>
-              <Button 
-                size="lg" 
-                className="w-full sm:w-auto text-lg px-8 sm:px-10 py-4 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-700 hover:via-blue-700 hover:to-indigo-700 shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105 hover:-translate-y-1 group relative overflow-hidden" 
-                asChild
-              >
-                <Link href="/create">
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <Sparkles className="h-5 w-5 mr-3 group-hover:animate-spin" />
-                  Create with AI
-                  <ArrowRight className="h-5 w-5 ml-3 group-hover:translate-x-1 transition-transform duration-300" />
-                </Link>
-              </Button>
-            </SignedIn>
-            
-            <SignedOut>
-              <Button 
-                size="lg" 
-                className="text-lg px-10 py-4 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-700 hover:via-blue-700 hover:to-indigo-700 shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105 hover:-translate-y-1 group relative overflow-hidden" 
-                asChild
-              >
-                <Link href="/create">
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <Sparkles className="h-5 w-5 mr-3 group-hover:animate-spin" />
-                  Create with AI
-                  <ArrowRight className="h-5 w-5 ml-3 group-hover:translate-x-1 transition-transform duration-300" />
-                </Link>
-              </Button>
-            </SignedOut>
-            
+          <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center transition-all duration-1000 delay-600 relative z-20 max-w-4xl mx-auto ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            {/* Primary CTA - Always visible */}
             <Button 
               size="lg" 
-              className="text-lg px-10 py-4 bg-gradient-to-r from-slate-900 to-slate-700 hover:from-slate-800 hover:to-slate-600 dark:from-slate-100 dark:to-slate-300 dark:hover:from-slate-200 dark:hover:to-slate-400 dark:text-slate-900 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 hover:-translate-y-1 group" 
+              className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-700 hover:via-blue-700 hover:to-indigo-700 shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105 hover:-translate-y-1 group relative overflow-hidden" 
               asChild
             >
-              <Link href="/browse">
-                <Shield className="h-5 w-5 mr-3 group-hover:rotate-12 transition-transform duration-300" />
-                Explore MCPs
-                <ArrowRight className="h-5 w-5 ml-3 group-hover:translate-x-1 transition-transform duration-300" />
+              <Link href="/create">
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3 group-hover:animate-spin" />
+                Create with AI
+                <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 ml-2 sm:ml-3 group-hover:translate-x-1 transition-transform duration-300" />
               </Link>
             </Button>
             
+            {/* Secondary CTA */}
+            <Button 
+              size="lg" 
+              className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-slate-900 to-slate-700 hover:from-slate-800 hover:to-slate-600 dark:from-slate-100 dark:to-slate-300 dark:hover:from-slate-200 dark:hover:to-slate-400 dark:text-slate-900 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 hover:-translate-y-1 group" 
+              asChild
+            >
+              <Link href="/browse">
+                <Shield className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3 group-hover:rotate-12 transition-transform duration-300" />
+                Explore MCPs
+                <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 ml-2 sm:ml-3 group-hover:translate-x-1 transition-transform duration-300" />
+              </Link>
+            </Button>
+          </div>
+          
+          {/* Secondary Navigation */}
+          <div className={`flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center items-center mt-4 transition-all duration-1000 delay-700 relative z-20 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <Button 
               variant="outline" 
-              size="lg" 
-              className="text-lg px-10 py-4 border-2 hover:bg-muted/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 hover:-translate-y-1 group" 
+              size="default" 
+              className="w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3 border hover:bg-muted/50 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 group" 
               asChild
             >
               <Link href="/blog">
-                <BookOpen className="h-5 w-5 mr-3 group-hover:animate-pulse" />
+                <BookOpen className="h-4 w-4 mr-2 group-hover:animate-pulse" />
                 MCP Blog
               </Link>
             </Button>
 
             <Button 
               variant="outline" 
-              size="lg" 
-              className="text-lg px-10 py-4 border-2 hover:bg-muted/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 hover:-translate-y-1 group" 
+              size="default" 
+              className="w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3 border hover:bg-muted/50 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 group" 
               asChild
             >
               <Link href="/docs">
-                <Cpu className="h-5 w-5 mr-3 group-hover:animate-pulse" />
+                <Cpu className="h-4 w-4 mr-2 group-hover:animate-pulse" />
                 Documentation
               </Link>
             </Button>
           </div>
-          <div className={`flex flex-wrap justify-center items-center gap-6 mt-8 text-sm transition-all duration-1000 delay-800 relative z-20 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div className={`flex flex-wrap justify-center items-center gap-3 sm:gap-4 md:gap-6 mt-8 text-sm transition-all duration-1000 delay-800 relative z-20 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             {[
               { icon: CheckCircle, text: "2,500+ verified MCPs", color: "text-emerald-500" },
               { icon: Zap, text: "AI-powered creation", color: "text-purple-500" },
@@ -147,11 +131,11 @@ export default function HomeClient() {
             ].map((item, index) => (
               <div 
                 key={index}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted/30 dark:bg-muted/20 backdrop-blur-sm border border-border/50 dark:border-border/30 hover:bg-muted/50 dark:hover:bg-muted/40 transition-all duration-300 hover:scale-105 group"
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-muted/30 dark:bg-muted/20 backdrop-blur-sm border border-border/50 dark:border-border/30 hover:bg-muted/50 dark:hover:bg-muted/40 transition-all duration-300 hover:scale-105 group"
                 style={{ animationDelay: `${index * 200}ms` }}
               >
                 <item.icon className={`h-4 w-4 ${item.color} group-hover:animate-pulse`} />
-                <span className="text-muted-foreground dark:text-muted-foreground group-hover:text-foreground dark:group-hover:text-foreground transition-colors duration-300">{item.text}</span>
+                <span className="text-xs sm:text-sm text-muted-foreground dark:text-muted-foreground group-hover:text-foreground dark:group-hover:text-foreground transition-colors duration-300 whitespace-nowrap">{item.text}</span>
               </div>
             ))}
           </div>
@@ -169,7 +153,7 @@ export default function HomeClient() {
           </p>
         </div>
         
-        <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto">
           {[
             {
               icon: Sparkles,
@@ -246,7 +230,7 @@ export default function HomeClient() {
               Discover the top-rated Model Context Protocol configurations
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Sample MCP Cards */}
             {[
               {
@@ -380,7 +364,7 @@ export default function HomeClient() {
             MCP Directory supports all major development environments and AI coding assistants
           </p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 sm:gap-6 max-w-5xl mx-auto">
           {[
             { name: "VS Code", icon: "💻" },
             { name: "Cursor", icon: "🎯" },
@@ -390,9 +374,9 @@ export default function HomeClient() {
             { name: "JetBrains", icon: "🚀" },
             { name: "OpenAI Codex", icon: "🧠" }
           ].map((stack, index) => (
-            <div key={index} className="text-center p-4 rounded-lg border hover:shadow-md transition-shadow">
-              <div className="text-3xl mb-2">{stack.icon}</div>
-              <div className="text-sm font-medium">{stack.name}</div>
+            <div key={index} className="text-center p-3 sm:p-4 rounded-lg border hover:shadow-md transition-all duration-300 hover:scale-105 group">
+              <div className="text-2xl sm:text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">{stack.icon}</div>
+              <div className="text-xs sm:text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors duration-300">{stack.name}</div>
             </div>
           ))}
         </div>
@@ -413,14 +397,14 @@ export default function HomeClient() {
           <p className="text-lg text-muted-foreground mb-8">
             Join thousands of developers already using MCP Directory to build better AI-powered applications.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-            <Button size="lg" className="w-full sm:w-auto text-lg px-8" asChild>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-md mx-auto">
+            <Button size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4" asChild>
               <Link href="/packages">
                 Start Building Your Package
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Link>
             </Button>
-            <Button variant="outline" size="lg" className="w-full sm:w-auto text-lg px-8" asChild>
+            <Button variant="outline" size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4" asChild>
               <Link href="/community">
                 Join Community
               </Link>
