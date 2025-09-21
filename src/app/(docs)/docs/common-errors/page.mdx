@@ -13,8 +13,12 @@ faqs:
 
 import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
 import Script from "next/script";
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 <Breadcrumbs slug="common-errors" />
+
+<DocMeta slug="common-errors" />
 
 # 10 Most Common MCP Setup Errors (and Fixes)
 
@@ -412,6 +416,8 @@ First, check if the server process is actually running. Then verify network conn
 ### What should I do if I get permission errors?
 
 Check file and directory permissions, ensure you're running with the correct user account, and avoid running servers as root. Use tools like `chmod` and `chown` to fix permissions.
+
+<DocFeedback slug="common-errors" />
 
 ---
 

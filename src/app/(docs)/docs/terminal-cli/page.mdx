@@ -13,8 +13,12 @@ faqs:
 
 import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
 import Script from "next/script";
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 <Breadcrumbs slug="terminal-cli" />
+
+<DocMeta slug="terminal-cli" />
 
 # Using MCPs in Terminal (Universal CLI Setup)
 
@@ -522,6 +526,8 @@ Use process managers like PM2 for cross-platform support, systemd on Linux, or b
 ### What's the best way to automate MCP server startup?
 
 Use system-level services (systemd, Windows services, macOS LaunchAgents) for production, or shell startup scripts for development environments.
+
+<DocFeedback slug="terminal-cli" />
 
 ---
 

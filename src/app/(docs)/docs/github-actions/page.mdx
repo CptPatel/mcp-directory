@@ -15,8 +15,12 @@ faqs:
 
 import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
 import Script from "next/script";
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 <Breadcrumbs slug="github-actions" />
+
+<DocMeta slug="github-actions" />
 
 # Automating MCP Workflows with GitHub Actions
 
@@ -271,6 +275,8 @@ Yes. Use matrix jobs or sequential steps to build and deploy multiple MCP packag
 ### How do I debug failed MCP jobs in Actions?
 
 Upload artifacts, enable verbose logging on your MCP commands, and run the workflow locally with `act` to reproduce issues. Consider adding temporary `sleep` or diagnostic steps when investigating flaky behaviour.
+
+<DocFeedback slug="github-actions" />
 
 ---
 

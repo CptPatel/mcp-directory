@@ -16,6 +16,8 @@ import Script from "next/script";
 
 <Breadcrumbs slug="vercel-deployment" />
 
+<DocMeta slug="vercel-deployment" />
+
 # Serverless MCP Deployment on Vercel
 
 <Script id="faq-jsonld" type="application/ld+json">
@@ -557,6 +559,8 @@ curl -X POST http://localhost:3000/api/mcp/tools \
 // tests/mcp.test.js
 import { createMocks } from 'node-mocks-http';
 import handler from '../api/mcp/tools.js';
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 describe('/api/mcp/tools', () => {
   it('should list available tools', async () => {
@@ -586,6 +590,8 @@ Main limitations include 10-second execution timeout, 50MB deployment size limit
 ### How do I handle file uploads in Vercel MCP servers?
 
 Use Vercel Blob storage for file uploads, or integrate with cloud storage services like AWS S3. Vercel functions have memory and execution time limits that make them unsuitable for large file processing.
+
+<DocFeedback slug="vercel-deployment" />
 
 ---
 

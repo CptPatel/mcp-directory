@@ -15,8 +15,12 @@ faqs:
 
 import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
 import Script from "next/script";
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 <Breadcrumbs slug="remote-mcp" />
+
+<DocMeta slug="remote-mcp" />
 
 # Connecting to Remote MCP Servers
 
@@ -178,6 +182,8 @@ Use API keys, OAuth flows, or mutual TLS. Store secrets in a managed vault and r
 ### How can I monitor latency between the client and a remote MCP server?
 
 Log timing information in your MCP client, forward metrics to Prometheus or Datadog, and run network diagnostics (mtr, traceroute) from the same region as your users.
+
+<DocFeedback slug="remote-mcp" />
 
 ---
 

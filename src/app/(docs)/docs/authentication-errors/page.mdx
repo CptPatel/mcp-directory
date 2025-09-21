@@ -15,8 +15,12 @@ faqs:
 
 import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
 import Script from "next/script";
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 <Breadcrumbs slug="authentication-errors" />
+
+<DocMeta slug="authentication-errors" />
 
 # MCP Authentication & API Key Fixes
 
@@ -127,6 +131,8 @@ Issue a new credential, update the MCP server to accept both old and new keys, t
 ### Do I need different keys for staging and production?
 
 Absolutely. Separate environments prevent accidental cross-environment access and simplify incident response.
+
+<DocFeedback slug="authentication-errors" />
 
 ---
 

@@ -13,8 +13,12 @@ faqs:
 
 import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
 import Script from "next/script";
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 <Breadcrumbs slug="claude-desktop" />
+
+<DocMeta slug="claude-desktop" />
 
 # Connecting MCPs in Claude Desktop (Mac & Windows)
 
@@ -486,6 +490,8 @@ Yes, MCP functionality is identical across platforms. The main differences are f
 ### Can I use the same MCP configuration on both Mac and Windows?
 
 The configuration format is the same, but you'll need to adjust file paths and possibly command names (e.g., `python3` vs `python`) for cross-platform compatibility.
+
+<DocFeedback slug="claude-desktop" />
 
 ---
 

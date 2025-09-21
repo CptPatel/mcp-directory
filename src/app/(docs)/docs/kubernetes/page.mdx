@@ -13,8 +13,12 @@ faqs:
 
 import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
 import Script from "next/script";
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 <Breadcrumbs slug="kubernetes" />
+
+<DocMeta slug="kubernetes" />
 
 # Deploying MCP Servers on Kubernetes Clusters
 
@@ -734,6 +738,8 @@ For stateful MCP servers, use StatefulSets with persistent volumes. For better s
 ### What's the best way to expose MCP servers externally?
 
 Use an Ingress controller with proper TLS termination and authentication. Consider using a service mesh like Istio for advanced traffic management and security policies.
+
+<DocFeedback slug="kubernetes" />
 
 ---
 

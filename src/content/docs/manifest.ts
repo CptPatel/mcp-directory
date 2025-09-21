@@ -1,14 +1,19 @@
+export type DocCategory = 'cli' | 'ide' | 'deploy' | 'testing';
+
 export type DocEntry = {
   slug: string;
   path: string;
   title: string;
   description: string;
-  category: 'cli' | 'ide' | 'deploy' | 'testing';
+  category: DocCategory;
   updatedAt: string;
+  readingTimeMinutes: number;
+  version: string;
+  tags: string[];
+  breadcrumbs?: string[];
 };
 
 export const DOCS: DocEntry[] = [
-  // CLI Tools
   {
     slug: 'codex-cli-installation',
     path: '/docs/codex-cli-installation',
@@ -16,6 +21,10 @@ export const DOCS: DocEntry[] = [
     description: 'Complete guide to installing and configuring MCP servers with Codex CLI for AI-powered development.',
     category: 'cli',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 4,
+    version: 'MCP SDK v2.1.0',
+    tags: ['codex', 'openai', 'cli', 'installation', 'setup'],
+    breadcrumbs: ['Codex CLI', 'Installation Guide'],
   },
   {
     slug: 'gemini-cli-setup',
@@ -24,6 +33,10 @@ export const DOCS: DocEntry[] = [
     description: 'Step-by-step setup guide for integrating Model Context Protocol servers with Gemini CLI.',
     category: 'cli',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 4,
+    version: 'MCP SDK v2.1.0',
+    tags: ['gemini', 'google', 'cli', 'setup'],
+    breadcrumbs: ['Gemini CLI', 'Setup Guide'],
   },
   {
     slug: 'claude-cli',
@@ -32,6 +45,10 @@ export const DOCS: DocEntry[] = [
     description: 'Learn to run MCP servers with Claude CLI, including practical examples and common troubleshooting solutions.',
     category: 'cli',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 4,
+    version: 'MCP SDK v2.1.0',
+    tags: ['claude', 'anthropic', 'cli', 'troubleshooting'],
+    breadcrumbs: ['Claude CLI', 'Examples & Troubleshooting'],
   },
   {
     slug: 'terminal-cli',
@@ -40,9 +57,11 @@ export const DOCS: DocEntry[] = [
     description: 'Universal guide for setting up and using MCP servers in any terminal environment.',
     category: 'cli',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 4,
+    version: 'MCP SDK v2.1.0',
+    tags: ['terminal', 'shell', 'cli', 'universal'],
+    breadcrumbs: ['Universal Terminal', 'Setup Guide'],
   },
-
-  // IDEs
   {
     slug: 'cursor-setup',
     path: '/docs/cursor-setup',
@@ -50,6 +69,10 @@ export const DOCS: DocEntry[] = [
     description: 'Complete setup guide for connecting and running MCP servers from Cursor IDE with troubleshooting tips.',
     category: 'ide',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 6,
+    version: 'MCP SDK v2.1.0',
+    tags: ['cursor', 'ide', 'ai', 'setup'],
+    breadcrumbs: ['Cursor', 'Setup Guide'],
   },
   {
     slug: 'windsurf-setup',
@@ -58,14 +81,22 @@ export const DOCS: DocEntry[] = [
     description: 'Step-by-step guide to configure and use Model Context Protocol servers in Windsurf IDE.',
     category: 'ide',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 5,
+    version: 'MCP SDK v2.1.0',
+    tags: ['windsurf', 'ide', 'codeium', 'setup'],
+    breadcrumbs: ['Windsurf', 'Configuration'],
   },
   {
     slug: 'vscode-integration',
     path: '/docs/vscode-integration',
-    title: 'MCPs in VSCode – Complete Setup Guide',
+    title: 'MCPs in VSCode - Complete Setup Guide',
     description: 'Comprehensive guide for integrating MCP servers with Visual Studio Code for enhanced AI development.',
     category: 'ide',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 4,
+    version: 'MCP SDK v2.1.0',
+    tags: ['vscode', 'visual studio code', 'integration', 'extension'],
+    breadcrumbs: ['VS Code', 'Integration Guide'],
   },
   {
     slug: 'jetbrains-integration',
@@ -74,6 +105,10 @@ export const DOCS: DocEntry[] = [
     description: 'Configure Model Context Protocol servers in JetBrains IDEs including PyCharm, IntelliJ IDEA, and WebStorm.',
     category: 'ide',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 5,
+    version: 'MCP SDK v2.1.0',
+    tags: ['jetbrains', 'pycharm', 'intellij', 'webstorm', 'integration'],
+    breadcrumbs: ['JetBrains', 'MCP Integration'],
   },
   {
     slug: 'claude-desktop',
@@ -82,9 +117,11 @@ export const DOCS: DocEntry[] = [
     description: 'Complete guide to connecting and managing MCP servers in Claude Desktop for Mac and Windows.',
     category: 'ide',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 5,
+    version: 'MCP SDK v2.1.0',
+    tags: ['claude', 'desktop', 'mac', 'windows', 'setup'],
+    breadcrumbs: ['Claude Desktop', 'Connection Guide'],
   },
-
-  // Deployment & Ops
   {
     slug: 'docker-deployment',
     path: '/docs/docker-deployment',
@@ -92,6 +129,10 @@ export const DOCS: DocEntry[] = [
     description: 'Deploy and manage MCP servers using Docker containers with security best practices and examples.',
     category: 'deploy',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 4,
+    version: 'MCP SDK v2.1.0',
+    tags: ['docker', 'containers', 'deployment', 'ops'],
+    breadcrumbs: ['Docker', 'Runtime Guide'],
   },
   {
     slug: 'kubernetes',
@@ -100,6 +141,10 @@ export const DOCS: DocEntry[] = [
     description: 'Scale MCP servers on Kubernetes with deployment manifests, service discovery, and monitoring.',
     category: 'deploy',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 4,
+    version: 'MCP SDK v2.1.0',
+    tags: ['kubernetes', 'k8s', 'deployment', 'clusters'],
+    breadcrumbs: ['Kubernetes', 'Cluster Deployment'],
   },
   {
     slug: 'vercel-deployment',
@@ -108,6 +153,10 @@ export const DOCS: DocEntry[] = [
     description: 'Deploy MCP servers as serverless functions on Vercel with edge computing and global distribution.',
     category: 'deploy',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 4,
+    version: 'MCP SDK v2.1.0',
+    tags: ['vercel', 'serverless', 'edge', 'deployment'],
+    breadcrumbs: ['Vercel', 'Serverless Deployment'],
   },
   {
     slug: 'aws-lambda',
@@ -116,6 +165,10 @@ export const DOCS: DocEntry[] = [
     description: 'Run MCP servers on AWS Lambda with API Gateway integration and cost-effective scaling.',
     category: 'deploy',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 4,
+    version: 'MCP SDK v2.1.0',
+    tags: ['aws', 'lambda', 'serverless', 'deployment'],
+    breadcrumbs: ['AWS Lambda', 'Function Guide'],
   },
   {
     slug: 'github-actions',
@@ -124,6 +177,10 @@ export const DOCS: DocEntry[] = [
     description: 'Automate MCP server deployment, testing, and distribution using GitHub Actions CI/CD pipelines.',
     category: 'deploy',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 5,
+    version: 'MCP SDK v2.1.0',
+    tags: ['github', 'actions', 'ci', 'cd', 'automation'],
+    breadcrumbs: ['GitHub Actions', 'Automation Guide'],
   },
   {
     slug: 'remote-mcp',
@@ -132,9 +189,11 @@ export const DOCS: DocEntry[] = [
     description: 'Configure and connect to remote MCP servers with authentication, security, and network considerations.',
     category: 'deploy',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 5,
+    version: 'MCP SDK v2.1.0',
+    tags: ['remote', 'network', 'security', 'connectivity'],
+    breadcrumbs: ['Remote MCP', 'Connectivity Guide'],
   },
-
-  // Testing & Debugging
   {
     slug: 'testing-mcp',
     path: '/docs/testing-mcp',
@@ -142,6 +201,10 @@ export const DOCS: DocEntry[] = [
     description: 'Debug and test MCP servers using MCP Inspector and other debugging tools for reliable development.',
     category: 'testing',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 3,
+    version: 'MCP SDK v2.1.0',
+    tags: ['testing', 'inspector', 'debug'],
+    breadcrumbs: ['MCP Inspector', 'Debugging Guide'],
   },
   {
     slug: 'common-errors',
@@ -150,6 +213,10 @@ export const DOCS: DocEntry[] = [
     description: 'Troubleshoot the most common MCP setup errors with step-by-step solutions and prevention tips.',
     category: 'testing',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 5,
+    version: 'MCP SDK v2.1.0',
+    tags: ['errors', 'setup', 'troubleshooting'],
+    breadcrumbs: ['Setup Errors', 'Fixes'],
   },
   {
     slug: 'connection-refused',
@@ -158,6 +225,10 @@ export const DOCS: DocEntry[] = [
     description: 'Resolve MCP server connection refused errors with network, firewall, and configuration troubleshooting.',
     category: 'testing',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 3,
+    version: 'MCP SDK v2.1.0',
+    tags: ['network', 'connection', 'firewall'],
+    breadcrumbs: ['Networking', 'Connection Refused'],
   },
   {
     slug: 'authentication-errors',
@@ -166,6 +237,10 @@ export const DOCS: DocEntry[] = [
     description: 'Fix MCP authentication issues, API key problems, and permission errors with detailed solutions.',
     category: 'testing',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 4,
+    version: 'MCP SDK v2.1.0',
+    tags: ['authentication', 'api keys', 'security'],
+    breadcrumbs: ['Authentication', 'API Keys'],
   },
   {
     slug: 'deployment-errors',
@@ -174,16 +249,24 @@ export const DOCS: DocEntry[] = [
     description: 'Troubleshoot MCP deployment problems in Docker containers and Vercel serverless environments.',
     category: 'testing',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 4,
+    version: 'MCP SDK v2.1.0',
+    tags: ['deployment', 'docker', 'vercel', 'errors'],
+    breadcrumbs: ['Deployment', 'Error Handling'],
   },
   {
     slug: 'mcp-not-showing',
     path: '/docs/mcp-not-showing',
-    title: "Why MCPs Don't Show Up in Claude Desktop",
+    title: 'Why MCPs Don't Show Up in Claude Desktop',
     description: 'Diagnose and fix issues when MCP servers are not appearing or working in Claude Desktop application.',
     category: 'testing',
     updatedAt: '2025-09-21T00:00:00.000Z',
+    readingTimeMinutes: 4,
+    version: 'MCP SDK v2.1.0',
+    tags: ['claude', 'desktop', 'visibility', 'troubleshooting'],
+    breadcrumbs: ['Claude Desktop', 'Visibility Issues'],
   },
-];
+]
 
 export const CATEGORY_LABELS = {
   cli: 'CLI Tools',
@@ -199,7 +282,7 @@ export function getDocsByCategory() {
     }
     acc[doc.category].push(doc);
     return acc;
-  }, {} as Record<string, DocEntry[]>);
+  }, {} as Record<DocCategory, DocEntry[]>);
 }
 
 export function getDocBySlug(slug: string) {

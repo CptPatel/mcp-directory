@@ -15,8 +15,12 @@ faqs:
 
 import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
 import Script from "next/script";
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 <Breadcrumbs slug="connection-refused" />
+
+<DocMeta slug="connection-refused" />
 
 # Fixing MCP Server Connection Refused
 
@@ -129,6 +133,8 @@ Use `nc -vz host port`, `lsof`, or `ss -tlnp` to check whether the port is liste
 ### Does container networking change the fix?
 
 Yes. Ensure container ports are exposed and mapped correctly, and that your orchestrator or reverse proxy forwards connections properly.
+
+<DocFeedback slug="connection-refused" />
 
 ---
 

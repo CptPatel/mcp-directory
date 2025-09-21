@@ -13,8 +13,12 @@ faqs:
 
 import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
 import Script from "next/script";
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 <Breadcrumbs slug="claude-cli" />
+
+<DocMeta slug="claude-cli" />
 
 # Running MCPs with Claude CLI (Examples + Troubleshooting)
 
@@ -347,6 +351,8 @@ Local servers run on your machine and are accessed via localhost, while remote s
 ### How do I secure my MCP servers?
 
 Use authentication tokens, run servers on non-standard ports, implement rate limiting, and consider using HTTPS for remote connections. Never expose servers directly to the internet without proper security measures.
+
+<DocFeedback slug="claude-cli" />
 
 ---
 

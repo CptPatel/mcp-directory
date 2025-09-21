@@ -16,6 +16,8 @@ import Script from "next/script";
 
 <Breadcrumbs slug="testing-mcp" />
 
+<DocMeta slug="testing-mcp" />
+
 # Debugging & Testing MCPs with MCP Inspector
 
 <Script id="faq-jsonld" type="application/ld+json">
@@ -164,6 +166,8 @@ class MCPServer {
 ```javascript
 // Validate MCP protocol compliance
 import { validateMCPMessage } from '@modelcontextprotocol/validator';
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 function validateRequest(request) {
   const validation = validateMCPMessage(request);
@@ -266,6 +270,8 @@ MCP Inspector is a debugging tool that provides a web interface for testing MCP 
 ### How do I test MCP servers locally before deployment?
 
 Use a combination of MCP Inspector for interactive testing, unit tests for individual components, integration tests for end-to-end functionality, and load tests for performance validation.
+
+<DocFeedback slug="testing-mcp" />
 
 ---
 

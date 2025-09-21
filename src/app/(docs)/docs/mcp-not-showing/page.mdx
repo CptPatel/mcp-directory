@@ -15,8 +15,12 @@ faqs:
 
 import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
 import Script from "next/script";
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 <Breadcrumbs slug="mcp-not-showing" />
+
+<DocMeta slug="mcp-not-showing" />
 
 # Why MCPs Don't Show Up in Claude Desktop
 
@@ -132,6 +136,8 @@ Yes. Restart or use the "Reload MCPs" control to refresh the manifest.
 ### Why does the MCP appear but return errors?
 
 The server may lack permissions, fail to start, or bind to a blocked port. Inspect logs and apply the fixes above.
+
+<DocFeedback slug="mcp-not-showing" />
 
 ---
 

@@ -13,8 +13,12 @@ faqs:
 
 import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
 import Script from "next/script";
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 <Breadcrumbs slug="aws-lambda" />
+
+<DocMeta slug="aws-lambda" />
 
 # Deploying MCPs on AWS Lambda
 
@@ -738,6 +742,8 @@ Use provisioned concurrency for critical MCPs, optimize your bundle size with we
 ### Can I run long-running MCP operations on Lambda?
 
 Lambda has a 15-minute maximum execution time. For longer operations, use Step Functions to orchestrate multiple Lambda invocations, or consider using SQS/SNS for asynchronous processing patterns.
+
+<DocFeedback slug="aws-lambda" />
 
 ---
 

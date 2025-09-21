@@ -13,8 +13,12 @@ faqs:
 
 import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
 import Script from "next/script";
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 <Breadcrumbs slug="docker-deployment" />
+
+<DocMeta slug="docker-deployment" />
 
 # Running MCP Servers in Docker
 
@@ -493,6 +497,8 @@ While technically possible, it's better practice to run one MCP server per conta
 ### How do I secure my Dockerized MCP servers?
 
 Use non-root users, implement proper authentication, use environment variables for secrets, set up reverse proxy with SSL, and keep your base images updated.
+
+<DocFeedback slug="docker-deployment" />
 
 ---
 

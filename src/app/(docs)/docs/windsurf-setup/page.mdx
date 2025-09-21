@@ -13,8 +13,12 @@ faqs:
 
 import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
 import Script from "next/script";
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 <Breadcrumbs slug="windsurf-setup" />
+
+<DocMeta slug="windsurf-setup" />
 
 # Running MCPs in Windsurf IDE
 
@@ -423,6 +427,8 @@ Update MCP servers using your package manager (npm, pip, uvx), then restart Wind
 ### Can I use multiple MCP servers simultaneously in Windsurf?
 
 Yes, Windsurf can run multiple MCP servers concurrently. Each server provides different capabilities that can be used together in AI interactions and code completion.
+
+<DocFeedback slug="windsurf-setup" />
 
 ---
 

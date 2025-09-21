@@ -13,8 +13,12 @@ faqs:
 
 import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
 import Script from "next/script";
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 <Breadcrumbs slug="jetbrains-integration" />
+
+<DocMeta slug="jetbrains-integration" />
 
 # MCP Setup in JetBrains IDEs (PyCharm, IntelliJ, WebStorm)
 
@@ -457,6 +461,8 @@ The core MCP configuration is the same across JetBrains IDEs. However, you may w
 ### Can I share MCP configurations across team members?
 
 Yes, commit the `.idea/mcp.xml` file to version control. Use environment variables for sensitive data and document setup requirements in your project README.
+
+<DocFeedback slug="jetbrains-integration" />
 
 ---
 

@@ -14,8 +14,12 @@ faqs:
 
 import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
 import Script from "next/script";
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 <Breadcrumbs slug="cursor-setup" />
+
+<DocMeta slug="cursor-setup" />
 
 # How to Install and Use MCPs in Cursor IDE
 
@@ -242,6 +246,8 @@ To update an MCP server:
 ### Can I use custom MCP servers?
 
 Absolutely! You can use any MCP server that follows the Model Context Protocol specification. Just point to the correct executable in your configuration.
+
+<DocFeedback slug="cursor-setup" />
 
 ---
 

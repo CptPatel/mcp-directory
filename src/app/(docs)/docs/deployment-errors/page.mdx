@@ -15,8 +15,12 @@ faqs:
 
 import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
 import Script from "next/script";
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 <Breadcrumbs slug="deployment-errors" />
+
+<DocMeta slug="deployment-errors" />
 
 # Fixing MCP Deployment Issues in Docker/Vercel
 
@@ -142,6 +146,8 @@ Use `docker logs`, inspect the container with `docker exec`, and verify environm
 ### Can I share the same Docker image across staging and production?
 
 Yes—tag the image once, then supply environment-specific configuration via secrets or environment variables.
+
+<DocFeedback slug="deployment-errors" />
 
 ---
 

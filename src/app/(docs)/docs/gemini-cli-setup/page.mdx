@@ -13,8 +13,12 @@ faqs:
 
 import { Breadcrumbs } from "@/components/docs/Breadcrumbs";
 import Script from "next/script";
+import { DocMeta } from "@/components/docs/DocMeta";
+import { DocFeedback } from "@/components/docs/DocFeedback";
 
 <Breadcrumbs slug="gemini-cli-setup" />
+
+<DocMeta slug="gemini-cli-setup" />
 
 # Getting Started with MCPs in Gemini CLI
 
@@ -441,6 +445,8 @@ Use `gemini auth login` to authenticate with your Google account. For programmat
 ### Can I use Gemini CLI with non-Google MCP servers?
 
 Yes, Gemini CLI can work with any MCP server that follows the standard protocol. However, Google service integrations work most seamlessly.
+
+<DocFeedback slug="gemini-cli-setup" />
 
 ---
 
