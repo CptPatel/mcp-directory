@@ -11,6 +11,7 @@ import Script from "next/script";
 import { cookies } from "next/headers";
 import "./globals.css";
 import Providers from "./providers";
+import { GoogleAdsense } from "@/components/google-adsense";
 import { VercelComponents } from "@/components/vercel-analytics";
 
 // Force dynamic rendering for all pages
@@ -93,6 +94,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <head>
+          <GoogleAdsense />
           <link rel="manifest" href="/manifest.json" />
           <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
           <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
