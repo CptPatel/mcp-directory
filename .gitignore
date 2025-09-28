@@ -20,6 +20,10 @@ dist/
 out/
 .next/
 
+# Tempo platform directories
+**/tempobook/dynamic/
+**/tempobook/storyboards/
+
 # Local MCP servers and configs
 servers/supabase-mcp/.env.local
 servers/supabase-mcp/node_modules/
@@ -37,3 +41,5 @@ NOTES.md
 *.todo
 *.notes
 
+.vercel
+.env*.local

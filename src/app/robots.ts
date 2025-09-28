@@ -6,17 +6,19 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/private/', '/admin/', '/api/auth/'],
+        disallow: ['/dashboard/', '/api/auth/', '/sign-in/', '/sign-up/'],
       },
       {
         userAgent: 'Googlebot',
         allow: '/',
-        disallow: ['/private/', '/admin/', '/api/auth/'],
+        disallow: ['/dashboard/', '/api/auth/', '/sign-in/', '/sign-up/'],
+        crawlDelay: 1,
       },
       {
         userAgent: 'Bingbot',
         allow: '/',
-        disallow: ['/private/', '/admin/', '/api/auth/'],
+        disallow: ['/dashboard/', '/api/auth/', '/sign-in/', '/sign-up/'],
+        crawlDelay: 1,
       }
     ],
     sitemap: 'https://mcpdirectory.app/sitemap.xml',

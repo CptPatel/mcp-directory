@@ -14,11 +14,6 @@ import Providers from "./providers";
 import { GoogleAdsense } from "@/components/google-adsense";
 import { VercelComponents } from "@/components/vercel-analytics";
 
-// Force dynamic rendering for all pages
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-export const fetchCache = 'force-no-store';
-
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -94,6 +89,12 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <head>
+          {/* AdSense - Primary method */}
+          <script 
+            async 
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5450113862618776"
+            crossOrigin="anonymous"
+          />
           <GoogleAdsense />
           <link rel="manifest" href="/manifest.json" />
           <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
