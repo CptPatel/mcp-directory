@@ -23,15 +23,36 @@ function isRateLimited(key: string, limit = 60, windowMs = 60_000) {
   return rec.count > limit;
 }
 
+// Known crawler user agents that should bypass rate limiting
+const CRAWLER_USER_AGENTS = [
+  'googlebot',
+  'bingbot',
+  'slurp',
+  'duckduckbot',
+  'baiduspider',
+  'yandexbot',
+  'facebookexternalhit',
+  'twitterbot',
+  'linkedinbot',
+  'whatsapp',
+  'telegrambot'
+];
+
+function isCrawler(userAgent: string): boolean {
+  const ua = userAgent.toLowerCase();
+  return CRAWLER_USER_AGENTS.some(crawler => ua.includes(crawler));
+}
+
 export default clerkMiddleware((auth, req) => {
   const res = NextResponse.next();
+  const userAgent = req.headers.get('user-agent') || '';
 
   const nonce = generateNonce();
   // Allow unsafe-eval and unsafe-inline in development for Next.js hot reload and GA
   const isDevelopment = process.env.NODE_ENV === 'development';
   const scriptSrc = isDevelopment 
-    ? `'self' 'nonce-${nonce}' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.clerk.com https://*.clerk.accounts.dev https://www.googletagmanager.com`
-    : `'self' 'nonce-${nonce}' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.clerk.com https://*.clerk.accounts.dev https://www.googletagmanager.com`;
+    ? `'self' 'nonce-${nonce}' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.clerk.com https://*.clerk.accounts.dev https://www.googletagmanager.com https://pagead2.googlesyndication.com`
+    : `'self' 'nonce-${nonce}' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.clerk.com https://*.clerk.accounts.dev https://www.googletagmanager.com https://pagead2.googlesyndication.com`;
 
   const csp = [
     "default-src 'self'",
@@ -39,7 +60,7 @@ export default clerkMiddleware((auth, req) => {
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https:",
     "font-src 'self' https://fonts.gstatic.com",
-    "connect-src 'self' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://openrouter.ai https://*.clerk.com https://*.clerk.accounts.dev https://www.google-analytics.com https://analytics.google.com",
+    "connect-src 'self' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://openrouter.ai https://*.clerk.com https://*.clerk.accounts.dev https://www.google-analytics.com https://analytics.google.com https://pagead2.googlesyndication.com",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self' https://*.clerk.com https://*.clerk.accounts.dev",
@@ -55,10 +76,10 @@ export default clerkMiddleware((auth, req) => {
   res.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   res.headers.set("Cross-Origin-Opener-Policy", "same-origin");
 
-  // Rate limit API routes
+  // Rate limit API routes but exempt crawlers
   const ip = (req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for") || "unknown").toString();
   const path = req.nextUrl.pathname;
-  if (path.startsWith("/api")) {
+  if (path.startsWith("/api") && !isCrawler(userAgent)) {
     const key = `${ip}:${path}`;
     if (isRateLimited(key)) {
       return new NextResponse("Rate limit exceeded", {
@@ -71,9 +92,9 @@ export default clerkMiddleware((auth, req) => {
     }
   }
 
-  // CSRF: enforce same-origin for state-changing methods
+  // CSRF: enforce same-origin for state-changing methods (but exempt crawlers)
   const method = req.method?.toUpperCase() || "GET";
-  if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(method) && !isCrawler(userAgent)) {
     const origin = req.headers.get("origin") || "";
     const referer = req.headers.get("referer") || "";
     const allowed = req.nextUrl.origin;
@@ -98,7 +119,9 @@ export default clerkMiddleware((auth, req) => {
 
 export const config = {
   matcher: [
+    // Skip Next.js internals and all static files, unless found in search params
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    // Always run for API routes
     "/(api|trpc)(.*)",
   ],
 };
