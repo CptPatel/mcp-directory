@@ -1,5 +1,5 @@
-// This file is intentionally empty to resolve route conflicts
-// The actual docs page is at /src/app/docs/page.tsx
+import { redirect } from "next/navigation";
+
 export default function DocsRedirect() {
-  return null;
+  redirect("/docs");
 }
