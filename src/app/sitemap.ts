@@ -3,7 +3,7 @@ import { DOCS } from '@/content/docs/manifest'
  
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://mcpdirectory.app'
-  const currentDate = new Date('2025-09-21')
+  const currentDate = new Date('2025-01-20') // Updated to current date
  
   const corePages = [
     {
@@ -50,43 +50,77 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ]
  
+  // Enhanced blog pages with proper SEO structure
   const blogPages = [
     {
       url: `${baseUrl}/blog`,
       lastModified: currentDate,
       changeFrequency: 'weekly' as const,
-      priority: 0.8,
+      priority: 0.9,
+    },
+    // New trending/featured posts with high priority
+    {
+      url: `${baseUrl}/blog/building-ai-agents-mcp-2025`,
+      lastModified: new Date('2025-01-18'),
+      changeFrequency: 'monthly' as const,
+      priority: 0.98, // Highest priority for newest trending content
     },
     {
+      url: `${baseUrl}/blog/mcp-vs-langchain-2025`,
+      lastModified: new Date('2025-01-15'),
+      changeFrequency: 'monthly' as const,
+      priority: 0.95, // High priority for trending content
+    },
+    {
+      url: `${baseUrl}/blog/ai-agent-security-mcp-2025`,
+      lastModified: new Date('2025-01-10'),
+      changeFrequency: 'monthly' as const,
+      priority: 0.95, // High priority for security content
+    },
+    // Existing popular posts
+    {
       url: `${baseUrl}/blog/how-to-create-custom-mcp-server`,
-      lastModified: new Date('2025-09-20'),
+      lastModified: new Date('2025-01-05'),
       changeFrequency: 'monthly' as const,
       priority: 0.9,
     },
     {
       url: `${baseUrl}/blog/best-mcps-2025`,
-      lastModified: new Date('2025-09-20'),
+      lastModified: new Date('2024-12-28'),
       changeFrequency: 'monthly' as const,
-      priority: 0.9,
+      priority: 0.85,
     },
   ]
  
-  // Documentation pages with proper categorization and priorities
+  // Documentation pages with enhanced categorization and priorities
   const docPages = DOCS.map((doc) => {
     const updated = doc.updatedAt ? new Date(doc.updatedAt) : currentDate
-    // Higher priority for popular setup guides
+    
+    // Enhanced priority calculation based on content type and popularity
     let priority = 0.75
+    
+    // High priority for setup and troubleshooting guides
     if (doc.category === 'cli' || doc.category === 'ide') {
       priority = 0.85
     } else if (doc.category === 'deploy') {
       priority = 0.8
     } else if (doc.category === 'testing') {
-      priority = 0.8 // Testing docs are important for troubleshooting
+      priority = 0.8 // Testing docs are crucial for troubleshooting
     }
     
-    // Boost priority for common setup guides
-    if (doc.slug.includes('cursor') || doc.slug.includes('vscode') || doc.slug.includes('claude') || doc.slug.includes('common-errors')) {
+    // Boost priority for most popular setup guides (based on search volume)
+    if (doc.slug.includes('cursor') || 
+        doc.slug.includes('vscode') || 
+        doc.slug.includes('claude-desktop') || 
+        doc.slug.includes('common-errors') ||
+        doc.slug.includes('authentication-errors')) {
       priority = 0.9
+    }
+    
+    // Ultra-high priority for critical troubleshooting guides
+    if (doc.slug.includes('connection-refused') || 
+        doc.slug.includes('mcp-not-showing')) {
+      priority = 0.95
     }
     
     return {
@@ -96,6 +130,47 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority,
     }
   })
+
+  // Additional SEO-focused pages that might exist
+  const additionalPages = [
+    {
+      url: `${baseUrl}/about`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/privacy`,
+      lastModified: currentDate,
+      changeFrequency: 'yearly' as const,
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/terms`,
+      lastModified: currentDate,
+      changeFrequency: 'yearly' as const,
+      priority: 0.3,
+    },
+    // Category pages for better SEO structure
+    {
+      url: `${baseUrl}/blog/category/tutorial`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog/category/security`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog/category/comparison`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    },
+  ]
  
-  return [...corePages, ...blogPages, ...docPages]
+  return [...corePages, ...blogPages, ...docPages, ...additionalPages]
 }
