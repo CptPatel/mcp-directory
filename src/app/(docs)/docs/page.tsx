@@ -1,2 +1,5 @@
-// This file has been moved to /src/app/docs/page.tsx to resolve route conflicts
-// Redirect is handled by Next.js automatically
+// This file is intentionally empty to resolve route conflicts
+// The actual docs page is at /src/app/docs/page.tsx
+export default function DocsRedirect() {
+  return null;
+}
