@@ -1,4 +1,4 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 function generateNonce(): string {
@@ -43,12 +43,32 @@ function isCrawler(userAgent: string): boolean {
   return CRAWLER_USER_AGENTS.some(crawler => ua.includes(crawler));
 }
 
+// Define protected routes
+const isProtectedRoute = createRouteMatcher([
+  '/dashboard(.*)',
+  '/create(.*)',
+]);
+
 export default clerkMiddleware((auth, req) => {
+  // Protect routes that require authentication
+  if (isProtectedRoute(req)) {
+    auth().protect();
+  }
+
   const res = NextResponse.next();
   const userAgent = req.headers.get('user-agent') || '';
 
+  // Skip middleware processing for static files and Next.js internals
+  const pathname = req.nextUrl.pathname;
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api/auth') ||
+    pathname.includes('.') && !pathname.startsWith('/api/')
+  ) {
+    return res;
+  }
+
   const nonce = generateNonce();
-  // Allow unsafe-eval and unsafe-inline in development for Next.js hot reload and GA
   const isDevelopment = process.env.NODE_ENV === 'development';
   const scriptSrc = isDevelopment 
     ? `'self' 'nonce-${nonce}' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.clerk.com https://*.clerk.accounts.dev https://www.googletagmanager.com https://pagead2.googlesyndication.com`
@@ -68,6 +88,7 @@ export default clerkMiddleware((auth, req) => {
     "upgrade-insecure-requests",
   ].join("; ");
 
+  // Set security headers
   res.headers.set("Content-Security-Policy", csp);
   res.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
   res.headers.set("X-Frame-Options", "DENY");
@@ -102,18 +123,21 @@ export default clerkMiddleware((auth, req) => {
       return new NextResponse("Invalid CSRF token", { status: 403, headers: { "Cache-Control": "no-store" } });
     }
   }
-  const p = req.nextUrl.pathname;
-  if (p.startsWith("/api") || p.startsWith("/sign-in") || p.startsWith("/sign-up") || p.startsWith("/auth")) {
+
+  // Set cache control for dynamic routes
+  if (path.startsWith("/api") || path.startsWith("/sign-in") || path.startsWith("/sign-up") || path.startsWith("/auth")) {
     res.headers.set("Cache-Control", "no-store");
     res.headers.set("Vary", "Authorization, Cookie");
   }
+
   // Expose nonce for server components via HttpOnly cookie
   res.cookies.set("csp-nonce", nonce, {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: "strict",
     path: "/",
   });
+
   return res;
 });
 
